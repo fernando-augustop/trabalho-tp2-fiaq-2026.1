@@ -85,7 +85,7 @@ Projeto desenvolvido por 11 alunos da disciplina de Técnicas de Programação 2
 | Augusto faller| [@tosgual](https://github.com/tosgual)|
 | Lucas Centurion Netto | [@LucasCenturionNetto](https://github.com/LucasCenturionNetto) |
 | Ricardo Rian | [@RianRSM](https://github.com/RianRSM) |
-| _A preencher_ | |
+| Érica Feitosa | [@ericafeitosa](https://github.com/ericafeitosa) |
 | _A preencher_ | |
 | _A preencher_ | |
 
