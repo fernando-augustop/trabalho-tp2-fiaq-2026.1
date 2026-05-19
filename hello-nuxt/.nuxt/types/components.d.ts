@@ -17,6 +17,11 @@ interface _GlobalComponents {
   AppLogo: typeof import("../../app/components/AppLogo.vue")['default']
   HelloWorld: typeof import("../../app/components/HelloWorld.vue")['default']
   TemplateMenu: typeof import("../../app/components/TemplateMenu.vue")['default']
+  ChatComposer: typeof import("../../app/components/chat/ChatComposer.vue")['default']
+  ChatWindow: typeof import("../../app/components/chat/ChatWindow.vue")['default']
+  ChatMessageBubble: typeof import("../../app/components/chat/MessageBubble.vue")['default']
+  ChatSourceChip: typeof import("../../app/components/chat/SourceChip.vue")['default']
+  ChatTypingIndicator: typeof import("../../app/components/chat/TypingIndicator.vue")['default']
   UColorModeAvatar: typeof import("../../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeAvatar.vue")['default']
   UColorModeButton: typeof import("../../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeButton.vue")['default']
   UColorModeImage: typeof import("../../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeImage.vue")['default']
@@ -172,6 +177,11 @@ interface _GlobalComponents {
   LazyAppLogo: LazyComponent<typeof import("../../app/components/AppLogo.vue")['default']>
   LazyHelloWorld: LazyComponent<typeof import("../../app/components/HelloWorld.vue")['default']>
   LazyTemplateMenu: LazyComponent<typeof import("../../app/components/TemplateMenu.vue")['default']>
+  LazyChatComposer: LazyComponent<typeof import("../../app/components/chat/ChatComposer.vue")['default']>
+  LazyChatWindow: LazyComponent<typeof import("../../app/components/chat/ChatWindow.vue")['default']>
+  LazyChatMessageBubble: LazyComponent<typeof import("../../app/components/chat/MessageBubble.vue")['default']>
+  LazyChatSourceChip: LazyComponent<typeof import("../../app/components/chat/SourceChip.vue")['default']>
+  LazyChatTypingIndicator: LazyComponent<typeof import("../../app/components/chat/TypingIndicator.vue")['default']>
   LazyUColorModeAvatar: LazyComponent<typeof import("../../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeAvatar.vue")['default']>
   LazyUColorModeButton: LazyComponent<typeof import("../../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeButton.vue")['default']>
   LazyUColorModeImage: LazyComponent<typeof import("../../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeImage.vue")['default']>

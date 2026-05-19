@@ -1,44 +1,44 @@
 import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, getResponseStatus, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, getResponseStatusText } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, getResponseStatus, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, getResponseStatusText } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/h3/dist/index.mjs';
-import { escapeHtml } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/@vue/shared/dist/shared.cjs.js';
-import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/vue-bundle-renderer/dist/runtime.mjs';
-import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/ufo/dist/index.mjs';
-import destr, { destr as destr$1 } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/destr/dist/index.mjs';
-import { renderToString } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/vue/server-renderer/index.mjs';
-import { klona } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/klona/dist/index.mjs';
-import defu, { defuFn } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/defu/dist/defu.mjs';
-import { snakeCase } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/scule/dist/index.mjs';
-import { createHead as createHead$1, propsToString, renderSSRHead } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/unhead/dist/server.mjs';
-import { createStorage, prefixStorage } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/unstorage/dist/index.mjs';
-import unstorage_47drivers_47fs from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/unstorage/drivers/fs.mjs';
-import { stringify, uneval } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/devalue/index.js';
-import { isVNode, isRef, toValue } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/vue/index.mjs';
-import { createHooks } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/nitropack/node_modules/hookable/dist/index.mjs';
-import { createFetch, Headers as Headers$1 } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/ofetch/dist/node.mjs';
-import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/node-mock-http/dist/index.mjs';
-import { digest, hash as hash$1 } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/ohash/dist/index.mjs';
-import { toRouteMatcher, createRouter } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/radix3/dist/index.mjs';
+import { escapeHtml } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/@vue/shared/dist/shared.cjs.js';
+import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/vue-bundle-renderer/dist/runtime.mjs';
+import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/ufo/dist/index.mjs';
+import destr, { destr as destr$1 } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/destr/dist/index.mjs';
+import { createHooks } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/nitropack/node_modules/hookable/dist/index.mjs';
+import { createFetch, Headers as Headers$1 } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/ofetch/dist/node.mjs';
+import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/node-mock-http/dist/index.mjs';
+import { createStorage, prefixStorage } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/unstorage/dist/index.mjs';
+import unstorage_47drivers_47fs from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/unstorage/drivers/fs.mjs';
+import { digest, hash as hash$1 } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/ohash/dist/index.mjs';
+import { klona } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/klona/dist/index.mjs';
+import defu, { defuFn } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/defu/dist/defu.mjs';
+import { snakeCase } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/scule/dist/index.mjs';
+import { getContext } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/unctx/dist/index.mjs';
+import { toRouteMatcher, createRouter } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/radix3/dist/index.mjs';
 import { readFile } from 'node:fs/promises';
-import consola, { consola as consola$1 } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/consola/dist/index.mjs';
-import { ErrorParser } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/youch-core/build/index.js';
-import { Youch } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/youch/build/index.js';
-import { SourceMapConsumer } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/source-map/source-map.js';
+import consola, { consola as consola$1 } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/consola/dist/index.mjs';
+import { ErrorParser } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/youch-core/build/index.js';
+import { Youch } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/youch/build/index.js';
+import { SourceMapConsumer } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/source-map/source-map.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { getContext } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/unctx/dist/index.mjs';
-import { captureRawStackTrace, parseRawStackTrace } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/errx/dist/index.js';
-import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
+import { stringify, uneval } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/devalue/index.js';
+import { captureRawStackTrace, parseRawStackTrace } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/errx/dist/index.js';
+import { isVNode, isRef, toValue } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/vue/index.mjs';
+import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
 import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname as dirname$1, resolve as resolve$1, basename } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/pathe/dist/index.mjs';
-import { walkResolver } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/unhead/dist/utils.mjs';
-import { getIcons } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/node_modules/@iconify/utils/lib/index.js';
-import { collections } from 'file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/.nuxt/nuxt-icon-server-bundle.mjs';
+import { dirname as dirname$1, resolve as resolve$1, basename } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/pathe/dist/index.mjs';
+import { createHead as createHead$1, propsToString, renderSSRHead } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/unhead/dist/server.mjs';
+import { renderToString } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/vue/server-renderer/index.mjs';
+import { walkResolver } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/unhead/dist/utils.mjs';
+import { getIcons } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/@iconify/utils/lib/index.js';
+import { collections } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/.nuxt/nuxt-icon-server-bundle.mjs';
 
-const serverAssets = [{"baseName":"server","dir":"C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/server/assets"}];
+const serverAssets = [{"baseName":"server","dir":"/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/server/assets"}];
 
 const assets$1 = createStorage();
 
@@ -50,11 +50,11 @@ const storage = createStorage({});
 
 storage.mount('/assets', assets$1);
 
-storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt","watchOptions":{"ignored":[null]}}));
-storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/server","watchOptions":{"ignored":[null]}}));
-storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/.nuxt"}));
-storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/.nuxt/cache"}));
-storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/.data/kv"}));
+storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt","watchOptions":{"ignored":[null]}}));
+storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/server","watchOptions":{"ignored":[null]}}));
+storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/.nuxt"}));
+storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/.nuxt/cache"}));
+storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/.data/kv"}));
 
 function useStorage(base = "") {
   return base ? prefixStorage(storage, base) : storage;
@@ -1020,6 +1020,11 @@ new Proxy(/* @__PURE__ */ Object.create(null), {
     }
     return void 0;
   }
+});
+
+getContext("nitro-app", {
+  asyncContext: false,
+  AsyncLocalStorage: void 0
 });
 
 const config = useRuntimeConfig();
@@ -2349,13 +2354,13 @@ if (!window.__NUXT_DEVTOOLS_TIME_METRIC__) {
 window.__NUXT_DEVTOOLS_TIME_METRIC__.appInit = Date.now()
 `;
 
-const _84OtQUNgZfXxU8rW2CNTAAYRUjxLX97lna2o5wMIjZ8 = (function(nitro) {
+const _PfLnB54zQG7zric4nKTypNEnUw6QTTKm4aDiIecCBk = (function(nitro) {
   nitro.hooks.hook("render:html", (htmlContext) => {
     htmlContext.head.push(`<script>${script$1}<\/script>`);
   });
 });
 
-const rootDir = "C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt";
+const rootDir = "/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt";
 
 const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
 
@@ -2384,7 +2389,7 @@ const asyncContext = getContext("nuxt-dev", {
 	asyncContext: true,
 	AsyncLocalStorage
 });
-const _ROYxHEtxjIq9oQK5UetYsREf_d8vOFNeg7jZlYCG5YQ = (nitroApp) => {
+const _GUmama7vQ24O6zwULReE1QLKaabkCOv5weguL1jlnzo = (nitroApp) => {
 	const handler = nitroApp.h3App.handler;
 	nitroApp.h3App.handler = (event) => {
 		return asyncContext.callAsync({
@@ -2459,16 +2464,16 @@ function onConsoleLog(callback) {
 
 const script = "\"use strict\";(()=>{const t=window,e=document.documentElement,c=[\"dark\",\"light\"],n=getStorageValue(\"localStorage\",\"nuxt-color-mode\")||\"system\";let i=n===\"system\"?u():n;const r=e.getAttribute(\"data-color-mode-forced\");r&&(i=r),l(i),t[\"__NUXT_COLOR_MODE__\"]={preference:n,value:i,getColorScheme:u,addColorScheme:l,removeColorScheme:d};function l(o){const s=\"\"+o+\"\",a=\"\";e.classList?e.classList.add(s):e.className+=\" \"+s,a&&e.setAttribute(\"data-\"+a,o)}function d(o){const s=\"\"+o+\"\",a=\"\";e.classList?e.classList.remove(s):e.className=e.className.replace(new RegExp(s,\"g\"),\"\"),a&&e.removeAttribute(\"data-\"+a)}function f(o){return t.matchMedia(\"(prefers-color-scheme\"+o+\")\")}function u(){if(t.matchMedia&&f(\"\").media!==\"not all\"){for(const o of c)if(f(\":\"+o).matches)return o}return\"light\"}})();function getStorageValue(t,e){switch(t){case\"localStorage\":return window.localStorage.getItem(e);case\"sessionStorage\":return window.sessionStorage.getItem(e);case\"cookie\":return getCookie(e);default:return null}}function getCookie(t){const c=(\"; \"+window.document.cookie).split(\"; \"+t+\"=\");if(c.length===2)return c.pop()?.split(\";\").shift()}";
 
-const _ovsNBm7Wx5WoslkwRbxZ42udL0Creo8rPdMkp0kili8 = (function(nitro) {
+const _6gSZYTwtqYu_Tma2OVRtQphh62WiHB8o7L1Mu9tqUtk = (function(nitro) {
   nitro.hooks.hook("render:html", (htmlContext) => {
     htmlContext.head.push(`<script>${script}<\/script>`);
   });
 });
 
 const plugins = [
-  _84OtQUNgZfXxU8rW2CNTAAYRUjxLX97lna2o5wMIjZ8,
-_ROYxHEtxjIq9oQK5UetYsREf_d8vOFNeg7jZlYCG5YQ,
-_ovsNBm7Wx5WoslkwRbxZ42udL0Creo8rPdMkp0kili8,
+  _PfLnB54zQG7zric4nKTypNEnUw6QTTKm4aDiIecCBk,
+_GUmama7vQ24O6zwULReE1QLKaabkCOv5weguL1jlnzo,
+_6gSZYTwtqYu_Tma2OVRtQphh62WiHB8o7L1Mu9tqUtk,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
@@ -2497,7 +2502,7 @@ function getAsset (id) {
 
 const METHODS = /* @__PURE__ */ new Set(["HEAD", "GET"]);
 const EncodingMap = { gzip: ".gz", br: ".br" };
-const _UKVrvc = eventHandler((event) => {
+const _QtSTdB = eventHandler((event) => {
   if (event.method && !METHODS.has(event.method)) {
     return;
   }
@@ -2639,9 +2644,9 @@ function publicAssetsURL(...path) {
 const APP_ROOT_OPEN_TAG = `<${appRootTag}${propsToString(appRootAttrs)}>`;
 const APP_ROOT_CLOSE_TAG = `</${appRootTag}>`;
 // @ts-expect-error file will be produced after app build
-const getServerEntry = () => import('file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/.nuxt//dist/server/server.mjs').then((r) => r.default || r);
+const getServerEntry = () => import('file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/.nuxt//dist/server/server.mjs').then((r) => r.default || r);
 // @ts-expect-error file will be produced after app build
-const getClientManifest = () => import('file://C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/.nuxt//dist/server/client.manifest.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
+const getClientManifest = () => import('file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/.nuxt//dist/server/client.manifest.mjs').then((r) => r.default || r).then((r) => typeof r === "function" ? r() : r);
 // -- SSR Renderer --
 const getSSRRenderer = lazyCachedFunction(async () => {
 	// Load server bundle
@@ -3011,7 +3016,7 @@ async function runTask(name, {
 
 const warnOnceSet = /* @__PURE__ */ new Set();
 const DEFAULT_ENDPOINT = "https://api.iconify.design";
-const _ORDX2P = defineCachedEventHandler(async (event) => {
+const _27eB4y = defineCachedEventHandler(async (event) => {
   const url = getRequestURL(event);
   if (!url)
     return createError({ status: 400, message: "Invalid icon request" });
@@ -3069,15 +3074,15 @@ const _ORDX2P = defineCachedEventHandler(async (event) => {
   // 1 week
 });
 
-const _lazy_GnY7X9 = () => Promise.resolve().then(function () { return renderer; });
+const _lazy_O7q8OQ = () => Promise.resolve().then(function () { return renderer; });
 
 const handlers = [
-  { route: '', handler: _UKVrvc, lazy: false, middleware: true, method: undefined },
-  { route: '/__nuxt_error', handler: _lazy_GnY7X9, lazy: true, middleware: false, method: undefined },
+  { route: '', handler: _QtSTdB, lazy: false, middleware: true, method: undefined },
+  { route: '/__nuxt_error', handler: _lazy_O7q8OQ, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
-  { route: '/api/_nuxt_icon/:collection', handler: _ORDX2P, lazy: false, middleware: false, method: undefined },
-  { route: '/_fonts/**', handler: _lazy_GnY7X9, lazy: true, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_GnY7X9, lazy: true, middleware: false, method: undefined }
+  { route: '/api/_nuxt_icon/:collection', handler: _27eB4y, lazy: false, middleware: false, method: undefined },
+  { route: '/_fonts/**', handler: _lazy_O7q8OQ, lazy: true, middleware: false, method: undefined },
+  { route: '/**', handler: _lazy_O7q8OQ, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {

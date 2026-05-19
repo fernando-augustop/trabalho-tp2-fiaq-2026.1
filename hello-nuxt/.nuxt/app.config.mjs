@@ -312,6 +312,6 @@ if (import.meta.dev && !import.meta.nitro && import.meta.hot) {
 }
 /** client-end **/
 
-import cfg0 from "C:/Users/dudur/WebstormProjects/pre_projeto/hello-nuxt/app/app.config.ts"
+import cfg0 from "/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/app/app.config.ts"
 
 export default /*@__PURE__*/ defuFn(cfg0, inlineConfig)

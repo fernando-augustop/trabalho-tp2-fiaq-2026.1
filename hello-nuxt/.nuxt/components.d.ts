@@ -17,6 +17,11 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 export const AppLogo: typeof import("../app/components/AppLogo.vue")['default']
 export const HelloWorld: typeof import("../app/components/HelloWorld.vue")['default']
 export const TemplateMenu: typeof import("../app/components/TemplateMenu.vue")['default']
+export const ChatComposer: typeof import("../app/components/chat/ChatComposer.vue")['default']
+export const ChatWindow: typeof import("../app/components/chat/ChatWindow.vue")['default']
+export const ChatMessageBubble: typeof import("../app/components/chat/MessageBubble.vue")['default']
+export const ChatSourceChip: typeof import("../app/components/chat/SourceChip.vue")['default']
+export const ChatTypingIndicator: typeof import("../app/components/chat/TypingIndicator.vue")['default']
 export const UColorModeAvatar: typeof import("../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeAvatar.vue")['default']
 export const UColorModeButton: typeof import("../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeButton.vue")['default']
 export const UColorModeImage: typeof import("../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeImage.vue")['default']
@@ -172,6 +177,11 @@ export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components
 export const LazyAppLogo: LazyComponent<typeof import("../app/components/AppLogo.vue")['default']>
 export const LazyHelloWorld: LazyComponent<typeof import("../app/components/HelloWorld.vue")['default']>
 export const LazyTemplateMenu: LazyComponent<typeof import("../app/components/TemplateMenu.vue")['default']>
+export const LazyChatComposer: LazyComponent<typeof import("../app/components/chat/ChatComposer.vue")['default']>
+export const LazyChatWindow: LazyComponent<typeof import("../app/components/chat/ChatWindow.vue")['default']>
+export const LazyChatMessageBubble: LazyComponent<typeof import("../app/components/chat/MessageBubble.vue")['default']>
+export const LazyChatSourceChip: LazyComponent<typeof import("../app/components/chat/SourceChip.vue")['default']>
+export const LazyChatTypingIndicator: LazyComponent<typeof import("../app/components/chat/TypingIndicator.vue")['default']>
 export const LazyUColorModeAvatar: LazyComponent<typeof import("../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeAvatar.vue")['default']>
 export const LazyUColorModeButton: LazyComponent<typeof import("../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeButton.vue")['default']>
 export const LazyUColorModeImage: LazyComponent<typeof import("../node_modules/@nuxt/ui/dist/runtime/components/color-mode/ColorModeImage.vue")['default']>
