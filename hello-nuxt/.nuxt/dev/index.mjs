@@ -3074,10 +3074,12 @@ const _27eB4y = defineCachedEventHandler(async (event) => {
   // 1 week
 });
 
+const _lazy_uZ7j9W = () => Promise.resolve().then(function () { return chat_post$1; });
 const _lazy_O7q8OQ = () => Promise.resolve().then(function () { return renderer; });
 
 const handlers = [
   { route: '', handler: _QtSTdB, lazy: false, middleware: true, method: undefined },
+  { route: '/api/chat', handler: _lazy_uZ7j9W, lazy: true, middleware: false, method: "post" },
   { route: '/__nuxt_error', handler: _lazy_O7q8OQ, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
   { route: '/api/_nuxt_icon/:collection', handler: _27eB4y, lazy: false, middleware: false, method: undefined },
@@ -3344,6 +3346,23 @@ const styles = {};
 const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: styles
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const chat_post = defineEventHandler(async (event) => {
+  const body = await readBody(event);
+  if (!(body == null ? void 0 : body.messages) || !Array.isArray(body.messages)) {
+    throw createError({ statusCode: 400, message: "INVALID_PAYLOAD" });
+  }
+  await new Promise((r) => setTimeout(r, 1200));
+  const lastUserMessage = [...body.messages].reverse().find((m) => m.role === "user");
+  return {
+    reply: `[MOCK] Recebi sua pergunta: "${lastUserMessage == null ? void 0 : lastUserMessage.content}". O backend real com Ollama ainda est\xE1 em desenvolvimento.`
+  };
+});
+
+const chat_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: chat_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 function renderPayloadResponse(ssrContext) {
