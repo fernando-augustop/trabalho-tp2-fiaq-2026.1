@@ -8,7 +8,6 @@ export interface SearchResult {
   score: number
 }
 
-// In-memory store — populated at boot by bootstrap-rag.ts
 const store: EmbeddedChunk[] = []
 
 export function addChunk(chunk: EmbeddedChunk): void {
@@ -19,7 +18,6 @@ export function getStoreSize(): number {
   return store.length
 }
 
-// Find the K most similar chunks to a query vector
 export function topK(queryVector: number[], k = 4): SearchResult[] {
   if (store.length === 0) return []
 
@@ -35,8 +33,6 @@ export function topK(queryVector: number[], k = 4): SearchResult[] {
     .slice(0, k)
 }
 
-// Only return results above a minimum similarity threshold
-// Prevents the LLM from getting irrelevant context
 export function topKFiltered(queryVector: number[], k = 4, minScore = 0.5): SearchResult[] {
   return topK(queryVector, k).filter(r => r.score >= minScore)
 }

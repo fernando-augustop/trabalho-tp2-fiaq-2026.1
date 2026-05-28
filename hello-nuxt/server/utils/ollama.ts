@@ -7,7 +7,6 @@ export interface OllamaMessage {
   content: string
 }
 
-// Non-streaming chat — used for testing
 export async function ollamaChat(messages: OllamaMessage[]): Promise<string> {
   const res = await fetch(`${OLLAMA_URL}/api/chat`, {
     method: 'POST',
@@ -21,7 +20,6 @@ export async function ollamaChat(messages: OllamaMessage[]): Promise<string> {
   return data.message.content
 }
 
-// Streaming chat — used by the real endpoint
 export async function ollamaChatStream(messages: OllamaMessage[]): Promise<ReadableStream<string>> {
   const res = await fetch(`${OLLAMA_URL}/api/chat`, {
     method: 'POST',
@@ -43,7 +41,6 @@ export async function ollamaChatStream(messages: OllamaMessage[]): Promise<Reada
         return
       }
 
-      // Ollama streams one JSON object per line
       const lines = decoder.decode(value).split('\n').filter(Boolean)
       for (const line of lines) {
         try {
@@ -59,7 +56,6 @@ export async function ollamaChatStream(messages: OllamaMessage[]): Promise<Reada
   })
 }
 
-// Generate embedding vector for a string
 export async function embed(text: string): Promise<number[]> {
   const res = await fetch(`${OLLAMA_URL}/api/embeddings`, {
     method: 'POST',

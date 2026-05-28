@@ -1,6 +1,6 @@
+/// <reference types="@nuxt/eslint" />
 /// <reference types="@nuxt/devtools" />
 /// <reference types="@nuxt/telemetry" />
-/// <reference types="@nuxt/eslint" />
 /// <reference types="@nuxt/ui" />
 /// <reference path="types/nitro-layouts.d.ts" />
 /// <reference path="types/modules.d.ts" />

@@ -1,9 +1,9 @@
 {
-  "_hash": "CdCEwhiuzlsMwADTObQWmMPy_iIMi09P2YBijFJiKNc",
+  "_hash": "_rd4taAKrNZpSuEYrmwIbZgD7f7P2V9z_x8hXC1FfAE",
   "project": {
     "rootDir": "/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt"
   },
   "versions": {
-    "nuxt": "4.4.2"
+    "nuxt": "4.4.6"
   }
 }

@@ -8,7 +8,6 @@ export interface EmbeddedChunk {
   vector: number[]
 }
 
-// Cosine similarity between two vectors
 export function cosineSimilarity(a: number[], b: number[]): number {
   let dot = 0
   let magA = 0
@@ -27,15 +26,12 @@ export function cosineSimilarity(a: number[], b: number[]): number {
   return dot / magnitude
 }
 
-// Embed a FAQ entry and return it with its vector
 export async function embedChunk(chunk: Omit<EmbeddedChunk, 'vector'>): Promise<EmbeddedChunk> {
-  // We embed titulo + conteudo together for better retrieval
   const text = `${chunk.titulo}\n${chunk.conteudo}`
   const vector = await embed(text)
   return { ...chunk, vector }
 }
 
-// Embed the user's query for similarity search
 export async function embedQuery(query: string): Promise<number[]> {
   return embed(query)
 }
