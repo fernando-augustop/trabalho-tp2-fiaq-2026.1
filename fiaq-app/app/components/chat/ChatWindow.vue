@@ -112,11 +112,13 @@ defineEmits<{
   suggest: [text: string]
 }>()
 
+// Perguntas prontas escolhidas a partir de títulos reais do FAQ e validadas
+// contra a base (a IA responde todas com fonte; ver data/faq/*.json).
 const suggestions = [
-  'Como solicitar aproveitamento de disciplina?',
-  'Como funciona o TCC?',
-  'Quais são os requisitos para estágio?',
-  'Como trancar uma matrícula?'
+  'Quais são as etapas da matrícula?',
+  'Como funciona o estágio obrigatório?',
+  'Como encontro um orientador de Projeto Final?',
+  'Posso migrar de estrutura curricular?'
 ]
 
 const messagesEl = ref<HTMLElement | null>(null)

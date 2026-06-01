@@ -25,7 +25,7 @@
           <input
             v-model="query"
             type="text"
-            placeholder="Ex: Como solicitar aproveitamento de disciplina?"
+            placeholder="Ex: Quais são as etapas da matrícula?"
             class="flex-1 bg-[#2b3f6e] text-white placeholder-gray-400 px-5 py-3.5 text-sm outline-none"
           >
           <button
