@@ -32,24 +32,35 @@ export async function ollamaChatStream(messages: OllamaMessage[]): Promise<Reada
 
   const reader = res.body.getReader()
   const decoder = new TextDecoder()
+  let buffer = ''
 
   return new ReadableStream<string>({
     async pull(controller) {
-      const { done, value } = await reader.read()
-      if (done) {
-        controller.close()
-        return
-      }
+      while (true) {
+        const { done, value } = await reader.read()
 
-      const lines = decoder.decode(value).split('\n').filter(Boolean)
-      for (const line of lines) {
-        try {
-          const json = JSON.parse(line)
-          if (json.message?.content) {
-            controller.enqueue(json.message.content)
+        if (done) {
+          controller.close()
+          return
+        }
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+
+        buffer = lines.pop() ?? ''
+
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (!trimmed) continue
+
+          try {
+            const json = JSON.parse(trimmed)
+
+            if (json.done === false && json.message?.content) {
+              controller.enqueue(json.message.content)
+              return
+            }
+          } catch {
           }
-        } catch {
-          // skip malformed lines
         }
       }
     }

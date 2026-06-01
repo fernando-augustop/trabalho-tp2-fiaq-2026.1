@@ -1,0 +1,14 @@
+[
+  {
+    "id": "coordenacao-001",
+    "titulo": "Como entrar em contato com a coordenação do CIC?",
+    "conteudo": "A coordenação do Departamento de Ciência da Computação pode ser contactada pelo e-mail coordenacao@cic.unb.br ou presencialmente no Campus Darcy Ribeiro, ICC Norte, sala B-116. O horário de atendimento é de segunda a sexta, das 10h às 12h e das 14h às 16h.",
+    "url": "https://www.unb.br/cic/coordenacao"
+  },
+  {
+    "id": "coordenacao-002",
+    "titulo": "Como solicitar declaração de vínculo ou histórico escolar?",
+    "conteudo": "Declarações de vínculo e histórico escolar podem ser emitidos diretamente pelo SIGAA na seção de documentos. Caso necessite de documento com assinatura física, deve-se solicitar presencialmente na secretaria do CIC com antecedência de 5 dias úteis.",
+    "url": "https://www.unb.br/cic/secretaria/documentos"
+  }
+]

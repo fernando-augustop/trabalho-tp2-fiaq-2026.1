@@ -215,7 +215,7 @@ declare global {
   export type { PageMeta } from '../../node_modules/nuxt/dist/app/composables/pages'
   import('../../node_modules/nuxt/dist/app/composables/pages')
   // @ts-ignore
-  export type { MessageRole, Message } from '../../app/composables/useFiaqChat'
+  export type { MessageRole, Source, Message } from '../../app/composables/useFiaqChat'
   import('../../app/composables/useFiaqChat')
 }
 // for vue template auto import

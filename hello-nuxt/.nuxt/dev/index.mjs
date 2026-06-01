@@ -23,7 +23,7 @@ import defu, { defuFn } from 'file:///home/eduardofgc/WebstormProjects/trabalhof
 import { snakeCase } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/scule/dist/index.mjs';
 import { getContext } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/unctx/dist/index.mjs';
 import { toRouteMatcher, createRouter } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/radix3/dist/index.mjs';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import consola, { consola as consola$1 } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/consola/dist/index.mjs';
 import { ErrorParser } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/youch-core/build/index.js';
 import { Youch } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/youch/build/index.js';
@@ -32,6 +32,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { stringify, uneval } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/devalue/index.js';
 import { captureRawStackTrace, parseRawStackTrace } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/errx/dist/index.js';
 import { isVNode, isRef, toValue } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/vue/index.mjs';
+import { extractText } from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/unpdf/dist/index.mjs';
 import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file:///home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
 import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -2536,10 +2537,197 @@ const _6gSZYTwtqYu_Tma2OVRtQphh62WiHB8o7L1Mu9tqUtk = (function(nitro) {
   });
 });
 
+function defineNitroPlugin(def) {
+  return def;
+}
+
+const OLLAMA_URL = "http://localhost:11434";
+const CHAT_MODEL = "phi3:mini";
+const EMBED_MODEL = "nomic-embed-text";
+async function ollamaChatStream(messages) {
+  const res = await fetch(`${OLLAMA_URL}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model: CHAT_MODEL, messages, stream: true })
+  });
+  if (!res.ok) throw new Error(`Ollama stream error: ${res.status}`);
+  if (!res.body) throw new Error("No response body");
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  return new ReadableStream({
+    async pull(controller) {
+      var _a, _b;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          controller.close();
+          return;
+        }
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = (_a = lines.pop()) != null ? _a : "";
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          try {
+            const json = JSON.parse(trimmed);
+            if (json.done === false && ((_b = json.message) == null ? void 0 : _b.content)) {
+              controller.enqueue(json.message.content);
+              return;
+            }
+          } catch {
+          }
+        }
+      }
+    }
+  });
+}
+async function embed(text) {
+  const res = await fetch(`${OLLAMA_URL}/api/embeddings`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model: EMBED_MODEL, prompt: text })
+  });
+  if (!res.ok) throw new Error(`Ollama embed error: ${res.status}`);
+  const data = await res.json();
+  return data.embedding;
+}
+
+function cosineSimilarity(a, b) {
+  var _a, _b;
+  let dot = 0;
+  let magA = 0;
+  let magB = 0;
+  for (let i = 0; i < a.length; i++) {
+    const ai = (_a = a[i]) != null ? _a : 0;
+    const bi = (_b = b[i]) != null ? _b : 0;
+    dot += ai * bi;
+    magA += ai * ai;
+    magB += bi * bi;
+  }
+  const magnitude = Math.sqrt(magA) * Math.sqrt(magB);
+  if (magnitude === 0) return 0;
+  return dot / magnitude;
+}
+async function embedChunk(chunk) {
+  const text = `${chunk.titulo}
+${chunk.conteudo}`;
+  const vector = await embed(text);
+  return { ...chunk, vector };
+}
+async function embedQuery(query) {
+  return embed(query);
+}
+
+const store = [];
+function addChunk(chunk) {
+  store.push(chunk);
+}
+function getStoreSize() {
+  return store.length;
+}
+function topK(queryVector, k = 4) {
+  if (store.length === 0) return [];
+  return store.map((chunk) => ({
+    id: chunk.id,
+    titulo: chunk.titulo,
+    conteudo: chunk.conteudo,
+    url: chunk.url,
+    score: cosineSimilarity(queryVector, chunk.vector)
+  })).sort((a, b) => b.score - a.score).slice(0, k);
+}
+function topKFiltered(queryVector, k = 4, minScore = 0.5) {
+  return topK(queryVector, k).filter((r) => r.score >= minScore);
+}
+
+function splitIntoChunks(text, chunkSize = 500, overlap = 50) {
+  const words = text.split(/\s+/).filter(Boolean);
+  const chunks = [];
+  let i = 0;
+  while (i < words.length) {
+    const chunk = words.slice(i, i + chunkSize).join(" ");
+    if (chunk.trim()) chunks.push(chunk);
+    i += chunkSize - overlap;
+  }
+  return chunks;
+}
+async function extractPdfChunks(pdfPath, sourceLabel, sourceUrl) {
+  const buffer = await readFile(pdfPath);
+  const { text } = await extractText(new Uint8Array(buffer), { mergePages: true });
+  const rawText = (Array.isArray(text) ? text.join(" ") : text).replace(/\s+/g, " ").replace(/\n+/g, " ").trim();
+  const chunks = splitIntoChunks(rawText);
+  return chunks.map((conteudo, index) => ({
+    id: `pdf-${sourceLabel.toLowerCase().replace(/\s+/g, "-")}-${index + 1}`,
+    titulo: `${sourceLabel} (parte ${index + 1})`,
+    conteudo,
+    url: sourceUrl
+  }));
+}
+
+const _SsFJzexuWxXSm60V19R92tY9GMbg0l3_BIwPrKUCDxw = defineNitroPlugin(async () => {
+  console.log("[RAG] Starting indexing...");
+  await indexFaq();
+  await indexPdfs();
+  console.log(`[RAG] Done. ${getStoreSize()} chunks indexed.`);
+});
+async function indexFaq() {
+  const faqDir = join(process.cwd(), "data", "faq");
+  let files;
+  try {
+    files = await readdir(faqDir);
+  } catch {
+    console.warn("[RAG] No data/faq directory found, skipping FAQ indexing.");
+    return;
+  }
+  const jsonFiles = files.filter((f) => f.endsWith(".json"));
+  console.log(`[RAG] Found ${jsonFiles.length} FAQ file(s).`);
+  for (const file of jsonFiles) {
+    const raw = await readFile(join(faqDir, file), "utf-8");
+    const entries = JSON.parse(raw);
+    for (const entry of entries) {
+      try {
+        const embedded = await embedChunk(entry);
+        addChunk(embedded);
+      } catch (e) {
+        console.error(`[RAG] Failed to embed FAQ entry ${entry.id}:`, e);
+      }
+    }
+    console.log(`[RAG] Indexed ${entries.length} entries from ${file}`);
+  }
+}
+async function indexPdfs() {
+  const pdfDir = join(process.cwd(), "data", "pdfs");
+  let files;
+  try {
+    files = await readdir(pdfDir);
+  } catch {
+    console.warn("[RAG] No data/pdfs directory found, skipping PDF indexing.");
+    return;
+  }
+  const pdfFiles = files.filter((f) => f.endsWith(".pdf"));
+  console.log(`[RAG] Found ${pdfFiles.length} PDF file(s).`);
+  for (const file of pdfFiles) {
+    const pdfPath = join(pdfDir, file);
+    const label = file.replace(".pdf", "").replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    try {
+      const chunks = await extractPdfChunks(pdfPath, label, "");
+      for (const chunk of chunks) {
+        const embedded = await embedChunk(chunk);
+        addChunk(embedded);
+      }
+      console.log(`[RAG] Indexed ${chunks.length} chunks from ${file}`);
+    } catch (e) {
+      console.error(`[RAG] Failed to index PDF ${file}:`, e);
+    }
+  }
+}
+
 const plugins = [
   _PfLnB54zQG7zric4nKTypNEnUw6QTTKm4aDiIecCBk,
 _GUmama7vQ24O6zwULReE1QLKaabkCOv5weguL1jlnzo,
 _6gSZYTwtqYu_Tma2OVRtQphh62WiHB8o7L1Mu9tqUtk,
+_SsFJzexuWxXSm60V19R92tY9GMbg0l3_BIwPrKUCDxw,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
@@ -3497,16 +3685,83 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: styles
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const SYSTEM_PROMPT = `Voc\xEA \xE9 o assistente virtual do fIAq, o portal de informa\xE7\xF5es da Universidade de Bras\xEDlia.
+
+Regras que voc\xEA DEVE seguir:
+- Cumprimentos e sauda\xE7\xF5es podem ser respondidos normalmente de forma amig\xE1vel.
+- Responda APENAS com base no <contexto> fornecido abaixo, exceto para sauda\xE7\xF5es simples.
+- Se a resposta n\xE3o estiver no contexto, diga exatamente: "N\xE3o tenho essa informa\xE7\xE3o. Por favor, entre em contato com a coordena\xE7\xE3o do CIC ou acesse o site da UnB."
+- NUNCA invente links, prazos, nomes ou informa\xE7\xF5es que n\xE3o estejam no contexto.
+- Responda SEMPRE em portugu\xEAs brasileiro, de forma clara e acolhedora.
+- Seja conciso: no m\xE1ximo 6 frases.
+- Se a pergunta envolver ass\xE9dio ou sa\xFAde mental, inclua sempre o contato da Ouvidoria (ouvidoria@unb.br) e do CAEP.
+- Se a pergunta n\xE3o for sobre a UnB e n\xE3o for uma sauda\xE7\xE3o, recuse educadamente.`;
+function buildPrompt(context, question) {
+  return `<contexto>
+${context}
+</contexto>
+
+Pergunta do aluno: ${question}`;
+}
+function sendEvent(res, data) {
+  res.write(`data: ${JSON.stringify(data)}
+
+`);
+}
 const chat_post = defineEventHandler(async (event) => {
   const body = await readBody(event);
-  if (!(body == null ? void 0 : body.messages) || !Array.isArray(body.messages)) {
+  if (!(body == null ? void 0 : body.messages) || !Array.isArray(body.messages) || body.messages.length === 0) {
     throw createError({ statusCode: 400, message: "INVALID_PAYLOAD" });
   }
-  await new Promise((r) => setTimeout(r, 1200));
   const lastUserMessage = [...body.messages].reverse().find((m) => m.role === "user");
-  return {
-    reply: `[MOCK] Recebi sua pergunta: "${lastUserMessage == null ? void 0 : lastUserMessage.content}". O backend real com Ollama ainda est\xE1 em desenvolvimento.`
-  };
+  if (!lastUserMessage) {
+    throw createError({ statusCode: 400, message: "INVALID_PAYLOAD" });
+  }
+  const question = lastUserMessage.content;
+  setResponseHeaders(event, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    "Connection": "keep-alive"
+  });
+  const res = event.node.res;
+  try {
+    let queryVector;
+    try {
+      queryVector = await embedQuery(question);
+    } catch {
+      sendEvent(res, { type: "error", message: "LLM_UNAVAILABLE" });
+      res.end();
+      return;
+    }
+    const results = topKFiltered(queryVector, 4, 0.5);
+    const context = results.length > 0 ? results.map((r) => `[${r.titulo}]
+${r.conteudo}`).join("\n\n") : "Nenhuma informa\xE7\xE3o relevante encontrada na base de dados.";
+    const history = body.messages.slice(0, -1).map((m) => ({ role: m.role, content: m.content }));
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...history,
+      { role: "user", content: buildPrompt(context, question) }
+    ];
+    const stream = await ollamaChatStream(messages);
+    const reader = stream.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      sendEvent(res, { type: "token", content: value });
+    }
+    if (results.length > 0) {
+      sendEvent(res, {
+        type: "sources",
+        items: results.map((r) => ({ id: r.id, titulo: r.titulo, url: r.url }))
+      });
+    }
+    sendEvent(res, { type: "done" });
+  } catch (e) {
+    console.error("[chat.post] Error:", e);
+    sendEvent(res, { type: "error", message: "LLM_UNAVAILABLE" });
+  } finally {
+    res.end();
+  }
 });
 
 const chat_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({

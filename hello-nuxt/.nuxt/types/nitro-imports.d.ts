@@ -46,6 +46,7 @@ declare global {
   const embedChunk: typeof import('../../server/utils/embeddings').embedChunk
   const embedQuery: typeof import('../../server/utils/embeddings').embedQuery
   const eventHandler: typeof import('../../node_modules/h3').eventHandler
+  const extractPdfChunks: typeof import('../../server/utils/pdfLoader').extractPdfChunks
   const fetchWithEvent: typeof import('../../node_modules/h3').fetchWithEvent
   const fromNodeMiddleware: typeof import('../../node_modules/h3').fromNodeMiddleware
   const fromPlainHandler: typeof import('../../node_modules/h3').fromPlainHandler
@@ -149,6 +150,9 @@ declare global {
   export type { OllamaMessage } from '../../server/utils/ollama'
   import('../../server/utils/ollama')
   // @ts-ignore
+  export type { PdfChunk } from '../../server/utils/pdfLoader'
+  import('../../server/utils/pdfLoader')
+  // @ts-ignore
   export type { SearchResult } from '../../server/utils/vectorStore'
   import('../../server/utils/vectorStore')
 }
@@ -168,4 +172,5 @@ export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsUR
 export { defineAppConfig } from '/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
 export { cosineSimilarity, embedChunk, embedQuery } from '/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/server/utils/embeddings';
 export { ollamaChat, ollamaChatStream, embed } from '/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/server/utils/ollama';
+export { extractPdfChunks } from '/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/server/utils/pdfLoader';
 export { addChunk, getStoreSize, topK, topKFiltered } from '/home/eduardofgc/WebstormProjects/trabalhofinal-fiaq/hello-nuxt/server/utils/vectorStore';

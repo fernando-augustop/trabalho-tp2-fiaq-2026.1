@@ -1,0 +1,20 @@
+[
+  {
+    "id": "tcc-001",
+    "titulo": "Como funciona o TCC no curso de Ciência da Computação?",
+    "conteudo": "O TCC é composto por duas disciplinas: Projeto Final 1 e Projeto Final 2. O aluno deve ter cumprido pelo menos 70% dos créditos obrigatórios para se matricular. É necessário ter um orientador professor do departamento aprovado pela coordenação.",
+    "url": "https://www.unb.br/cic/tcc"
+  },
+  {
+    "id": "tcc-002",
+    "titulo": "Como escolher orientador para o TCC?",
+    "conteudo": "O aluno deve entrar em contato diretamente com o professor de interesse e verificar sua disponibilidade. Após acordo com o orientador, o aluno preenche o formulário de registro de orientação e entrega na secretaria do CIC.",
+    "url": "https://www.unb.br/cic/tcc/orientador"
+  },
+  {
+    "id": "tcc-003",
+    "titulo": "Qual é o prazo para entrega do TCC?",
+    "conteudo": "A entrega do TCC deve seguir o calendário acadêmico do semestre. Geralmente a versão final deve ser entregue até duas semanas antes do fim do semestre. A banca deve ser agendada com pelo menos 15 dias de antecedência.",
+    "url": "https://www.unb.br/cic/tcc/prazos"
+  }
+]
