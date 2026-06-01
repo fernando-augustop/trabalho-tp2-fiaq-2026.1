@@ -1,19 +1,79 @@
-import { readFile, readdir } from 'fs/promises'
+import { readFile, readdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { embedChunk } from '../utils/embeddings'
-import { addChunk, getStoreSize } from '../utils/vectorStore'
+import type { EmbeddedChunk } from '../utils/embeddings'
+import { addChunk, loadChunks, getAllChunks, getStoreSize } from '../utils/vectorStore'
+import { embedInfo } from '../utils/ollama'
 import { extractPdfChunks } from '../utils/pdfLoader'
 import { extractCrawlChunks } from '../utils/crawlLoader'
 
-export default defineNitroPlugin(async () => {
-  console.log('[RAG] Starting indexing...')
+interface RagIndexFile {
+  meta: { provider?: string, model?: string, dim?: number, count?: number, builtAt?: string }
+  chunks: EmbeddedChunk[]
+}
 
+// Caminho do índice em disco — usado apenas para REGRAVAR o cache em dev/regeneração.
+const INDEX_PATH = join(process.cwd(), 'server', 'assets', 'rag-index.json')
+
+// O índice é carregado como SERVER ASSET (não via import estático), pois importar
+// um JSON de vários MB faz o bundler inaliná-lo num chunk JS e estourar o heap.
+// server/assets/ é empacotado pelo Nitro e exposto no storage "assets:server".
+async function loadCachedIndex(): Promise<RagIndexFile | null> {
+  try {
+    const data = await useStorage('assets:server').getItem('rag-index.json')
+    if (!data) return null
+    return (typeof data === 'string' ? JSON.parse(data) : data) as RagIndexFile
+  } catch {
+    return null
+  }
+}
+
+export default defineNitroPlugin(async () => {
+  const force = process.env.RAG_FORCE_REINDEX === '1'
+  const cached = force ? null : await loadCachedIndex()
+
+  // Caminho rápido (produção/Vercel e dev normal): hidrata do índice pré-computado.
+  if (cached?.chunks?.length) {
+    loadChunks(cached.chunks)
+    if (cached.meta?.model && cached.meta.model !== embedInfo.model) {
+      console.warn(
+        `[RAG] ⚠️ Índice foi gerado com "${cached.meta.model}" mas o runtime usa `
+        + `"${embedInfo.model}". As buscas podem ficar inconsistentes — regenere o índice.`
+      )
+    }
+    console.log(`[RAG] Índice pré-computado carregado: ${getStoreSize()} chunks (modelo: ${cached.meta?.model ?? '?'}).`)
+    return
+  }
+
+  // Caminho de regeneração: indexa ao vivo (chama o provider de embeddings) e
+  // grava o índice em disco para ser commitado e empacotado no deploy.
+  console.log('[RAG] Regenerando índice (indexação ao vivo)...')
   await indexFaq()
   await indexPdfs()
   await indexCrawl()
-
-  console.log(`[RAG] Done. ${getStoreSize()} chunks indexed.`)
+  console.log(`[RAG] Indexação concluída: ${getStoreSize()} chunks.`)
+  await writeIndex()
 })
+
+async function writeIndex(): Promise<void> {
+  const chunks = getAllChunks()
+  const payload: RagIndexFile = {
+    meta: {
+      provider: embedInfo.provider,
+      model: embedInfo.model,
+      dim: chunks[0]?.vector.length ?? 0,
+      count: chunks.length,
+      builtAt: new Date().toISOString()
+    },
+    chunks
+  }
+  try {
+    await writeFile(INDEX_PATH, JSON.stringify(payload) + '\n', 'utf-8')
+    console.log(`[RAG] Índice gravado em ${INDEX_PATH} (${chunks.length} chunks, dim ${payload.meta.dim}).`)
+  } catch (e) {
+    console.warn('[RAG] Não foi possível gravar o índice (FS somente-leitura?):', e)
+  }
+}
 
 async function indexFaq() {
   const faqDir = join(process.cwd(), 'data', 'faq')

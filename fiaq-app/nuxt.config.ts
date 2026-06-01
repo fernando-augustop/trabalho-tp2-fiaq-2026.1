@@ -15,6 +15,14 @@ export default defineNuxtConfig({
     '/': { prerender: true }
   },
 
+  nitro: {
+    // No Vercel, a rota de chat faz streaming (SSE) do OpenRouter — precisa de
+    // uma janela maior que o default de 10s. Ignorado por outros presets.
+    vercel: {
+      functions: { maxDuration: 60 }
+    }
+  },
+
   compatibilityDate: '2025-01-15',
 
   eslint: {

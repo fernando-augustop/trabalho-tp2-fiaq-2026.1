@@ -161,7 +161,7 @@
 | 154 | Reprovação em componente obrigatório durante o período de Verão conta para o desligamento? | https://www.cic.unb.br/informacoes/faq#reprovacao-em-componente-obrigatorio-durante-o-periodo-de-verao-conta-para-o-desligamento | `desligamento` | 1 |
 | 155 | Preciso ser aprovado em, no mínimo, 4 componentes curriculares obrigatórios ou optativos do curso em dois semestres consecutivos? | https://www.cic.unb.br/informacoes/faq#preciso-ser-aprovado-em-no-minimo-4-componentes-curriculares-obrigatorios-ou-optativos-do-curso-em-dois-semestres-consecutivos | `desligamento` | 1 |
 | 156 | Como solicitar o desligamento voluntário? | https://www.cic.unb.br/informacoes/faq#como-solicitar-o-desligamento-voluntario | `desligamento` | 1 |
-| 157 | página da CAO | https://www.cic.unb.br/[https://deg.unb.br/pfdesligamentovoluntario/] | `como-solicitar-o-desligamento-voluntario` | 1 |
+| 157 | página da CAO | https://deg.unb.br/pfdesligamentovoluntario/ | `como-solicitar-o-desligamento-voluntario` | 1 |
 | 158 | Formatura | https://www.cic.unb.br/informacoes/faq#formatura | `trajetoria-academica` | 1 |
 | 159 | Cerimonial | http://cerimonial.unb.br/ | `formatura` | 1 |
 | 160 | O que eu preciso fazer para me formar? | https://www.cic.unb.br/informacoes/faq#o-que-eu-preciso-fazer-para-me-formar | `formatura` | 1 |
