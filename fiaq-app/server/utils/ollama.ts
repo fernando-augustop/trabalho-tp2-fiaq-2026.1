@@ -15,6 +15,11 @@ const OPENROUTER_EMBED_MODEL = process.env.OPENROUTER_EMBED_MODEL || 'nvidia/lla
 const CHAT_PROVIDER = (process.env.CHAT_PROVIDER || 'ollama').toLowerCase()
 const EMBED_PROVIDER = (process.env.EMBED_PROVIDER || 'ollama').toLowerCase()
 
+// URL pública do app — usada no header HTTP-Referer do OpenRouter (atribuição).
+// Na Vercel usa VERCEL_URL automaticamente; localmente cai no localhost.
+const APP_URL = process.env.APP_URL
+  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
 // Identifica o modelo de embedding ativo — usado para gravar/validar o índice
 // pré-computado (embeddings de modelos diferentes são incompatíveis entre si).
 export const embedInfo = {
@@ -30,7 +35,7 @@ function openRouterHeaders(): Record<string, string> {
   return {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-    'HTTP-Referer': 'http://localhost:3000',
+    'HTTP-Referer': APP_URL,
     'X-Title': 'fIAq'
   }
 }
