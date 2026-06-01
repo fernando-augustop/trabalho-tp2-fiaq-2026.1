@@ -1,0 +1,97 @@
+# Índice do FAQ
+
+- Total de painéis: 90
+- Seções de topo: 7
+
+## Árvore de conteúdo
+
+- 01. [LEIA-ME!](https://www.cic.unb.br/informacoes/faq#leia-me) `leia-me` — `secoes/01-leia-me.md`
+  - 02. [Boas Vindas](https://www.cic.unb.br/informacoes/faq#boas-vindas) `boas-vindas`
+  - 03. [Assuntos Comunitários & Direitos Humanos](https://www.cic.unb.br/informacoes/faq#assuntos-comunitarios-direitos-humanos) `assuntos-comunitarios-direitos-humanos`
+  - 04. [Cursos do CIC](https://www.cic.unb.br/informacoes/faq#cursos-do-cic) `cursos-do-cic`
+  - 05. [Legislação & Regulamentos](https://www.cic.unb.br/informacoes/faq#legislacao-regulamentos) `legislacao-regulamentos`
+- 06. [Atividades de Curso](https://www.cic.unb.br/informacoes/faq#atividades-de-curso) `atividades-de-curso` — `secoes/02-atividades-de-curso.md`
+  - 07. [Atividades Complementares](https://www.cic.unb.br/informacoes/faq#atividades-complementares) `atividades-complementares`
+    - 08. [Existe carga horária mínima de atividades complementares?](https://www.cic.unb.br/informacoes/faq#existe-carga-horaria-minima-de-atividades-complementares) `existe-carga-horaria-minima-de-atividades-complementares`
+    - 09. [Como integralizo carga horária de atividades complementares?](https://www.cic.unb.br/informacoes/faq#como-integralizo-carga-horaria-de-atividades-complementares) `como-integralizo-carga-horaria-de-atividades-complementares`
+    - 10. [Como integralizo carga horária referente a certificados de língua estrangeira?](https://www.cic.unb.br/informacoes/faq#como-integralizo-carga-horaria-referente-a-certificados-de-lingua-estrangeira) `como-integralizo-carga-horaria-referente-a-certificados-de-lingua-estrangeira`
+    - 11. [O que é Iniciação Científica?](https://www.cic.unb.br/informacoes/faq#o-que-e-iniciacao-cientifica) `o-que-e-iniciacao-cientifica`
+  - 12. [Estágio](https://www.cic.unb.br/informacoes/faq#estagio) `estagio`
+    - 13. [Como lido com estágio não obrigatório?](https://www.cic.unb.br/informacoes/faq#como-lido-com-estagio-nao-obrigatorio) `como-lido-com-estagio-nao-obrigatorio`
+    - 14. [Estágio em Engenharia de Computação](https://www.cic.unb.br/informacoes/faq#estagio-em-engenharia-de-computacao) `estagio-em-engenharia-de-computacao`
+      - 15. [Como faço matrícula em estágio obrigatório?'](https://www.cic.unb.br/informacoes/faq#como-faco-matricula-em-estagio-obrigatorio) `como-faco-matricula-em-estagio-obrigatorio`
+      - 16. [Como faço para ter meus documentos de estágio assinados?](https://www.cic.unb.br/informacoes/faq#como-faco-para-ter-meus-documentos-de-estagio-assinados) `como-faco-para-ter-meus-documentos-de-estagio-assinados`
+      - 17. [Eu trabalho na área de computação, preciso fazer estágio obrigatório?](https://www.cic.unb.br/informacoes/faq#eu-trabalho-na-area-de-computacao-preciso-fazer-estagio-obrigatorio) `eu-trabalho-na-area-de-computacao-preciso-fazer-estagio-obrigatorio`
+      - 18. [Existem restrições para começar o estágio obrigatório?](https://www.cic.unb.br/informacoes/faq#existem-restricoes-para-comecar-o-estagio-obrigatorio) `existem-restricoes-para-comecar-o-estagio-obrigatorio`
+      - 19. [Já concluí a carga horária de estágio obrigatório, como recebo a menção?](https://www.cic.unb.br/informacoes/faq#ja-conclui-a-carga-horaria-de-estagio-obrigatorio-como-recebo-a-mencao) `ja-conclui-a-carga-horaria-de-estagio-obrigatorio-como-recebo-a-mencao`
+      - 20. [Posso aproveitar o estágio não-obrigatório como obrigatório?](https://www.cic.unb.br/informacoes/faq#posso-aproveitar-o-estagio-nao-obrigatorio-como-obrigatorio) `posso-aproveitar-o-estagio-nao-obrigatorio-como-obrigatorio`
+  - 21. [Extensão](https://www.cic.unb.br/informacoes/faq#extensao) `extensao`
+    - 22. [O que é extensão universitária?](https://www.cic.unb.br/informacoes/faq#o-que-e-extensao-universitaria) `o-que-e-extensao-universitaria`
+    - 23. [Sou obrigado a fazer extensão?](https://www.cic.unb.br/informacoes/faq#sou-obrigado-a-fazer-extensao) `sou-obrigado-a-fazer-extensao`
+    - 24. [Quais as ações de Extensão da UnB?](https://www.cic.unb.br/informacoes/faq#quais-as-acoes-de-extensao-da-unb) `quais-as-acoes-de-extensao-da-unb`
+    - 25. [Extensão em Engenharia de Computação](https://www.cic.unb.br/informacoes/faq#extensao-em-engenharia-de-computacao) `extensao-em-engenharia-de-computacao`
+  - 26. [Trabalho de Conclusão de Curso](https://www.cic.unb.br/informacoes/faq#trabalho-de-conclusao-de-curso) `trabalho-de-conclusao-de-curso`
+    - 27. [Como encontro um orientador de Projeto Final?](https://www.cic.unb.br/informacoes/faq#como-encontro-um-orientador-de-projeto-final) `como-encontro-um-orientador-de-projeto-final`
+    - 28. [TCC em Engenharia de Computação](https://www.cic.unb.br/informacoes/faq#tcc-em-engenharia-de-computacao) `tcc-em-engenharia-de-computacao`
+      - 29. [Existem restrições para começar o Projeto Final?](https://www.cic.unb.br/informacoes/faq#existem-restricoes-para-comecar-o-projeto-final) `existem-restricoes-para-comecar-o-projeto-final`
+      - 30. [Como sou matriculado nas atividades de Projeto Final?](https://www.cic.unb.br/informacoes/faq#como-sou-matriculado-nas-atividades-de-projeto-final) `como-sou-matriculado-nas-atividades-de-projeto-final`
+- 31. [Coordenação](https://www.cic.unb.br/informacoes/faq#coordenacao) `coordenacao` — `secoes/03-coordenacao.md`
+  - 32. [O que faz o coordenador de curso?](https://www.cic.unb.br/informacoes/faq#o-que-faz-o-coordenador-de-curso) `o-que-faz-o-coordenador-de-curso`
+  - 33. [Quem está atuando como coordenador e consigo contato?](https://www.cic.unb.br/informacoes/faq#quem-esta-atuando-como-coordenador-e-consigo-contato) `quem-esta-atuando-como-coordenador-e-consigo-contato`
+  - 34. [Como encaminho elogio/reclamação sobre infraestrutura, ensino, atendimento, procedimentos, etc.?](https://www.cic.unb.br/informacoes/faq#como-encaminho-elogio-reclamacao-sobre-infraestrutura-ensino-atendimento-procedimentos-etc) `como-encaminho-elogio-reclamacao-sobre-infraestrutura-ensino-atendimento-procedimentos-etc`
+- 35. [Estrutura Curricular](https://www.cic.unb.br/informacoes/faq#estrutura-curricular) `estrutura-curricular` — `secoes/04-estrutura-curricular.md`
+  - 36. [Qual a minha estrutura curricular?](https://www.cic.unb.br/informacoes/faq#qual-a-minha-estrutura-curricular) `qual-a-minha-estrutura-curricular`
+  - 37. [O que é uma cadeia de seletividade?](https://www.cic.unb.br/informacoes/faq#o-que-e-uma-cadeia-de-seletividade) `o-que-e-uma-cadeia-de-seletividade`
+  - 38. [Componente Curricular](https://www.cic.unb.br/informacoes/faq#componente-curricular) `componente-curricular`
+    - 39. [O que são componentes obrigatórios, optativos e eletivos?](https://www.cic.unb.br/informacoes/faq#o-que-sao-componentes-obrigatorios-optativos-e-eletivos) `o-que-sao-componentes-obrigatorios-optativos-e-eletivos`
+    - 40. [Qual a diferença entre disciplina e atividade?](https://www.cic.unb.br/informacoes/faq#qual-a-diferenca-entre-disciplina-e-atividade) `qual-a-diferenca-entre-disciplina-e-atividade`
+    - 41. [Posso aproveitar componentes curriculares?](https://www.cic.unb.br/informacoes/faq#posso-aproveitar-componentes-curriculares) `posso-aproveitar-componentes-curriculares`
+  - 42. [Carga Horária](https://www.cic.unb.br/informacoes/faq#carga-horaria) `carga-horaria`
+    - 43. [Existe carga horária optativa mínima?](https://www.cic.unb.br/informacoes/faq#existe-carga-horaria-optativa-minima) `existe-carga-horaria-optativa-minima`
+    - 44. [Existe carga horária eletiva mínima/máxima?](https://www.cic.unb.br/informacoes/faq#existe-carga-horaria-eletiva-minima-maxima) `existe-carga-horaria-eletiva-minima-maxima`
+  - 45. [Migração de Estrutura Curricular](https://www.cic.unb.br/informacoes/faq#migracao-de-estrutura-curricular) `migracao-de-estrutura-curricular`
+    - 46. [Posso migrar de estrutura curricular?](https://www.cic.unb.br/informacoes/faq#posso-migrar-de-estrutura-curricular) `posso-migrar-de-estrutura-curricular`
+    - 47. [Devo migrar de estrutura curricular?](https://www.cic.unb.br/informacoes/faq#devo-migrar-de-estrutura-curricular) `devo-migrar-de-estrutura-curricular`
+    - 48. [Se eu migrar, vou 'encurtar' o curso (e 'adiantar' a formatura)?](https://www.cic.unb.br/informacoes/faq#se-eu-migrar-vou-encurtar-o-curso-e-adiantar-a-formatura) `se-eu-migrar-vou-encurtar-o-curso-e-adiantar-a-formatura`
+    - 49. [Como solicitar a migração?](https://www.cic.unb.br/informacoes/faq#como-solicitar-a-migracao) `como-solicitar-a-migracao`
+    - 50. [Mudei de ideia, posso voltar para a estrutura curricular anterior?](https://www.cic.unb.br/informacoes/faq#mudei-de-ideia-posso-voltar-para-a-estrutura-curricular-anterior) `mudei-de-ideia-posso-voltar-para-a-estrutura-curricular-anterior`
+    - 51. [Quais componentes terei de cursar na nova estrutura curricular?](https://www.cic.unb.br/informacoes/faq#quais-componentes-terei-de-cursar-na-nova-estrutura-curricular) `quais-componentes-terei-de-cursar-na-nova-estrutura-curricular`
+    - 52. [A carga horária de optativas que já integralizei é aproveitada?](https://www.cic.unb.br/informacoes/faq#a-carga-horaria-de-optativas-que-ja-integralizei-e-aproveitada) `a-carga-horaria-de-optativas-que-ja-integralizei-e-aproveitada`
+    - 53. [O que é carga horária de extensão obrigatória?](https://www.cic.unb.br/informacoes/faq#o-que-e-carga-horaria-de-extensao-obrigatoria) `o-que-e-carga-horaria-de-extensao-obrigatoria`
+    - 54. [O que são os componentes 'Projeto Integrador ...'?](https://www.cic.unb.br/informacoes/faq#o-que-sao-os-componentes-projeto-integrador) `o-que-sao-os-componentes-projeto-integrador`
+    - 55. [Já integralizei horas de extensão, elas serão aproveitadas em caso de migração?](https://www.cic.unb.br/informacoes/faq#ja-integralizei-horas-de-extensao-elas-serao-aproveitadas-em-caso-de-migracao) `ja-integralizei-horas-de-extensao-elas-serao-aproveitadas-em-caso-de-migracao`
+    - 56. [Migração na Engenharia de Computação](https://www.cic.unb.br/informacoes/faq#migracao-na-engenharia-de-computacao) `migracao-na-engenharia-de-computacao`
+      - 57. [O que é o componente CIC0289 Atividades Extensionistas 1?](https://www.cic.unb.br/informacoes/faq#o-que-e-o-componente-cic0289-atividades-extensionistas-1) `o-que-e-o-componente-cic0289-atividades-extensionistas-1`
+      - 58. [Na estrutura curricular 1741/3, o que muda na segunda etapa do TCC?](https://www.cic.unb.br/informacoes/faq#na-estrutura-curricular-1741-3-o-que-muda-na-segunda-etapa-do-tcc) `na-estrutura-curricular-1741-3-o-que-muda-na-segunda-etapa-do-tcc`
+      - 59. [Quais as estruturas curriculares da Engenharia de Computação?](https://www.cic.unb.br/informacoes/faq#quais-as-estruturas-curriculares-da-engenharia-de-computacao) `quais-as-estruturas-curriculares-da-engenharia-de-computacao`
+      - 60. [Devo migrar da estrutura curricular 1741/1 para a 1741/2?](https://www.cic.unb.br/informacoes/faq#devo-migrar-da-estrutura-curricular-1741-1-para-a-1741-2) `devo-migrar-da-estrutura-curricular-1741-1-para-a-1741-2`
+      - 61. [Devo migrar para a estrutura curricular 1741/3?](https://www.cic.unb.br/informacoes/faq#devo-migrar-para-a-estrutura-curricular-1741-3) `devo-migrar-para-a-estrutura-curricular-1741-3`
+- 62. [Matrícula](https://www.cic.unb.br/informacoes/faq#matricula) `matricula` — `secoes/05-matricula.md`
+  - 63. [Quais as etapas da matrícula?](https://www.cic.unb.br/informacoes/faq#quais-as-etapas-da-matricula) `quais-as-etapas-da-matricula`
+  - 64. [Como consigo vaga em uma turma?](https://www.cic.unb.br/informacoes/faq#como-consigo-vaga-em-uma-turma) `como-consigo-vaga-em-uma-turma`
+  - 65. [Não consegui vaga na matrícula nem na rematrícula. E agora?](https://www.cic.unb.br/informacoes/faq#nao-consegui-vaga-na-matricula-nem-na-rematricula-e-agora) `nao-consegui-vaga-na-matricula-nem-na-rematricula-e-agora`
+  - 66. [Quais as componentes devo cursar?](https://www.cic.unb.br/informacoes/faq#quais-as-componentes-devo-cursar) `quais-as-componentes-devo-cursar`
+  - 67. [Quais os componentes curriculares ofertados?](https://www.cic.unb.br/informacoes/faq#quais-os-componentes-curriculares-ofertados) `quais-os-componentes-curriculares-ofertados`
+  - 68. [Quais são os critérios de classificação durante a matrícula e rematrícula?](https://www.cic.unb.br/informacoes/faq#quais-sao-os-criterios-de-classificacao-durante-a-matricula-e-rematricula) `quais-sao-os-criterios-de-classificacao-durante-a-matricula-e-rematricula`
+  - 69. [O que é a retirada de disciplina?](https://www.cic.unb.br/informacoes/faq#o-que-e-a-retirada-de-disciplina) `o-que-e-a-retirada-de-disciplina`
+- 70. [Organizações Estudantis](https://www.cic.unb.br/informacoes/faq#organizacoes-estudantis) `organizacoes-estudantis` — `secoes/06-organizacoes-estudantis.md`
+  - 71. [Atléticas](https://www.cic.unb.br/informacoes/faq#atleticas) `atleticas`
+  - 72. [Centros Acadêmicos](https://www.cic.unb.br/informacoes/faq#centros-academicos) `centros-academicos`
+  - 73. [Empresas Júniores](https://www.cic.unb.br/informacoes/faq#empresas-juniores) `empresas-juniores`
+  - 74. [Equipes de Competição](https://www.cic.unb.br/informacoes/faq#equipes-de-competicao) `equipes-de-competicao`
+- 75. [Trajetória Acadêmica](https://www.cic.unb.br/informacoes/faq#trajetoria-academica) `trajetoria-academica` — `secoes/07-trajetoria-academica.md`
+  - 76. [Desligamento](https://www.cic.unb.br/informacoes/faq#desligamento) `desligamento`
+    - 77. [Reprovação em componente 'optatório' conta para o desligamento?](https://www.cic.unb.br/informacoes/faq#reprovacao-em-componente-optatorio-conta-para-o-desligamento) `reprovacao-em-componente-optatorio-conta-para-o-desligamento`
+    - 78. [Reprovação em componente obrigatório durante o período de Verão conta para o desligamento?](https://www.cic.unb.br/informacoes/faq#reprovacao-em-componente-obrigatorio-durante-o-periodo-de-verao-conta-para-o-desligamento) `reprovacao-em-componente-obrigatorio-durante-o-periodo-de-verao-conta-para-o-desligamento`
+    - 79. [Preciso ser aprovado em, no mínimo, 4 componentes curriculares obrigatórios ou optativos do curso em dois semestres consecutivos?](https://www.cic.unb.br/informacoes/faq#preciso-ser-aprovado-em-no-minimo-4-componentes-curriculares-obrigatorios-ou-optativos-do-curso-em-dois-semestres-consecutivos) `preciso-ser-aprovado-em-no-minimo-4-componentes-curriculares-obrigatorios-ou-optativos-do-curso-em-dois-semestres-consecutivos`
+    - 80. [Como solicitar o desligamento voluntário?](https://www.cic.unb.br/informacoes/faq#como-solicitar-o-desligamento-voluntario) `como-solicitar-o-desligamento-voluntario`
+  - 81. [Formatura](https://www.cic.unb.br/informacoes/faq#formatura) `formatura`
+    - 82. [O que eu preciso fazer para me formar?](https://www.cic.unb.br/informacoes/faq#o-que-eu-preciso-fazer-para-me-formar) `o-que-eu-preciso-fazer-para-me-formar`
+    - 83. [Qual é o prazo mínimo para conclusão do curso?](https://www.cic.unb.br/informacoes/faq#qual-e-o-prazo-minimo-para-conclusao-do-curso) `qual-e-o-prazo-minimo-para-conclusao-do-curso`
+    - 84. [Sou obrigado a fazer o Enade?](https://www.cic.unb.br/informacoes/faq#sou-obrigado-a-fazer-o-enade) `sou-obrigado-a-fazer-o-enade`
+    - 85. [Posso pedir outorga antecipada de grau?](https://www.cic.unb.br/informacoes/faq#posso-pedir-outorga-antecipada-de-grau) `posso-pedir-outorga-antecipada-de-grau`
+    - 86. [O que é a colação de grau simplificada?](https://www.cic.unb.br/informacoes/faq#o-que-e-a-colacao-de-grau-simplificada) `o-que-e-a-colacao-de-grau-simplificada`
+    - 87. [Sou formando, qual a burocracia envolvida?](https://www.cic.unb.br/informacoes/faq#sou-formando-qual-a-burocracia-envolvida) `sou-formando-qual-a-burocracia-envolvida`
+  - 88. [Reintegração](https://www.cic.unb.br/informacoes/faq#reintegracao) `reintegracao`
+  - 89. [Revisão de Menção?](https://www.cic.unb.br/informacoes/faq#revisao-de-mencao) `revisao-de-mencao`
+  - 90. [Trancamento](https://www.cic.unb.br/informacoes/faq#trancamento) `trancamento`
