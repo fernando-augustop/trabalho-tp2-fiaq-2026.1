@@ -1,0 +1,32 @@
+[
+  {
+    "id": "organizacoes-estudantis",
+    "titulo": "Organizações Estudantis",
+    "conteudo": "A UnB não é composta apenas de disciplinas, professores e prédios. Os alunos são o combustível que move toda a estrutura acadêmica. Diversas organizações estudantis podem complementar e auxiliar a formação do estudante.",
+    "url": "https://www.cic.unb.br/informacoes/faq#organizacoes-estudantis"
+  },
+  {
+    "id": "atleticas",
+    "titulo": "Atléticas",
+    "conteudo": "[Binária - Engenharia de Computação](https://www.instagram.com/binariaunb/)\n\n[Descontrolada - Engenharia Mecatrônica](https://mecatronica.unb.br/index.php/pt/pesquisa-e-extensao/organizacoes-estudantis#ancora_descontrolada)",
+    "url": "https://www.cic.unb.br/informacoes/faq#atleticas"
+  },
+  {
+    "id": "centros-academicos",
+    "titulo": "Centros Acadêmicos",
+    "conteudo": "[Engenharia de Computação](https://www.instagram.com/caecunb/)\n\n[Engenharia Mecatrônica](https://mecatronica.unb.br/index.php/pt/pesquisa-e-extensao/organizacoes-estudantis#ancora_catron)",
+    "url": "https://www.cic.unb.br/informacoes/faq#centros-academicos"
+  },
+  {
+    "id": "empresas-juniores",
+    "titulo": "Empresas Júniores",
+    "conteudo": "[CJR - Ciência da Computação](https://www.cjr.org.br/)\n\n[Struct - Engenharia de Computação](https://www.struct.unb.br/)\n\n[Mecajun - Engenharia Mecatrônica](https://mecatronica.unb.br/index.php/pt/pesquisa-e-extensao/organizacoes-estudantis#ancora_mecajun)",
+    "url": "https://www.cic.unb.br/informacoes/faq#empresas-juniores"
+  },
+  {
+    "id": "equipes-de-competicao",
+    "titulo": "Equipes de Competição",
+    "conteudo": "[UnBalloon](https://unballoon.github.io) ([Maratona de Programação](https://maratona.unb.br/))",
+    "url": "https://www.cic.unb.br/informacoes/faq#equipes-de-competicao"
+  }
+]
