@@ -92,12 +92,11 @@ export function useFiaqChat() {
                 streaming: false
               })
             }
-
           } catch {
+            // evento SSE parcial/malformado — ignora esta linha
           }
         }
       }
-
     } catch {
       updateLastAssistantMessage({
         content: 'Ocorreu um erro ao enviar sua mensagem. Tente novamente.',

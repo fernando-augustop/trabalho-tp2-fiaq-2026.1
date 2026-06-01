@@ -1,13 +1,9 @@
 {
-  "name": "${PROJECT_NAME}",
+  "name": "trabalhofinal-fiaq",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "description": "fIAq — portal de FAQ e assistente virtual com IA do CIC/UnB. O app fica em fiaq-app/ (Nuxt 4).",
   "private": true,
-  "dependencies": {
-    "unpdf": "^1.6.2"
-  }
+  "workspaces": [
+    "fiaq-app"
+  ]
 }

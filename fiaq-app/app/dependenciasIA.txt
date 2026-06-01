@@ -1,5 +1,0 @@
-NAME                       ID              SIZE      MODIFIED
-nomic-embed-text:latest    0a109f422b47    274 MB    4 days ago
-phi3:mini                  4f2222927938    2.2 GB    4 days ago
-
-unpdf - PDF parsing

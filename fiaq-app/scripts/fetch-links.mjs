@@ -19,9 +19,9 @@ const CRAWL_DIR = join(ROOT, 'data', 'crawl')
 // Domínios/padrões cujo conteúdo NÃO é útil crawlear (mas entram no registro de links).
 const SKIP_FETCH = [
   /instagram\.com/i, /facebook\.com/i, /(^|\/\/)x\.com/i, /youtu\.?be/i, /linktr\.ee/i,
-  /sigaa\.unb\.br/i,   // portais JSF dinâmicos / login
+  /sigaa\.unb\.br/i, // portais JSF dinâmicos / login
   /sei\.unb\.br/i, /portalsig\.unb\.br\/?$/i,
-  /github\.com/i,
+  /github\.com/i
 ]
 const IS_PDF = /\.pdf($|\?)/i
 const IS_FAQ_ANCHOR = /cic\.unb\.br\/informacoes\/faq#/i
@@ -55,10 +55,10 @@ function slugify(url) {
 
 function htmlToText(html) {
   let body = html
-  const main =
-    html.match(/<main\b[\s\S]*?<\/main>/i) ||
-    html.match(/<article\b[\s\S]*?<\/article>/i) ||
-    html.match(/<div[^>]*(?:id|class)="[^"]*(?:content|conteudo|entry|post)[^"]*"[\s\S]*?<\/div>/i)
+  const main
+    = html.match(/<main\b[\s\S]*?<\/main>/i)
+      || html.match(/<article\b[\s\S]*?<\/article>/i)
+      || html.match(/<div[^>]*(?:id|class)="[^"]*(?:content|conteudo|entry|post)[^"]*"[\s\S]*?<\/div>/i)
   if (main) body = main[0]
 
   return body
@@ -94,7 +94,7 @@ async function fetchPage(url) {
     const res = await fetch(url, {
       redirect: 'follow',
       signal: ctrl.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; fIAq-bot/1.0)' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; fIAq-bot/1.0)' }
     })
     if (!res.ok) return { ok: false, status: res.status }
     const html = await res.text()
@@ -125,7 +125,7 @@ function buildRegistry(rows) {
       id: `links-${contexto}`,
       titulo: `Links úteis sobre ${legivel}`,
       conteudo: `Para mais informações sobre ${legivel}, acesse os links oficiais:\n${bullets}`,
-      url: `https://www.cic.unb.br/informacoes/faq#${contexto}`,
+      url: `https://www.cic.unb.br/informacoes/faq#${contexto}`
     })
   }
   return entries
@@ -177,4 +177,7 @@ async function main() {
   console.log(`\nCrawl concluído: ${ok} páginas salvas, ${fail} ignoradas.`)
 }
 
-main().catch(err => { console.error(err); process.exit(1) })
+main().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})

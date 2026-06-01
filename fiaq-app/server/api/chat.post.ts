@@ -62,7 +62,7 @@ export default defineEventHandler(async (event: H3Event) => {
   setResponseHeaders(event, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
+    'Connection': 'keep-alive'
   })
 
   const res = event.node.res
@@ -110,7 +110,6 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     sendEvent(res, { type: 'done' })
-
   } catch (e) {
     console.error('[chat.post] Error:', e)
     sendEvent(res, { type: 'error', message: 'LLM_UNAVAILABLE' })

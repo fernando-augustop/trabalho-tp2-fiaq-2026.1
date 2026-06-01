@@ -20,11 +20,11 @@ function parseCrawlFile(raw: string): CrawlDoc {
   const m = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/)
   if (!m) return { title: '', url: '', body: raw }
 
-  const meta = m[1]
-  const body = m[2].trim()
+  const meta = m[1] ?? ''
+  const body = (m[2] ?? '').trim()
   const get = (key: string): string => {
     const line = meta.match(new RegExp(`^${key}:\\s*(.*)$`, 'm'))
-    return line ? line[1].trim() : ''
+    return line?.[1]?.trim() ?? ''
   }
   return { title: get('title'), url: get('url'), body }
 }
@@ -41,6 +41,6 @@ export async function extractCrawlChunks(filePath: string, slug: string): Promis
     id: `crawl-${slug}-${index + 1}`,
     titulo: chunks.length > 1 ? `${label} (parte ${index + 1})` : label,
     conteudo,
-    url,
+    url
   }))
 }

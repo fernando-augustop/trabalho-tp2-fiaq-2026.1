@@ -7,27 +7,29 @@ useHead({
     { rel: 'icon', href: '/favicon.ico' }
   ],
   htmlAttrs: {
-    lang: 'en'
+    lang: 'pt-BR'
   }
 })
 
-const title = 'fIAq'
-const description = 'A production-ready starter template powered by Nuxt UI. Build beautiful, accessible, and performant applications in minutes, not hours.'
+const title = 'fIAq — Assistente do CIC/UnB'
+const description = 'Portal de dúvidas frequentes do Departamento de Ciência da Computação da UnB, '
+  + 'com FAQ por tema e assistente virtual com IA baseado no conteúdo institucional oficial.'
 
 useSeoMeta({
   title,
+  titleTemplate: t => (t && t !== title ? t : title),
   description,
   ogTitle: title,
   ogDescription: description,
-  ogImage: 'https://ui.nuxt.com/assets/templates/nuxt/starter-light.png',
-  twitterCard: 'summary_large_image'
+  ogType: 'website',
+  twitterCard: 'summary'
 })
 </script>
 
 <template>
   <UApp>
-    <UMain>
+    <NuxtLayout>
       <NuxtPage />
-    </UMain>
+    </NuxtLayout>
   </UApp>
 </template>

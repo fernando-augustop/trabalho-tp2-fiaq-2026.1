@@ -111,6 +111,7 @@ export async function ollamaChatStream(messages: OllamaMessage[]): Promise<Reada
               return
             }
           } catch {
+            // linha parcial/incompleta no buffer — ignora e aguarda a próxima
           }
         }
       }
@@ -168,6 +169,7 @@ async function openRouterChatStream(messages: OllamaMessage[]): Promise<Readable
               return
             }
           } catch {
+            // chunk SSE parcial — ignora e aguarda completar no próximo read
           }
         }
       }

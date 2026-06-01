@@ -122,7 +122,7 @@ async function main() {
   console.log(`\nTotal: ${total} entradas em ${files.length} arquivos.`)
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err)
   process.exit(1)
 })

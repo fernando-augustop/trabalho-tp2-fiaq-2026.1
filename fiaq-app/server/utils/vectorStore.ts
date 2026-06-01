@@ -13,7 +13,7 @@ export interface SearchResult {
 const KIND_BOOST: Record<ChunkKind, number> = {
   faq: 0.06,
   pdf: 0.02,
-  crawl: 0,
+  crawl: 0
 }
 
 const store: EmbeddedChunk[] = []
