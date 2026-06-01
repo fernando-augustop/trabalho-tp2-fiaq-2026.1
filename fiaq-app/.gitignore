@@ -9,6 +9,7 @@ build/
 .vite/
 .nuxt/
 .output/
+.vercel/
 
 # Environment
 .env
