@@ -4,11 +4,13 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "TMPDIR=/tmp nuxt dev",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "build:faq": "node scripts/build-faq.mjs",
+    "index:rag": "node scripts/build-rag-index.mjs",
     "fetch:links": "node scripts/fetch-links.mjs",
+    "test:openrouter": "node scripts/test-openrouter.mjs",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck"
   },

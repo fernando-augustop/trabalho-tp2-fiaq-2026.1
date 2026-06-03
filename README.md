@@ -63,15 +63,21 @@ pnpm install
 pnpm dev                      # http://localhost:3000
 ```
 
-Para validar a chave do OpenRouter (chat + embeddings): `node scripts/test-openrouter.mjs`.
+Também é possível rodar pela raiz do repositório:
+
+```bash
+pnpm install
+pnpm dev                      # http://localhost:3000
+```
+
+Para validar a chave do OpenRouter (chat + embeddings): `pnpm test:openrouter`.
 
 ### Regenerar a base de conhecimento
 
 ```bash
-cd fiaq-app
 pnpm build:faq                # gera data/faq/*.json a partir das fontes em data/sources/
 pnpm fetch:links              # re-crawleia as páginas institucionais (data/crawl/)
-RAG_FORCE_REINDEX=1 pnpm dev  # re-embeda e regrava server/assets/rag-index.json
+pnpm index:rag                # re-embeda e regrava server/assets/rag-index.json
 ```
 
 > O índice precisa ser gerado com o **mesmo modelo de embedding** usado em produção,

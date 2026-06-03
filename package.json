@@ -5,10 +5,14 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "dev": "NUXT_TELEMETRY_DISABLED=1 pnpm --dir fiaq-app dev",
+    "dev": "TMPDIR=/tmp NUXT_TELEMETRY_DISABLED=1 pnpm --dir fiaq-app dev",
     "build": "pnpm --dir fiaq-app build",
     "preview": "pnpm --dir fiaq-app preview",
     "lint": "pnpm --dir fiaq-app lint",
-    "typecheck": "pnpm --dir fiaq-app typecheck"
+    "typecheck": "pnpm --dir fiaq-app typecheck",
+    "build:faq": "pnpm --dir fiaq-app build:faq",
+    "fetch:links": "pnpm --dir fiaq-app fetch:links",
+    "index:rag": "pnpm --dir fiaq-app index:rag",
+    "test:openrouter": "pnpm --dir fiaq-app test:openrouter"
   }
 }

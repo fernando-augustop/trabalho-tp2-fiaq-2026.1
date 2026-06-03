@@ -82,8 +82,15 @@
       <!-- Sources -->
       <div
         v-if="message.sources && message.sources.length > 0"
-        class="flex flex-wrap gap-2 px-1"
+        class="grid gap-2 px-1"
       >
+        <p class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+          <UIcon
+            name="i-lucide-book-open"
+            class="h-3.5 w-3.5 text-green-600"
+          />
+          Fontes consultadas
+        </p>
         <ChatSourceChip
           v-for="source in message.sources"
           :key="source.id"
