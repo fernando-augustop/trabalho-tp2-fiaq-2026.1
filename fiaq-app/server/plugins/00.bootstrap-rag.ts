@@ -3,7 +3,7 @@ import { join } from 'path'
 import { embedChunk } from '../utils/embeddings'
 import type { EmbeddedChunk } from '../utils/embeddings'
 import { addChunk, loadChunks, getAllChunks, getStoreSize } from '../utils/vectorStore'
-import { embedInfo } from '../utils/ollama'
+import { embedInfo } from '../utils/llmProvider'
 import { extractPdfChunks } from '../utils/pdfLoader'
 import { extractCrawlChunks } from '../utils/crawlLoader'
 

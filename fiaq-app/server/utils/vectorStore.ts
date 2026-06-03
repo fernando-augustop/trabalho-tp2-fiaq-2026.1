@@ -24,7 +24,7 @@ export function addChunk(chunk: EmbeddedChunk): void {
 
 // Carrega vários chunks de uma vez (usado ao hidratar o índice pré-computado).
 export function loadChunks(chunks: EmbeddedChunk[]): void {
-  store.push(...chunks)
+  store.splice(0, store.length, ...chunks)
 }
 
 // Retorna todos os chunks indexados (usado para serializar o índice).

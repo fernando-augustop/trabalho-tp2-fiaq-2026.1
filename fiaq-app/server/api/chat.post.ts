@@ -1,7 +1,7 @@
 import type { H3Event } from 'h3'
 import { embedQuery } from '../utils/embeddings'
 import { topKFiltered } from '../utils/vectorStore'
-import { ollamaChatStream } from '../utils/ollama'
+import { chatStream } from '../utils/llmProvider'
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
@@ -21,6 +21,8 @@ Regras que você DEVE seguir:
 - Responda SEMPRE em português brasileiro, de forma clara e acolhedora.
 - Responda DIRETAMENTE ao aluno. NUNCA simule um diálogo nem use prefixos como "Aluno:", "Assistente:" ou "FIAq:".
 - Seja conciso: no máximo 6 frases.
+- Não complete listas, requisitos, prazos ou nomes com conhecimento externo. Se o contexto listar apenas um item, responda apenas esse item.
+- Se o contexto for parcial, diga que a base consultada só informa aquilo, sem especular sobre o que pode existir fora da base.
 - Se a pergunta envolver assédio ou saúde mental, oriente a procurar a Ouvidoria (ouvidoria@unb.br) e o CAEP.
 - Se a pergunta não for sobre a UnB e não for uma saudação, recuse educadamente.
 
@@ -36,6 +38,17 @@ ${context}
 </contexto>
 
 Pergunta do aluno: ${question}`
+}
+
+function stripLinks(text: string): string {
+  return text
+    .replace(/\[([^\]]+)\]\((?:[^)]*)\)/g, '$1')
+    .replace(/<https?:\/\/[^>]+>/gi, '')
+    .replace(/\bhttps?:\/\/\S+/gi, '')
+    .replace(/\bwww\.\S+/gi, '')
+    .replace(/\b(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/\S*)?\b/gi, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/[ \t]+([.,;:!?])/g, '$1')
 }
 
 function sendEvent(res: NodeJS.WritableStream, data: object): void {
@@ -77,10 +90,10 @@ export default defineEventHandler(async (event: H3Event) => {
       return
     }
 
-    const results = topKFiltered(queryVector, 4, 0.5)
+    const results = topKFiltered(queryVector, 5, 0.45)
 
     const context = results.length > 0
-      ? results.map(r => `[${r.titulo}]\n${r.conteudo}`).join('\n\n')
+      ? results.map(r => `[${r.titulo}]\n${stripLinks(r.conteudo)}`).join('\n\n')
       : 'Nenhuma informação relevante encontrada na base de dados.'
 
     const history = body.messages
@@ -93,7 +106,7 @@ export default defineEventHandler(async (event: H3Event) => {
       { role: 'user', content: buildPrompt(context, question) }
     ]
 
-    const stream = await ollamaChatStream(messages)
+    const stream = await chatStream(messages)
     const reader = stream.getReader()
 
     while (true) {

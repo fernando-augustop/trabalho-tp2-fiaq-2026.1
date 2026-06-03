@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable vue/no-v-html -->
   <div class="flex-1">
     <!-- Cabeçalho da categoria -->
     <div class="bg-[#1a2e5a] px-6 sm:px-10 pt-8 pb-10">
@@ -101,8 +102,8 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { marked } from 'marked'
 import type { FaqCategory } from '~~/server/api/faq.get'
+import { renderMarkdown } from '~/utils/markdown'
 
 const route = useRoute()
 const slug = computed(() => String(route.params.slug))
@@ -116,9 +117,8 @@ useSeoMeta({
   description: () => `Perguntas frequentes sobre ${category.value?.titulo ?? 'o curso'} no CIC/UnB.`
 })
 
-marked.setOptions({ breaks: true, gfm: true })
 function render(text: string): string {
-  return marked.parse(text ?? '', { async: false }) as string
+  return renderMarkdown(text)
 }
 
 const open = ref<Set<string>>(new Set())

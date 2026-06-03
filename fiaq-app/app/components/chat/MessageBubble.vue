@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable vue/no-v-html -->
   <!-- User bubble -->
   <div
     v-if="message.role === 'user'"
@@ -95,15 +96,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { marked } from 'marked'
 import type { Message } from '~/composables/useFiaqChat'
+import { renderMarkdown } from '~/utils/markdown'
 
 const props = defineProps<{ message: Message }>()
 
 // Só mostra a bolha do assistente quando há texto (ou quando o stream terminou).
 const showBody = computed(() => (props.message.content?.trim().length ?? 0) > 0 || !props.message.streaming)
-
-marked.setOptions({ breaks: true, gfm: true })
 
 // Remove links/URLs do texto do assistente — os links oficiais e verificados
 // são exibidos nos chips de Fonte abaixo. Isso evita URLs inventadas pelo modelo.
@@ -119,7 +118,7 @@ function stripLinks(text: string): string {
 // Renderiza o Markdown da resposta do assistente em HTML (sem links no corpo).
 const renderedContent = computed(() => {
   const clean = stripLinks(props.message.content ?? '')
-  return marked.parse(clean, { async: false }) as string
+  return renderMarkdown(clean)
 })
 </script>
 

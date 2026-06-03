@@ -1,4 +1,4 @@
-import { embed } from './ollama'
+import { embed } from './llmProvider'
 
 export type ChunkKind = 'faq' | 'pdf' | 'crawl'
 

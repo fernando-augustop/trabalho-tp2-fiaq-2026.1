@@ -25,6 +25,12 @@ export default defineNuxtConfig({
     }
   },
 
+  vite: {
+    optimizeDeps: {
+      include: ['marked', 'sanitize-html']
+    }
+  },
+
   eslint: {
     config: {
       stylistic: {
