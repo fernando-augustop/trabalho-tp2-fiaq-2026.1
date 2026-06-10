@@ -83,6 +83,13 @@ pnpm index:rag                # re-embeda e regrava server/assets/rag-index.json
 > O índice precisa ser gerado com o **mesmo modelo de embedding** usado em produção,
 > senão as buscas ficam inconsistentes (o app emite um warning no log se detectar divergência).
 
+## Banco de Dados
+
+O app usa **PostgreSQL** para autenticação de usuários e histórico de conversas.
+O setup do banco é independente do setup do app acima — siga [`db/SETUP.md`](./db/SETUP.md)
+para subir o Postgres localmente, aplicar os SQLs e validar a conexão antes de
+usar as funcionalidades de login e histórico.
+
 ## Deploy
 
 Veja [`DEPLOY.md`](./DEPLOY.md) — na Vercel, configure **Root Directory = `fiaq-app`** e
