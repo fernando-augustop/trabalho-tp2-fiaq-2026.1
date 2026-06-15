@@ -1,6 +1,5 @@
--- Executar APÓS geracao_de_tabelas.sql
--- Depende de nenhuma das três tabelas anteriores, mas segue o mesmo
--- padrão de nomenclatura (português, prefixo dthr_ para timestamps).
+-- Executar PRIMEIRO (02_perguntas_tabelas.sql depende de faq_entrada).
+-- Segue o padrão de nomenclatura do projeto (português, prefixo dthr_ para timestamps).
 
 CREATE TABLE faq_categoria (
     id           SERIAL PRIMARY KEY,

@@ -1,7 +1,8 @@
 import type { H3Event } from 'h3'
 import { embedQuery } from '../utils/embeddings'
 import { topKFiltered } from '../utils/vectorStore'
-import { chatStream } from '../utils/llmProvider'
+import { chatStream, embedInfo } from '../utils/llmProvider'
+import { registrarPergunta } from '../repositorios/pergunta'
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
@@ -108,10 +109,12 @@ export default defineEventHandler(async (event: H3Event) => {
 
     const stream = await chatStream(messages)
     const reader = stream.getReader()
+    let respostaCompleta = ''
 
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
+      respostaCompleta += value
       sendEvent(res, { type: 'token', content: value })
     }
 
@@ -123,6 +126,12 @@ export default defineEventHandler(async (event: H3Event) => {
     }
 
     sendEvent(res, { type: 'done' })
+
+    try {
+      await registrarPergunta(question, queryVector, embedInfo.model, respostaCompleta, results.map(r => ({ id: r.id, titulo: r.titulo, url: r.url })))
+    } catch (e) {
+      console.error('[chat.post] Falha ao registrar pergunta:', e)
+    }
   } catch (e) {
     console.error('[chat.post] Error:', e)
     sendEvent(res, { type: 'error', message: 'LLM_UNAVAILABLE' })

@@ -85,10 +85,14 @@ pnpm index:rag                # re-embeda e regrava server/assets/rag-index.json
 
 ## Banco de Dados
 
-O app usa **PostgreSQL** para autenticação de usuários e histórico de conversas.
-O setup do banco é independente do setup do app acima — siga [`db/SETUP.md`](./db/SETUP.md)
-para subir o Postgres localmente, aplicar os SQLs e validar a conexão antes de
-usar as funcionalidades de login e histórico.
+O app usa **PostgreSQL** para registro anônimo e agregado das perguntas feitas ao
+chatbot — sem cadastro, sem login, sem dados pessoais. Perguntas semanticamente
+similares são agrupadas por similaridade de embedding e incrementam um contador de
+frequência. O objetivo é detectar perguntas em alta (ex: matrícula em período de
+matrícula) e apoiar o controle de qualidade das respostas geradas.
+
+Siga [`db/SETUP.md`](./db/SETUP.md) para subir o Postgres localmente e aplicar os
+SQLs. O setup do banco é independente do setup do app acima.
 
 ## Deploy
 
