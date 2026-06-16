@@ -26,6 +26,7 @@ const MAX_DEPTH = Number(process.env.UNB_DISCOVERY_DEPTH || 1)
 const MAX_CRAWL = Number(process.env.UNB_CRAWL_LIMIT || 60)
 const MIN_SCORE = Number(process.env.UNB_DISCOVERY_MIN_SCORE || 18)
 const MIN_CHARS = Number(process.env.UNB_DISCOVERY_MIN_CHARS || 600)
+const EMAIL_PROTECTION_MESSAGE = /Este endereço de email está sendo protegido de spambots\.\s*Você precisa do JavaScript ativado para vê-lo\./gi
 
 const SKIP_EXTENSIONS = /\.(7z|avi|bmp|csv|docx?|gif|ico|jpe?g|mpe?g|mp4|ods|odt|png|pptx?|rar|svg|txt|webp|xlsx?|xml|zip)($|\?)/i
 const SKIP_PATTERNS = [
@@ -83,7 +84,7 @@ function slugify(url) {
     .replace(/^https?:\/\//, '')
     .replace(/[^a-z0-9]+/gi, '-')
     .replace(/^-+|-+$/g, '')
-    .slice(0, 90)
+    .slice(0, 80)
     .toLowerCase()
 }
 
@@ -100,10 +101,16 @@ function htmlToText(html) {
 
   const body = main ? main[0] : html
 
-  return decodeHtml(body)
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
+  return decodeHtml(
+    body
+      .replace(/<(script|style|noscript|nav|aside|footer|form)\b[\s\S]*?<\/\1>/gi, ' ')
+      .replace(/<span[^>]*class=["'][^"']*sbi-screenreader[^"']*["'][\s\S]*?<\/span>/gi, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ')
+  )
+    .replace(EMAIL_PROTECTION_MESSAGE, ' ')
+    .replace(/>\s*['"]?;\s*['"]?>/g, ' ')
+    .replace(/\bpara\s+para\b/gi, 'para')
+    .replace(/obtidasde/gi, 'obtidas de')
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<\/(p|div|li|h[1-6]|tr|section|article|header|footer)>/gi, '\n')
     .replace(/<br\s*\/?>/gi, '\n')
@@ -111,7 +118,7 @@ function htmlToText(html) {
     .replace(/[ \t]+/g, ' ')
     .split('\n')
     .map(line => line.trim())
-    .filter(Boolean)
+    .filter(line => line && !/^(Nome|Email|Opinião|Tipo)\s*\*$/i.test(line) && !/^\*\s*Campos obrigatórios$/i.test(line))
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()

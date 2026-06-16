@@ -4,10 +4,9 @@ url: https://acessibilidade.unb.br/
 contexto: acessibilidade
 source: unb-official-discovery
 score: 83
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Página Inicial
-Home
 Diretoria de Acessibilidade
 Decanato de Assuntos Comunitários
 Sou Aluno

@@ -4,10 +4,9 @@ url: https://bce.unb.br/
 contexto: portal
 source: unb-official-discovery
 score: 53
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Página Inicial
-Buscar
 Empréstimo
 Acessibilidade
 Nada Consta

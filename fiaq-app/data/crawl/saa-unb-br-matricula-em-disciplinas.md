@@ -4,7 +4,7 @@ url: https://saa.unb.br/matricula-em-disciplinas
 contexto: secretaria-academica
 source: unb-official-discovery
 score: 92
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Matrícula em disciplina(s)
 A matrícula em componentes curriculares é feita antes do início de cada semestre por meio do Sistema Integrado de Gestão de Atividades Acadêmicas, o Sigaa.

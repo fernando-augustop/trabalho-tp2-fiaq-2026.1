@@ -123,19 +123,24 @@ async function main() {
         }
       }
 
-      await tx`
-        DELETE FROM faq_entrada
-        WHERE slug NOT IN ${tx(activeEntrySlugs)}
-      `
-      await tx`
-        DELETE FROM faq_categoria
-        WHERE slug NOT IN ${tx(activeCategorySlugs)}
-          AND NOT EXISTS (
-            SELECT 1
-            FROM faq_entrada e
-            WHERE e.id_categoria = faq_categoria.id
-          )
-      `
+      if (activeEntrySlugs.length > 0) {
+        await tx`
+          DELETE FROM faq_entrada
+          WHERE slug NOT IN ${tx(activeEntrySlugs)}
+        `
+      }
+
+      if (activeCategorySlugs.length > 0) {
+        await tx`
+          DELETE FROM faq_categoria
+          WHERE slug NOT IN ${tx(activeCategorySlugs)}
+            AND NOT EXISTS (
+              SELECT 1
+              FROM faq_entrada e
+              WHERE e.id_categoria = faq_categoria.id
+            )
+        `
+      }
     })
 
     const total = categories.reduce((sum, category) => sum + category.entries.length, 0)

@@ -4,15 +4,12 @@ url: https://boasvindas.unb.br/campus-ceilandia
 contexto: boas-vindas
 source: unb-official-discovery
 score: 64
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Ceilândia
 Claudio Bezerra de Medeiros
 15 de abril de 2025
 Notícias
-Home
-Notícias
-Ceilândia
 Programação Boas-Vindas - UnB Ceilândia
 OFICINAS CALOUROSAS
 Data: 18/08/2025 (segunda-feira) 10h entrada da UAC Data: 19/08/2025 (terça-feira) 10h Auditório da UAC Data: 21/08/2025 (quinta-feira) 12h Sala UAC 7

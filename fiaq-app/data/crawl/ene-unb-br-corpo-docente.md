@@ -5,8 +5,6 @@ contexto: tcc-em-engenharia-de-computacao
 ---
 
 Corpo Docente
-Home
-Corpo Docente
 O Departamento possui 57 professores do quadro permanente, atuando nas mais diversas áreas, em atividades de ensino, pesquisa e extensão universitária. A Faculdade de Tecnologia possui ainda professores substitutos, voluntários, visitantes e pesquisadores.
 Achiles Fontana da Mota
 Professor Adjunto

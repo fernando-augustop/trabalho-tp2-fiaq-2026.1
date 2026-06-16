@@ -4,10 +4,8 @@ url: https://dpg.unb.br/programas-de-pos-graduacao
 contexto: estudante
 source: unb-official-discovery
 score: 49
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
-Programas de Pós-Graduação
-Home
 Programas de Pós-Graduação
 Apresentação dos Programas de Pós-Graduação (PPGs)
 Consulte abaixo informações de todos os Programas de Pós-Graduação (PPGs) da Universidade de Brasília. Utilize o campo de busca para localizar facilmente qualquer programa, coordenador, telefone ou e-mail.

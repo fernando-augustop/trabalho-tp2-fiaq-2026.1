@@ -4,10 +4,8 @@ url: https://sti.unb.br/estudante-unb
 contexto: tecnologia
 source: unb-official-discovery
 score: 78
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
-ESTUDANTE UnB
-Home
 ESTUDANTE UnB
 ESTUDANTE UnB
 Nesta seção são apresentados os Serviços de TI destinados aos discentes da UnB, bem como as unidades que executam esses serviços com o apoio da STI.

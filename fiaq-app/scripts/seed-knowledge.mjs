@@ -360,19 +360,24 @@ async function seedFaq(tx, categories) {
     }
   }
 
-  await tx`
-    DELETE FROM faq_entrada
-    WHERE slug NOT IN ${tx(activeEntrySlugs)}
-  `
-  await tx`
-    DELETE FROM faq_categoria
-    WHERE slug NOT IN ${tx(activeCategorySlugs)}
-      AND NOT EXISTS (
-        SELECT 1
-        FROM faq_entrada e
-        WHERE e.id_categoria = faq_categoria.id
-      )
-  `
+  if (activeEntrySlugs.length > 0) {
+    await tx`
+      DELETE FROM faq_entrada
+      WHERE slug NOT IN ${tx(activeEntrySlugs)}
+    `
+  }
+
+  if (activeCategorySlugs.length > 0) {
+    await tx`
+      DELETE FROM faq_categoria
+      WHERE slug NOT IN ${tx(activeCategorySlugs)}
+        AND NOT EXISTS (
+          SELECT 1
+          FROM faq_entrada e
+          WHERE e.id_categoria = faq_categoria.id
+        )
+    `
+  }
 
   return entryIdsBySlug
 }
@@ -465,18 +470,23 @@ async function seedRag(tx, documents, entryIdsBySlug) {
     }
   }
 
-  await tx`
-    UPDATE rag_chunk
-    SET ativo = FALSE,
-        dthr_atualizacao = CURRENT_TIMESTAMP
-    WHERE chunk_uid NOT IN ${tx(activeChunkUids)}
-  `
-  await tx`
-    UPDATE rag_documento
-    SET ativo = FALSE,
-        dthr_atualizacao = CURRENT_TIMESTAMP
-    WHERE slug NOT IN ${tx(activeDocumentSlugs)}
-  `
+  if (activeChunkUids.length > 0) {
+    await tx`
+      UPDATE rag_chunk
+      SET ativo = FALSE,
+          dthr_atualizacao = CURRENT_TIMESTAMP
+      WHERE chunk_uid NOT IN ${tx(activeChunkUids)}
+    `
+  }
+
+  if (activeDocumentSlugs.length > 0) {
+    await tx`
+      UPDATE rag_documento
+      SET ativo = FALSE,
+          dthr_atualizacao = CURRENT_TIMESTAMP
+      WHERE slug NOT IN ${tx(activeDocumentSlugs)}
+    `
+  }
 }
 
 async function main() {

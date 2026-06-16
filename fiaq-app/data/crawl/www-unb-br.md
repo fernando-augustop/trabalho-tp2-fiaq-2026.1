@@ -4,7 +4,7 @@ url: https://www.unb.br/
 contexto: portal
 source: unb-official-discovery
 score: 105
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Destaques
 EXCELÊNCIA RECONHECIDA
@@ -40,20 +40,6 @@ RESULTADO FINAL
 DPG celebra avanços da pós em avaliação da Capes
 CONTRIBUA AQUI
 A Secom/UnB quer saber sua opinião sobre a revista Darcy
-Opine sobre o Portal
-Encaminhe a sua opinião sobre o funcionamento do Portal UnB
-Elogios e sugestões
-Reclamações
-Outros
-Nome *
-Email *
-Opinião *
-Tipo *
-* Campos obrigatórios
-Captcha *
-Em caso de emergência, ligue:
-(61) 3107 6222
-Plantão de Segurança UnB
 UnB CIÊNCIA
 UnB IMAGENS
 UnB HOJE

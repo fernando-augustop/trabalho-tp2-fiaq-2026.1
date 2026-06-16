@@ -4,7 +4,7 @@ url: https://saa.unb.br/calendario-academico
 contexto: calendario-academico
 source: unb-official-discovery
 score: 68
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Calendário Acadêmico de Graduação
 Tipos

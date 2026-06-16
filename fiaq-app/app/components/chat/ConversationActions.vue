@@ -3,7 +3,7 @@
     <div class="flex items-center gap-2">
       <button
         type="button"
-        :disabled="disabled"
+        :disabled="disabled || busy"
         title="Importar conversa temporária"
         class="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-[#1a2e5a] shadow-sm transition-colors hover:border-[#1a2e5a] hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
         @click="fileInput?.click()"
@@ -28,7 +28,7 @@
         v-for="option in exportOptions"
         :key="option.format"
         type="button"
-        :disabled="disabled || !canExport"
+        :disabled="disabled || busy || !canExport"
         :title="option.title"
         class="inline-flex h-9 min-w-14 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-[#1a2e5a] shadow-sm transition-colors hover:border-[#1a2e5a] hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
         @click="handleExport(option.format)"
@@ -72,6 +72,7 @@ const emit = defineEmits<{
 const fileInput = ref<HTMLInputElement | null>(null)
 const status = ref('')
 const statusKind = ref<'info' | 'error'>('info')
+const busy = ref(false)
 
 const canExport = computed(() => props.messages.some(message => message.content.trim()))
 
@@ -88,7 +89,10 @@ const exportOptions: Array<{
 ]
 
 async function handleExport(format: ConversationExportFormat) {
+  if (busy.value) return
+
   status.value = ''
+  busy.value = true
 
   try {
     await exportConversation(props.messages, format)
@@ -97,15 +101,23 @@ async function handleExport(format: ConversationExportFormat) {
   } catch {
     statusKind.value = 'error'
     status.value = 'Não foi possível exportar.'
+  } finally {
+    busy.value = false
   }
 }
 
 async function handleImport(event: Event) {
-  status.value = ''
   const input = event.target as HTMLInputElement
+  if (busy.value) {
+    input.value = ''
+    return
+  }
+
+  status.value = ''
   const file = input.files?.[0]
   if (!file) return
 
+  busy.value = true
   try {
     const importedMessages = await readConversationFile(file)
     const shouldReplace = !canExport.value || window.confirm('Substituir a conversa atual pela conversa importada?')
@@ -119,6 +131,7 @@ async function handleImport(event: Event) {
     status.value = 'Arquivo inválido.'
   } finally {
     input.value = ''
+    busy.value = false
   }
 }
 </script>

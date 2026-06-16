@@ -8,10 +8,6 @@ Legislações para Estudantes por Assunto
 Cláudio Bezerra de Medeiros
 9 de fevereiro de 2026
 Sem categoria
-Home
-Sem categoria
-Legislações para Estudantes por Assunto
-Search
 Ações Afirmativas
 Alunos(as) com Deficiência e/ou Necessidades Educacionais Específicas
 Aproveitamento de Estudos

@@ -8,11 +8,6 @@ Manuais e Tutoriais do SIGAA para Estágio
 Cláudio Bezerra de Medeiros
 15 de julho de 2025
 CESG
-Home
-Diretorias
-DAIA
-CESG
-Manuais e Tutoriais do SIGAA para Estágio
 Vídeos Tutoriais
 Estudantes – Estágios de Graduação e Módulo de Estágios – Visão Geral
 Estudantes – Orientações para Estágios Não Obrigatórios

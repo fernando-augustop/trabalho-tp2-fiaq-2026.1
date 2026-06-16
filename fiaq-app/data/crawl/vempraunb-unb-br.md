@@ -4,10 +4,9 @@ url: https://vempraunb.unb.br/
 contexto: portal
 source: unb-official-discovery
 score: 54
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Página Inicial
-Home
 EXPANDINDO HORIZONTES
 Universidade de Brasília
 Excelência em Ensino​
@@ -21,10 +20,6 @@ Podcast
 PodVir UnB — O podcast oficial da Universidade de Brasília.
 Iniciativa realizada pelo Decanato de Ensino e Graduação (DEG), que busca aproximar você, futuro(a) calouro(a), das experiências, oportunidades e histórias que tornam a trajetória na UnB única. Este podcast é feito com parceria oficial do Cebraspe e apoio institucional do Cead.
 Rede Social
-Lançamos o PodVir UnB na última sexta-feira (12) c
-🎓 Quer conhecer melhor a Universidade de Brasília
-A semana no DF começou daquele jeito.🥶 Quem aí ai
-📓ÁLBUM DA UnB: EDIÇÃO LIMITADA! 🎓 Arrasta pro lad
 Leia Mais
 Siga-nos no Instagram
 Formas de Ingresso Primário na Graduação

@@ -4,7 +4,7 @@ url: https://dds.dac.unb.br/
 contexto: assistencia-estudantil
 source: unb-official-discovery
 score: 65
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Página Inicial
 EDITAIS

@@ -15,6 +15,7 @@ const ROOT = join(__dirname, '..')
 const SOURCES_DIR = join(ROOT, 'data', 'sources', 'faq-cic-unb')
 const LINKS_MD = join(SOURCES_DIR, '02-links.md')
 const CRAWL_DIR = join(ROOT, 'data', 'crawl')
+const EMAIL_PROTECTION_MESSAGE = /Este endereço de email está sendo protegido de spambots\.\s*Você precisa do JavaScript ativado para vê-lo\./gi
 
 // Domínios/padrões cujo conteúdo NÃO é útil crawlear (mas entram no registro de links).
 const SKIP_FETCH = [
@@ -62,9 +63,8 @@ function htmlToText(html) {
   if (main) body = main[0]
 
   return body
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
+    .replace(/<(script|style|noscript|nav|aside|footer|form)\b[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<span[^>]*class=["'][^"']*sbi-screenreader[^"']*["'][\s\S]*?<\/span>/gi, ' ')
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<\/(p|div|li|h[1-6]|tr|section|article)>/gi, '\n')
     .replace(/<br\s*\/?>/gi, '\n')
@@ -76,8 +76,15 @@ function htmlToText(html) {
     .replace(/&quot;/gi, '"')
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
     .replace(/&[a-z]+;/gi, ' ')
+    .replace(EMAIL_PROTECTION_MESSAGE, ' ')
+    .replace(/>\s*['"]?;\s*['"]?>/g, ' ')
+    .replace(/\bpara\s+para\b/gi, 'para')
+    .replace(/obtidasde/gi, 'obtidas de')
     .replace(/[ \t]+/g, ' ')
-    .split('\n').map(l => l.trim()).filter(Boolean).join('\n')
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l && !/^(Nome|Email|Opinião|Tipo)\s*\*$/i.test(l) && !/^\*\s*Campos obrigatórios$/i.test(l))
+    .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 }

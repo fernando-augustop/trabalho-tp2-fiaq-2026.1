@@ -4,10 +4,9 @@ url: https://ru.unb.br/
 contexto: restaurante-universitario
 source: unb-official-discovery
 score: 56
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Página Inicial
-Home
 Cardápio do Dia
 Veja nosso cardápio semanal (sujeito a alterações).
 Clique aqui
@@ -17,8 +16,6 @@ Clique aqui
 Cardápio do Dia
 Veja nosso cardápio semanal (sujeito a alterações).
 Clique aqui
-Search
-Buscar
 Cardápio
 Clique aqui
 Emitir Carteirinha Estudantil

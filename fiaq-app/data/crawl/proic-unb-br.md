@@ -4,10 +4,9 @@ url: https://proic.unb.br/
 contexto: pesquisa
 source: unb-official-discovery
 score: 55
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Página Inicial
-Home
 Acordo de Cooperação Técnica nº 21/2025
 A Câmara Legislativa do Distrito Federal (CLDF), por intermédio da Comissão de Assuntos Sociais (CAS), e a Universidade de Brasília (UnB) celebraram entre si o Acordo de Cooperação Técnica nº 21/2025, destinado a transformar a produção acadêmica dos estudantes de graduação da Universidade em propostas legislativas e políticas públicas, especialmente aquelas relacionadas às atribuições da Comissão de Assuntos Sociais.
 O acordo foi assinado em 30 de setembro de 2025 pelo presidente da CLDF, Deputado Wellington Luiz, e pela Reitora da UnB, Professora Rozana Reigota Naves, com o testemunho do presidente da CAS, Deputado Rogério Morro da Cruz. A vigência é de até 24 meses.

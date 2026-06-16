@@ -5,7 +5,6 @@ contexto: equipes-de-competicao
 ---
 
 Maratona de Programação
-Home
 Maratona de Programação
 Juntos, nos preparamos para "simplesmente, o maior, mais antigo e mais prestigiado concurso de programação do mundo".
 Saiba mais

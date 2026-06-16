@@ -3,73 +3,10 @@ title: Universidade de Brasília - UnB em números
 url: https://www.unb.br/estudante/institucional/a-unb/unb-em-numeros
 contexto: estudante
 source: unb-official-discovery
-score: 146
-discovered_at: 2026-06-16T20:00:11.917Z
+score: 80
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Pular menu lateral
-Institucional A UnB História
-Missão
-Títulos e condecorações
-UnB em números
-Campanhas institucionais
-Contatos
-Estrutura Acadêmica Faculdades
-Institutos
-Centros
-Vida Acadêmica Estude na UnB
-Portal do estudante
-Graduação Cursos
-Formas de ingresso
-Boas-vindas
-Guia do calouro
-Guia de matrícula
-Central de Acolhimento
-Calendários
-Oportunidades
-SIGAA
-Aprender UnB
-Diploma
-Pós-graduação Programas
-Editais
-Especialização
-Mestrado e doutorado
-Calendário
-Diploma
-Oferta de disciplinas
-MençãoWeb
-Educação a Distância Centro de Educação a Distância
-Extensão universitária
-Assuntos internacionais
-Egresso
-Identidade Estudantil
-Representação estudantil
-Pesquisa e Inovação UnB Pesquisa
-Empreendedorismo
-Iniciação Científica
-Cultura e Sociedade Extensão universitária
-Arte e Cultura
-Museus
-Acessibilidade
-Diversidade
-Esporte e lazer
-Saúde
-Sustentabilidade
-Empresa Junior
-Serviços Mapas dos campi
-Assistência estudantil
-Apoio psicológico
-Biblioteca Central
-Ouvidoria
-Restaurante Universitário
-Transportes
-UnB Idiomas
-Telefones úteis
-DCE
-Início
-Estudante
-Institucional
-A UnB
-UnB em números
 UnB em números
 25/09/2020
 Ilustração: Igor Outeiral/Secom UnB
@@ -78,17 +15,3 @@ Entre esses documentos, atualizados periodicamente, estão o Anuário Estatísti
 Acesse aqui o site do DPO
 No portal público do Sistema Integrado de Gestão de Recursos Humanos (SIGRH), é possível acessar relatórios estatísticos detalhados sobre a força de trabalho que compõe a Universidade.
 Acesse aqui o portal público do SIGRH
-Opine sobre o Portal
-Encaminhe a sua opinião sobre o funcionamento do Portal UnB
-Elogios e sugestões
-Reclamações
-Outros
-Nome *
-Email *
-Opinião *
-Tipo *
-* Campos obrigatórios
-Captcha *
-Em caso de emergência, ligue:
-(61) 3107 6222
-Plantão de Segurança UnB

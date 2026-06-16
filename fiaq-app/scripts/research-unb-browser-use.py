@@ -20,6 +20,7 @@ OUTPUT = ROOT / "data" / "sources" / "unb-official" / "browser-use-findings.json
 
 
 def load_env() -> None:
+    original_keys = set(os.environ.keys())
     for name in (".env", ".env.local"):
         path = ROOT / name
         if not path.exists():
@@ -29,7 +30,14 @@ def load_env() -> None:
             if not stripped or stripped.startswith("#") or "=" not in stripped:
                 continue
             key, value = stripped.split("=", 1)
-            os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+            key = key.strip()
+            if key in original_keys:
+                continue
+            value = value.strip().strip("\"'")
+            if name == ".env.local":
+                os.environ[key] = value
+            else:
+                os.environ.setdefault(key, value)
 
 
 def make_llm():

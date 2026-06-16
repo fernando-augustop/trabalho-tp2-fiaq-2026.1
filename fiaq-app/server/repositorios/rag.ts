@@ -27,6 +27,16 @@ function toVectorLiteral(vector: number[]): string | null {
   return `[${vector.join(',')}]`
 }
 
+function normalizeK(k: number): number {
+  if (!Number.isFinite(k)) return 5
+  return Math.min(Math.max(Math.trunc(k), 1), 20)
+}
+
+function normalizeMinScore(minScore: number): number {
+  if (!Number.isFinite(minScore)) return 0.45
+  return Math.min(Math.max(minScore, 0), 1)
+}
+
 export async function buscarRagNoBanco(
   queryVector: number[],
   modeloEmbedding: string,
@@ -34,6 +44,8 @@ export async function buscarRagNoBanco(
   minScore = 0.45
 ): Promise<SearchResult[] | null> {
   if (!isDatabaseConfigured()) return null
+  const safeK = normalizeK(k)
+  const safeMinScore = normalizeMinScore(minScore)
 
   const vectorLiteral = toVectorLiteral(queryVector)
   if (!vectorLiteral) {
@@ -50,8 +62,8 @@ export async function buscarRagNoBanco(
     FROM buscar_rag_chunks(
       ${vectorLiteral}::extensions.vector(2048),
       ${modeloEmbedding},
-      ${minScore},
-      ${k}
+      ${safeMinScore},
+      ${safeK}
     )
   `
 
@@ -70,9 +82,12 @@ export async function buscarRag(
   k = 5,
   minScore = 0.45
 ): Promise<{ results: SearchResult[], source: 'database' | 'json' }> {
+  const safeK = normalizeK(k)
+  const safeMinScore = normalizeMinScore(minScore)
+
   try {
-    const dbResults = await buscarRagNoBanco(queryVector, modeloEmbedding, k, minScore)
-    if (dbResults?.length) {
+    const dbResults = await buscarRagNoBanco(queryVector, modeloEmbedding, safeK, safeMinScore)
+    if (dbResults) {
       return { results: dbResults, source: 'database' }
     }
   } catch (error) {
@@ -80,7 +95,7 @@ export async function buscarRag(
   }
 
   return {
-    results: topKFiltered(queryVector, k, minScore),
+    results: topKFiltered(queryVector, safeK, safeMinScore),
     source: 'json'
   }
 }

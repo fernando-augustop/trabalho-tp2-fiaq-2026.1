@@ -4,11 +4,11 @@ url: https://saa.unb.br/aluno-especial-graduacao
 contexto: secretaria-academica
 source: unb-official-discovery
 score: 84
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Aluno Especial – Graduação
 O que é:
-É uma modalidade de matrícula em disciplinas isoladas em cursos de graduação da UnB e é destinada para para:
+É uma modalidade de matrícula em disciplinas isoladas em cursos de graduação da UnB e é destinada para:
 – portadores de diploma de nível superior;
 – alunos regulares matriculados no último ano do curso superior, com direito a admissão por transferência obrigatória, nos termos da legislação em vigor;
 – alunos regulares de outras IES;
@@ -28,7 +28,7 @@ Observação:
 Os alunos especiais não terão vínculo com cursos regulares, portanto,  não fazem jus a identidade estudantil, alojamento, passe estudantil, qualquer tipo de bolsa, qualquer forma de subvenção para utilização do Restaurante Universitário e a utilização da Biblioteca se dá nos mesmos critérios observados para a comunidade geral.
 PERGUNTAS FREQUENTES
 Como obtenho documento que concluí uma disciplina como aluno especial?
-O aluno especial fará jus ao histórico comprobatório de ter cursado disciplinas nesta modalidade. O histórico identificará todas as disciplinas cursadas como aluno especial, com as respectivas cargas horárias e menções obtidasde aprovação e reprovação.
+O aluno especial fará jus ao histórico comprobatório de ter cursado disciplinas nesta modalidade. O histórico identificará todas as disciplinas cursadas como aluno especial, com as respectivas cargas horárias e menções obtidas de aprovação e reprovação.
 Posso aproveitar na UnB as disciplinas cursadas como aluno especial?
 Sim, o aproveitamento é possível, desde que o aluno solicite via peticionamento eletrônico (SEI/UnB) > modalidade aproveitamento de estudos.
 Quais documentos são necessários para a inscrição?

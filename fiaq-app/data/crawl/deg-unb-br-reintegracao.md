@@ -8,11 +8,6 @@ Reintegração
 Cláudio Bezerra de Medeiros
 29 de agosto de 2024
 CAA , DAIA
-Home
-Diretorias
-DAIA
-CAA
-Reintegração
 A reintegração é o processo pelo qual o(a) estudante com o vínculo interrompido pelo desligamento da Universidade de Brasília pode reingressar para finalizar seu curso, desde que atenda às condições e critérios estabelecidos pela Instituição.
 Quais as situações que levam ao desligamento?
 – Exceder o limite do tempo de permanência (jubilamento);

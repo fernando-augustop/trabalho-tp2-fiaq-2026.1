@@ -10,6 +10,9 @@ export default defineEventHandler(async (): Promise<FaqCategory[]> => {
 
   const { categories, source } = await listarFaq()
   console.log(`[faq] FAQ carregado de ${source}.`)
-  cache = categories
-  return cache
+  if (source === 'database') {
+    cache = categories
+  }
+
+  return categories
 })

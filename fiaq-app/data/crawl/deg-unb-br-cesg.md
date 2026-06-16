@@ -8,11 +8,6 @@ CESG – Coordenação de Estágios da Graduação
 Cláudio Bezerra de Medeiros
 6 de setembro de 2024
 CESG
-Home
-Diretorias
-DAIA
-CESG
-CESG – Coordenação de Estágios da Graduação
 A CESG – Coordenação de Estágios da Graduação desenvolve ações relacionadas aos estágios, visando que a experiência do estágio represente uma autêntica atividade pedagógica.
 A CESG é responsável pela formalização de convênios entre a UnB e empresas, instituições e entidades públicas e privadas para oferta de vagas de estágio.
 Amador Goncalves de Siqueira Junior

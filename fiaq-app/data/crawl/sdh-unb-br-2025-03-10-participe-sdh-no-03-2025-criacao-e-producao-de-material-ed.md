@@ -8,9 +8,6 @@ Participe! EDITAL SDH Nº 03/2025 – Criação e produção de material educati
 Matheus Caetano Alves de Oliveira Lima
 10 de março de 2025
 Notícias
-Home
-Notícias
-Participe! EDITAL SDH Nº 03/2025 – Criação e produção de material educativo voltado à prevenção e combate aos assédios, discriminações e outras violência no âmbito da UnB
 A SECRETARIA DE DIREITOS HUMANOS (SDH), no âmbito das ações do #8M 2025, realizadas na Universidade de Brasília (UnB), torna público o presente edital para criação e produção de materiais educativos voltados à prevenção e combate aos assédios, discriminações e outras violências na universidade .
 Materiais selecionados Cartilha Educativa  – Prevenção e Combate: Assédios, Discriminações e outras
 Violências

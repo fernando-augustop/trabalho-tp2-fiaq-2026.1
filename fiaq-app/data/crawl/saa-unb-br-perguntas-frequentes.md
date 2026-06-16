@@ -4,7 +4,7 @@ url: https://saa.unb.br/perguntas-frequentes
 contexto: secretaria-academica
 source: unb-official-discovery
 score: 94
-discovered_at: 2026-06-16T20:00:11.917Z
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
 Perguntas frequentes
 Aproveitamentos

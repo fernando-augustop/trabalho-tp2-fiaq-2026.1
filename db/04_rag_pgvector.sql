@@ -126,7 +126,7 @@ AS $$
     (1 - distancia_exata)::DOUBLE PRECISION AS similaridade,
     (1 - distancia_exata + boost)::DOUBLE PRECISION AS score
   FROM candidatos
-  WHERE (1 - distancia_exata) >= p_match_threshold
+  WHERE (1 - distancia_exata + boost) >= p_match_threshold
   ORDER BY score DESC, similaridade DESC
   LIMIT LEAST(p_match_count, 20);
 $$;

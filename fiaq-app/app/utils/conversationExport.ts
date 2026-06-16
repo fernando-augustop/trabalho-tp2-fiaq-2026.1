@@ -38,6 +38,8 @@ interface PdfSourceTarget {
   page: number
 }
 
+type SourceInput = Partial<Source>
+
 const BRAND_NAVY = '#1a2e5a'
 const BRAND_GREEN = '#00DC82'
 const TEXT_SLATE = '#24324a'
@@ -79,10 +81,16 @@ function sourceKey(source: Source): string {
   return source.url || `${source.id}:${source.titulo}`
 }
 
-function cleanSource(source: Source): Source {
+function hasSourceIdentity(source: unknown): source is SourceInput {
+  if (!source || typeof source !== 'object') return false
+  const candidate = source as SourceInput
+  return Boolean(String(candidate.titulo || '').trim() || String(candidate.url || '').trim())
+}
+
+function cleanSource(source: SourceInput): Source {
   return {
     id: String(source.id || source.url || source.titulo || 'fonte'),
-    titulo: decodeEntities(source.titulo || 'Fonte oficial').replace(/\s+/g, ' ').trim() || 'Fonte oficial',
+    titulo: decodeEntities(String(source.titulo || 'Fonte oficial')).replace(/\s+/g, ' ').trim() || 'Fonte oficial',
     url: String(source.url || '').trim()
   }
 }
@@ -479,7 +487,9 @@ export async function readConversationFile(file: File): Promise<MessageDraft[]> 
       if (!role || !content) return null
 
       const sources = Array.isArray(message.sources)
-        ? (message.sources as Source[]).map(cleanSource).filter((source: Source) => source.titulo || source.url)
+        ? (message.sources as unknown[])
+            .filter(hasSourceIdentity)
+            .map(cleanSource)
         : undefined
 
       return {

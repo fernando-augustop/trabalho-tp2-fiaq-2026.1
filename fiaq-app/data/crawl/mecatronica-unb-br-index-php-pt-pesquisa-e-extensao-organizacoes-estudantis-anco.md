@@ -5,8 +5,6 @@ contexto: empresas-juniores
 ---
 
 Organizações Estudantis
-Home
-Organizações Estudantis
 A UnB não é composta apenas por disciplinas, professores e prédios. Os alunos são o combustível que impulsiona toda a estrutura acadêmica. Diversas organizações estudantis podem complementar e auxiliar a formação do estudante. Dentre elas, destacam-se:
 Centro Acadêmico
 Atlética

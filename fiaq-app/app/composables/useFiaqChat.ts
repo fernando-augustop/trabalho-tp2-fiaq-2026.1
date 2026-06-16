@@ -117,12 +117,16 @@ export function useFiaqChat() {
         if (!content) return null
 
         const sources = (message.sources ?? [])
+          .filter((source) => {
+            const titulo = String(source.titulo || '').trim()
+            const url = String(source.url || '').trim()
+            return Boolean(titulo || url)
+          })
           .map(source => ({
             id: String(source.id || source.url || source.titulo || 'fonte'),
             titulo: String(source.titulo || 'Fonte oficial').trim() || 'Fonte oficial',
             url: String(source.url || '').trim()
           }))
-          .filter(source => source.titulo || source.url)
 
         return {
           id: ++msgId,

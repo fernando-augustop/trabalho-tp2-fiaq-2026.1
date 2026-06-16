@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-16T20:00:11.917Z",
+  "generated_at": "2026-06-16T20:44:10.782Z",
   "max_depth": 1,
   "page_limit": 120,
   "min_score": 18,
@@ -14,637 +14,7 @@
       "title": "Universidade de Brasília - Assistência estudantil",
       "categoria": "estudante",
       "depth": 1,
-      "score": 156,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 5038
-    },
-    {
-      "url": "https://www.unb.br/estudante/cultura-e-sociedade/extensao-universitaria",
-      "title": "Universidade de Brasília - Extensão universitária",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 156,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3787
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/extensao-universitaria",
-      "title": "Universidade de Brasília - Extensão universitária",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 156,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3782
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/graduacao/oportunidades",
-      "title": "Universidade de Brasília - Oportunidades",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 155,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "monitoria",
-        "estagio",
-        "extensao"
-      ],
-      "textLength": 1930
-    },
-    {
-      "url": "https://www.unb.br/estudante",
-      "title": "Universidade de Brasília - Estudante",
-      "categoria": "estudante",
-      "depth": 0,
-      "score": 153,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3251
-    },
-    {
-      "url": "https://www.unb.br/estudante/cultura-e-sociedade/empresa-junior",
-      "title": "Universidade de Brasília - Empresa Junior",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 151,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 4507
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/a-unb/historia",
-      "title": "Universidade de Brasília - História",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 151,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 4256
-    },
-    {
-      "url": "https://www.unb.br/estudante/servicos/biblioteca-central",
-      "title": "Universidade de Brasília - Biblioteca Central",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 151,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 4228
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/a-unb/titulos-e-condecoracoes",
-      "title": "Universidade de Brasília - Títulos e condecorações",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 151,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3272
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/assuntos-internacionais",
-      "title": "Universidade de Brasília - Assuntos internacionais",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 151,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3170
-    },
-    {
-      "url": "https://www.unb.br/estudante/servicos/restaurante-universitario",
-      "title": "Universidade de Brasília - Restaurante Universitário",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 151,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2911
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/graduacao/cursos",
-      "title": "Universidade de Brasília - Cursos",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 151,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2776
-    },
-    {
-      "url": "https://www.unb.br/estudante/cultura-e-sociedade/diversidade",
-      "title": "Universidade de Brasília - Diversidade",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 151,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2707
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/a-unb",
-      "title": "Universidade de Brasília - A UnB",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 151,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2647
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/estrutura-academica/centros",
-      "title": "Universidade de Brasília - Centros",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 7190
-    },
-    {
-      "url": "https://www.unb.br/estudante/servicos/apoio-psicologico",
-      "title": "Universidade de Brasília - Apoio psicológico",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3885
-    },
-    {
-      "url": "https://www.unb.br/estudante/pesquisa-e-inovacao/iniciacao-cientifica",
-      "title": "Universidade de Brasília - Iniciação Científica",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3857
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/educacao-a-distancia",
-      "title": "Universidade de Brasília - Educação a Distância",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3391
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/representacao-estudantil",
-      "title": "Universidade de Brasília - Representação estudantil",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3261
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/pos-graduacao/diploma",
-      "title": "Universidade de Brasília - Diploma",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3062
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/graduacao/diploma",
-      "title": "Universidade de Brasília - Diploma",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3058
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/identidade-estudantil",
-      "title": "Universidade de Brasília - Identidade Estudantil",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3001
-    },
-    {
-      "url": "https://www.unb.br/estudante/cultura-e-sociedade/acessibilidade",
-      "title": "Universidade de Brasília - Acessibilidade",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2793
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/a-unb/unb-em-numeros",
-      "title": "Universidade de Brasília - UnB em números",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2677
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/graduacao",
-      "title": "Universidade de Brasília - Graduação",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2514
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/a-unb/campanhas-institucionais",
-      "title": "Universidade de Brasília - Campanhas institucionais",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2505
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/pos-graduacao",
-      "title": "Universidade de Brasília - Pós-graduação",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2188
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/pos-graduacao/especializacao",
-      "title": "Universidade de Brasília - Especialização",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2114
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/egresso",
-      "title": "Universidade de Brasília - Egresso",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 146,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 2044
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/a-unb/missao",
-      "title": "Universidade de Brasília - Missão",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 145,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 1908
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/a-unb/contatos",
-      "title": "Universidade de Brasília - Contatos",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 140,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 1897
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/estrutura-academica",
-      "title": "Universidade de Brasília - Estrutura Acadêmica",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 140,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 1891
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/estrutura-academica/faculdades",
-      "title": "Universidade de Brasília - Faculdades",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 140,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 1820
-    },
-    {
-      "url": "https://www.unb.br/estudante/vida-academica/pos-graduacao/mencaoweb",
-      "title": "Universidade de Brasília - MençãoWeb",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 140,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 1757
-    },
-    {
-      "url": "https://www.unb.br/estudante/institucional/estrutura-academica/institutos",
-      "title": "Universidade de Brasília - Institutos",
-      "categoria": "estudante",
-      "depth": 1,
-      "score": 140,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 1695
-    },
-    {
-      "url": "https://www.unb.br/servicos/assistencia-estudantil",
-      "title": "Universidade de Brasília - Assistência estudantil",
-      "categoria": "portal",
-      "depth": 1,
-      "score": 122,
+      "score": 126,
       "motivos": [
         "estudante",
         "graduacao",
@@ -655,7 +25,25 @@
         "bolsa",
         "moradia"
       ],
-      "textLength": 4136
+      "textLength": 3402
+    },
+    {
+      "url": "https://www.unb.br/servicos/assistencia-estudantil",
+      "title": "Universidade de Brasília - Assistência estudantil",
+      "categoria": "portal",
+      "depth": 1,
+      "score": 112,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "matricula",
+        "disciplina",
+        "assistencia estudantil",
+        "auxilio",
+        "bolsa",
+        "moradia"
+      ],
+      "textLength": 3402
     },
     {
       "url": "https://www.unb.br/",
@@ -673,25 +61,58 @@
         "acessibilidade",
         "biblioteca"
       ],
-      "textLength": 3980
+      "textLength": 3726
     },
     {
-      "url": "https://www.unb.br/graduacao/cursos",
-      "title": "Universidade de Brasília - Cursos",
-      "categoria": "secretaria-academica",
+      "url": "https://www.unb.br/estudante/vida-academica/extensao-universitaria",
+      "title": "Universidade de Brasília - Extensão universitária",
+      "categoria": "estudante",
       "depth": 1,
-      "score": 102,
+      "score": 101,
+      "motivos": [
+        "estudante",
+        "disciplina",
+        "extensao",
+        "pesquisa",
+        "bolsa",
+        "saude",
+        "direitos humanos"
+      ],
+      "textLength": 2452
+    },
+    {
+      "url": "https://www.unb.br/estudante/cultura-e-sociedade/extensao-universitaria",
+      "title": "Universidade de Brasília - Extensão universitária",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 101,
+      "motivos": [
+        "estudante",
+        "disciplina",
+        "extensao",
+        "pesquisa",
+        "bolsa",
+        "saude",
+        "direitos humanos"
+      ],
+      "textLength": 2452
+    },
+    {
+      "url": "https://www.unb.br/estudante/pesquisa-e-inovacao/iniciacao-cientifica",
+      "title": "Universidade de Brasília - Iniciação Científica",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 101,
       "motivos": [
         "estudante",
         "graduacao",
         "matricula",
-        "calendario",
         "disciplina",
-        "extensao",
+        "pesquisa",
         "iniciacao cientifica",
         "saude"
       ],
-      "textLength": 2235
+      "textLength": 2420
     },
     {
       "url": "https://saa.unb.br/perguntas-frequentes",
@@ -709,24 +130,6 @@
         "sei"
       ],
       "textLength": 49079
-    },
-    {
-      "url": "https://www.unb.br/vida-academica/extensao-universitaria",
-      "title": "Universidade de Brasília - Extensão universitária",
-      "categoria": "portal",
-      "depth": 1,
-      "score": 94,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "pesquisa",
-        "iniciacao cientifica"
-      ],
-      "textLength": 3256
     },
     {
       "url": "https://saa.unb.br/matricula-em-disciplinas",
@@ -747,22 +150,65 @@
       "textLength": 4770
     },
     {
-      "url": "https://www.unb.br/servicos/biblioteca-central",
-      "title": "Universidade de Brasília - Biblioteca Central",
-      "categoria": "portal",
-      "depth": 1,
+      "url": "https://www.unb.br/estudante",
+      "title": "Universidade de Brasília - Estudante",
+      "categoria": "estudante",
+      "depth": 0,
       "score": 92,
       "motivos": [
+        "estudante",
+        "graduacao",
+        "matricula",
+        "restaurante universitario",
+        "sigaa"
+      ],
+      "textLength": 1959
+    },
+    {
+      "url": "https://www.unb.br/estudante/cultura-e-sociedade/empresa-junior",
+      "title": "Universidade de Brasília - Empresa Junior",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 91,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "matricula",
+        "extensao",
+        "bolsa"
+      ],
+      "textLength": 2972
+    },
+    {
+      "url": "https://www.unb.br/estudante/servicos/biblioteca-central",
+      "title": "Universidade de Brasília - Biblioteca Central",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 91,
+      "motivos": [
+        "estudante",
         "extensao",
         "pesquisa",
-        "assistencia estudantil",
-        "restaurante universitario",
-        "ouvidoria",
         "biblioteca",
-        "campus",
-        "transporte"
+        "campus"
       ],
-      "textLength": 3326
+      "textLength": 2804
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/identidade-estudantil",
+      "title": "Universidade de Brasília - Identidade Estudantil",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 90,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "matricula",
+        "extensao",
+        "restaurante universitario",
+        "biblioteca"
+      ],
+      "textLength": 1672
     },
     {
       "url": "https://boasvindas.unb.br/matricula",
@@ -779,43 +225,35 @@
         "aproveitamento",
         "sigaa"
       ],
-      "textLength": 3195
+      "textLength": 3166
     },
     {
-      "url": "https://www.unb.br/vida-academica/graduacao",
-      "title": "Universidade de Brasília - Graduação",
-      "categoria": "portal",
+      "url": "https://www.unb.br/estudante/institucional/estrutura-academica/centros",
+      "title": "Universidade de Brasília - Centros",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 86,
+      "motivos": [
+        "estudante",
+        "disciplina",
+        "pesquisa",
+        "transporte"
+      ],
+      "textLength": 2528
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/representacao-estudantil",
+      "title": "Universidade de Brasília - Representação estudantil",
+      "categoria": "estudante",
       "depth": 1,
       "score": 86,
       "motivos": [
         "estudante",
         "graduacao",
-        "matricula",
         "calendario",
-        "disciplina",
-        "extensao",
-        "iniciacao cientifica",
-        "sigaa"
+        "disciplina"
       ],
-      "textLength": 1988
-    },
-    {
-      "url": "https://www.unb.br/graduacao",
-      "title": "Universidade de Brasília - Graduação",
-      "categoria": "portal",
-      "depth": 1,
-      "score": 86,
-      "motivos": [
-        "estudante",
-        "graduacao",
-        "matricula",
-        "calendario",
-        "disciplina",
-        "extensao",
-        "iniciacao cientifica",
-        "sigaa"
-      ],
-      "textLength": 1973
+      "textLength": 2113
     },
     {
       "url": "https://saa.unb.br/aluno-especial-graduacao",
@@ -833,7 +271,7 @@
         "bolsa",
         "restaurante universitario"
       ],
-      "textLength": 5348
+      "textLength": 5344
     },
     {
       "url": "https://acessibilidade.unb.br/",
@@ -849,7 +287,162 @@
         "transporte",
         "sigaa"
       ],
-      "textLength": 1154
+      "textLength": 1149
+    },
+    {
+      "url": "https://www.unb.br/estudante/institucional/a-unb/historia",
+      "title": "Universidade de Brasília - História",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 81,
+      "motivos": [
+        "estudante",
+        "pesquisa",
+        "campus"
+      ],
+      "textLength": 2935
+    },
+    {
+      "url": "https://www.unb.br/estudante/servicos/apoio-psicologico",
+      "title": "Universidade de Brasília - Apoio psicológico",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 81,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "saude"
+      ],
+      "textLength": 2358
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/educacao-a-distancia",
+      "title": "Universidade de Brasília - Educação a Distância",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 81,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "extensao"
+      ],
+      "textLength": 2063
+    },
+    {
+      "url": "https://www.unb.br/estudante/institucional/a-unb/titulos-e-condecoracoes",
+      "title": "Universidade de Brasília - Títulos e condecorações",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 80,
+      "motivos": [
+        "estudante",
+        "extensao",
+        "pesquisa",
+        "internacional"
+      ],
+      "textLength": 1936
+    },
+    {
+      "url": "https://www.unb.br/estudante/servicos/restaurante-universitario",
+      "title": "Universidade de Brasília - Restaurante Universitário",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 80,
+      "motivos": [
+        "estudante",
+        "assistencia estudantil",
+        "restaurante universitario",
+        "campus"
+      ],
+      "textLength": 1584
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/graduacao/cursos",
+      "title": "Universidade de Brasília - Cursos",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 80,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "saude",
+        "campus"
+      ],
+      "textLength": 1452
+    },
+    {
+      "url": "https://www.unb.br/estudante/cultura-e-sociedade/acessibilidade",
+      "title": "Universidade de Brasília - Acessibilidade",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 80,
+      "motivos": [
+        "estudante",
+        "matricula",
+        "acessibilidade",
+        "sigaa"
+      ],
+      "textLength": 1362
+    },
+    {
+      "url": "https://www.unb.br/estudante/institucional/a-unb/unb-em-numeros",
+      "title": "Universidade de Brasília - UnB em números",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 80,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "extensao",
+        "pesquisa"
+      ],
+      "textLength": 1350
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/pos-graduacao",
+      "title": "Universidade de Brasília - Pós-graduação",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 80,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "extensao",
+        "pesquisa"
+      ],
+      "textLength": 867
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/pos-graduacao/especializacao",
+      "title": "Universidade de Brasília - Especialização",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 80,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "disciplina",
+        "saude"
+      ],
+      "textLength": 778
+    },
+    {
+      "url": "https://saa.unb.br/aluno-especial-pos-graduacao",
+      "title": "Aluno Especial – Pós-Graduação – saa",
+      "categoria": "secretaria-academica",
+      "depth": 1,
+      "score": 79,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "matricula",
+        "calendario",
+        "disciplina",
+        "trancamento",
+        "bolsa",
+        "restaurante universitario"
+      ],
+      "textLength": 2383
     },
     {
       "url": "https://sti.unb.br/estudante-unb",
@@ -864,7 +457,7 @@
         "sigaa",
         "sei"
       ],
-      "textLength": 1998
+      "textLength": 1979
     },
     {
       "url": "https://deg.unb.br/estudante",
@@ -879,7 +472,140 @@
         "monitoria",
         "estagio"
       ],
-      "textLength": 703
+      "textLength": 688
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/assuntos-internacionais",
+      "title": "Universidade de Brasília - Assuntos internacionais",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 75,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "bolsa"
+      ],
+      "textLength": 1919
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/graduacao/diploma",
+      "title": "Universidade de Brasília - Diploma",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 75,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "biblioteca"
+      ],
+      "textLength": 1629
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/pos-graduacao/diploma",
+      "title": "Universidade de Brasília - Diploma",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 75,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "biblioteca"
+      ],
+      "textLength": 1629
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/graduacao",
+      "title": "Universidade de Brasília - Graduação",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 75,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "matricula"
+      ],
+      "textLength": 1197
+    },
+    {
+      "url": "https://www.unb.br/acesso-a-informacao/perguntas-frequentes",
+      "title": "Universidade de Brasília - Perguntas Frequentes",
+      "categoria": "portal",
+      "depth": 1,
+      "score": 72,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "matricula",
+        "internacional"
+      ],
+      "textLength": 13721
+    },
+    {
+      "url": "https://www.unb.br/servicos/biblioteca-central",
+      "title": "Universidade de Brasília - Biblioteca Central",
+      "categoria": "portal",
+      "depth": 1,
+      "score": 72,
+      "motivos": [
+        "extensao",
+        "pesquisa",
+        "biblioteca",
+        "campus"
+      ],
+      "textLength": 2804
+    },
+    {
+      "url": "https://www.unb.br/estudante/cultura-e-sociedade/diversidade",
+      "title": "Universidade de Brasília - Diversidade",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 70,
+      "motivos": [
+        "estudante",
+        "direitos humanos"
+      ],
+      "textLength": 1383
+    },
+    {
+      "url": "https://www.unb.br/estudante/institucional/a-unb",
+      "title": "Universidade de Brasília - A UnB",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 70,
+      "motivos": [
+        "estudante",
+        "campus"
+      ],
+      "textLength": 1335
+    },
+    {
+      "url": "https://www.unb.br/estudante/vida-academica/egresso",
+      "title": "Universidade de Brasília - Egresso",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 70,
+      "motivos": [
+        "estudante",
+        "biblioteca"
+      ],
+      "textLength": 729
+    },
+    {
+      "url": "https://www.unb.br/vida-academica/iniciacao-cientifica",
+      "title": "Universidade de Brasília - Iniciação científica",
+      "categoria": "portal",
+      "depth": 1,
+      "score": 69,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "matricula",
+        "disciplina",
+        "pesquisa",
+        "iniciacao cientifica",
+        "saude"
+      ],
+      "textLength": 2420
     },
     {
       "url": "https://ouvidoria.unb.br/",
@@ -891,7 +617,7 @@
         "estudante",
         "ouvidoria"
       ],
-      "textLength": 2271
+      "textLength": 2266
     },
     {
       "url": "https://saa.unb.br/calendario-academico",
@@ -905,6 +631,45 @@
         "calendario"
       ],
       "textLength": 1170
+    },
+    {
+      "url": "https://www.unb.br/cultura-e-sociedade/acessibilidade",
+      "title": "Universidade de Brasília - Acessibilidade",
+      "categoria": "portal",
+      "depth": 1,
+      "score": 66,
+      "motivos": [
+        "estudante",
+        "matricula",
+        "acessibilidade",
+        "sigaa"
+      ],
+      "textLength": 1362
+    },
+    {
+      "url": "https://www.unb.br/acessibilidade",
+      "title": "Universidade de Brasília - Acessibilidade",
+      "categoria": "portal",
+      "depth": 1,
+      "score": 66,
+      "motivos": [
+        "estudante",
+        "matricula",
+        "acessibilidade",
+        "sigaa"
+      ],
+      "textLength": 1343
+    },
+    {
+      "url": "https://www.unb.br/estudante/institucional/a-unb/campanhas-institucionais",
+      "title": "Universidade de Brasília - Campanhas institucionais",
+      "categoria": "estudante",
+      "depth": 1,
+      "score": 65,
+      "motivos": [
+        "estudante"
+      ],
+      "textLength": 1168
     },
     {
       "url": "https://dds.dac.unb.br/",
@@ -936,7 +701,90 @@
         "direitos humanos",
         "campus"
       ],
-      "textLength": 2785
+      "textLength": 2761
+    },
+    {
+      "url": "https://www.unb.br/vida-academica/extensao-universitaria",
+      "title": "Universidade de Brasília - Extensão universitária",
+      "categoria": "portal",
+      "depth": 1,
+      "score": 64,
+      "motivos": [
+        "disciplina",
+        "extensao",
+        "pesquisa",
+        "bolsa",
+        "saude",
+        "direitos humanos"
+      ],
+      "textLength": 2452
+    },
+    {
+      "url": "https://www.unb.br/graduacao/cursos",
+      "title": "Universidade de Brasília - Cursos",
+      "categoria": "secretaria-academica",
+      "depth": 1,
+      "score": 61,
+      "motivos": [
+        "graduacao",
+        "saude",
+        "campus"
+      ],
+      "textLength": 1452
+    },
+    {
+      "url": "https://www.unb.br/vida-academica/graduacao",
+      "title": "Universidade de Brasília - Graduação",
+      "categoria": "portal",
+      "depth": 1,
+      "score": 61,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "matricula"
+      ],
+      "textLength": 1197
+    },
+    {
+      "url": "https://www.unb.br/graduacao",
+      "title": "Universidade de Brasília - Graduação",
+      "categoria": "portal",
+      "depth": 1,
+      "score": 61,
+      "motivos": [
+        "estudante",
+        "graduacao",
+        "matricula"
+      ],
+      "textLength": 1197
+    },
+    {
+      "url": "https://saa.unb.br/calendario-academico-de-pos-graduacao",
+      "title": "Calendário Acadêmico de Pós-Graduação – saa",
+      "categoria": "secretaria-academica",
+      "depth": 1,
+      "score": 61,
+      "motivos": [
+        "graduacao",
+        "matricula",
+        "calendario"
+      ],
+      "textLength": 1108
+    },
+    {
+      "url": "https://saa.unb.br/peticionamento-eletronico-sei-unb",
+      "title": "Peticionamento Eletrônico (SEI-UnB) – saa",
+      "categoria": "secretaria-academica",
+      "depth": 1,
+      "score": 59,
+      "motivos": [
+        "graduacao",
+        "disciplina",
+        "trancamento",
+        "aproveitamento",
+        "sei"
+      ],
+      "textLength": 2416
     },
     {
       "url": "https://ru.unb.br/",
@@ -949,7 +797,7 @@
         "auxilio",
         "campus"
       ],
-      "textLength": 2192
+      "textLength": 2173
     },
     {
       "url": "https://sdh.unb.br/",
@@ -963,7 +811,7 @@
         "direitos humanos",
         "internacional"
       ],
-      "textLength": 1852
+      "textLength": 1847
     },
     {
       "url": "https://proic.unb.br/",
@@ -977,7 +825,7 @@
         "pesquisa",
         "iniciacao cientifica"
       ],
-      "textLength": 1469
+      "textLength": 1464
     },
     {
       "url": "https://vempraunb.unb.br/",
@@ -991,7 +839,7 @@
         "disciplina",
         "extensao"
       ],
-      "textLength": 2872
+      "textLength": 2662
     },
     {
       "url": "https://bce.unb.br/",
@@ -1006,7 +854,7 @@
         "acessibilidade",
         "biblioteca"
       ],
-      "textLength": 758
+      "textLength": 751
     },
     {
       "url": "https://dpg.unb.br/programas-de-pos-graduacao",
@@ -1019,7 +867,7 @@
         "saude",
         "internacional"
       ],
-      "textLength": 10775
+      "textLength": 10743
     },
     {
       "url": "https://dac.unb.br/",
