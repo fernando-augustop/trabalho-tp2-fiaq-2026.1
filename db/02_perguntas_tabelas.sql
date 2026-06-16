@@ -30,5 +30,6 @@ CREATE TABLE IF NOT EXISTS ocorrencia_pergunta (
 
 CREATE INDEX IF NOT EXISTS idx_pergunta_total       ON pergunta_registrada(total_vezes DESC);
 CREATE INDEX IF NOT EXISTS idx_pergunta_modelo      ON pergunta_registrada(modelo_embedding);
+CREATE INDEX IF NOT EXISTS idx_pergunta_faq_entrada ON pergunta_registrada(id_faq_entrada);
 CREATE INDEX IF NOT EXISTS idx_ocorrencia_pergunta  ON ocorrencia_pergunta(id_pergunta_registrada);
 CREATE INDEX IF NOT EXISTS idx_ocorrencia_dthr      ON ocorrencia_pergunta(dthr_ocorrencia);

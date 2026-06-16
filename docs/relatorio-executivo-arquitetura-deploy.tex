@@ -1,0 +1,139 @@
+\documentclass[9pt,a4paper]{article}
+
+\usepackage[a4paper,landscape,margin=9mm]{geometry}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{xurl}
+\usepackage{titlesec}
+\usepackage{microtype}
+\usepackage{ragged2e}
+
+\setmainfont{Noto Sans}
+\setsansfont{Noto Sans}
+\setmonofont{Noto Sans Mono}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+\renewcommand{\arraystretch}{1.1}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+\titleformat{\section}{\large\bfseries\color{navy}}{}{0pt}{}
+\titlespacing*{\section}{0pt}{4pt}{3pt}
+\hypersetup{colorlinks=true,urlcolor=green,linkcolor=navy}
+\urlstyle{same}
+
+\definecolor{navy}{HTML}{142B57}
+\definecolor{navy2}{HTML}{1D3B76}
+\definecolor{green}{HTML}{00B86B}
+\definecolor{green2}{HTML}{DDF8EB}
+\definecolor{ink}{HTML}{15223A}
+\definecolor{muted}{HTML}{5B6678}
+\definecolor{soft}{HTML}{F5F8FC}
+\definecolor{line}{HTML}{D9E2EE}
+
+\newcommand{\card}[2]{%
+  \begingroup
+  \setlength{\fboxsep}{6pt}%
+  \fcolorbox{line}{soft}{%
+    \begin{minipage}[t]{\dimexpr#1-2\fboxsep-2\fboxrule}
+      #2
+    \end{minipage}%
+  }%
+  \endgroup
+}
+
+\newcommand{\metric}[3]{%
+  \begin{minipage}[t]{0.235\linewidth}
+    {\color{green}\Large\bfseries #1}\\[-1pt]
+    {\color{ink}\bfseries\footnotesize #2}\\[-1pt]
+    {\color{muted}\scriptsize #3}
+  \end{minipage}
+}
+
+\newcommand{\labelrow}[2]{%
+  {\scriptsize\color{muted}\MakeUppercase{#1}}\\[-1pt]
+  {\small #2}\par\vspace{3pt}
+}
+
+\newcommand{\step}[3]{%
+  {\color{green}\bfseries #1}\quad{\color{navy}\bfseries #2}\\[-1pt]
+  {\scriptsize\color{muted}#3}\par\vspace{3pt}
+}
+
+\begin{document}
+\RaggedRight
+\color{ink}
+
+\colorbox{navy}{%
+  \begin{minipage}{\dimexpr\linewidth-2\fboxsep}
+    \vspace{7pt}
+    {\color{white}\Huge\bfseries fIAq}\hfill
+    {\color{white}\small Produção validada em 16/06/2026}\\[-1pt]
+    {\color{white}\Large Arquitetura executiva do app, IA e deploy}\\[4pt]
+    \colorbox{green2}{\color{navy}\bfseries\Large\href{https://fiaq-app.vercel.app}{https://fiaq-app.vercel.app}}
+    \vspace{7pt}
+  \end{minipage}
+}
+
+\vspace{5pt}
+\metric{READY}{Vercel}{Nuxt/Nitro em produção}
+\metric{RLS}{Supabase}{Postgres com role limitada}
+\metric{2 modelos}{OpenRouter}{chat + embeddings}
+\metric{190}{RAG chunks}{85 FAQ, 90 crawl, 15 PDF}
+
+\vspace{3pt}
+\card{\linewidth}{%
+  {\color{navy}\bfseries Evidências finais}\quad
+  {\color{green}\bfseries OK} \texttt{/api/health/db}\quad
+  {\color{green}\bfseries 7 categorias} / 85 entradas no FAQ\quad
+  {\color{green}\bfseries 200} assets \texttt{/\_nuxt/*}\quad
+  {\color{green}\bfseries sem erros} nos logs recentes da Vercel.
+}
+
+\vspace{5pt}
+{\large\bfseries\color{navy}Resumo executivo}\\[-1pt]
+O fIAq é um portal do CIC/UnB com FAQ por tema e assistente virtual com IA. A aplicação roda em \textbf{Nuxt 4 + Vue 3 + Nitro}, dentro de \texttt{fiaq-app/}, com frontend, APIs server-side, streaming de chat e registro de métricas anônimas no Supabase. A entrega está publicada no projeto \textbf{fIAq} em \href{https://fiaq-app.vercel.app}{\textbf{https://fiaq-app.vercel.app}}, no caminho gratuito \textbf{Vercel Hobby + Supabase Free + OpenRouter}.
+
+\vspace{5pt}
+\begin{minipage}[t]{0.32\linewidth}
+\card{\linewidth}{%
+  {\large\bfseries\color{navy}1. Deploy web}\\[2pt]
+  \labelrow{Projeto público}{\href{https://fiaq-app.vercel.app}{\textbf{https://fiaq-app.vercel.app}}}
+  \labelrow{Vercel}{\texttt{fernandos-projects-8b069a52/fiaq-app}}
+  \labelrow{Repositório}{\texttt{trabalho-tp2-fiaq-2026.1}}
+  \labelrow{Root directory}{\texttt{fiaq-app}}
+  \labelrow{Build}{\texttt{pnpm build}}
+  \labelrow{Output}{Build Output nativo do Nitro}
+  \labelrow{Operação}{\texttt{docs/DEPLOY.md} + \texttt{fiaq-app/vercel.json}}
+}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.32\linewidth}
+\card{\linewidth}{%
+  {\large\bfseries\color{navy}2. IA e enriquecimento}\\[2pt]
+  \labelrow{Chat}{OpenRouter com \texttt{openrouter/owl-alpha}}
+  \labelrow{Embeddings}{OpenRouter com \path{nvidia/llama-nemotron-embed-vl-1b-v2:free}}
+  \labelrow{Base RAG}{FAQ curado, páginas UnB/CIC crawleadas e PDFs oficiais em \texttt{fiaq-app/data/}}
+  \labelrow{Índice}{\texttt{rag-index.json}; 190 chunks; vetores de 2048 dimensões}
+  \step{1}{Pergunta}{Interface envia a mensagem para \texttt{/api/chat}.}
+  \step{2}{Busca}{Embedding consulta o índice RAG pré-computado.}
+  \step{3}{Resposta}{OpenRouter gera resposta em SSE com fontes oficiais.}
+}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.32\linewidth}
+\card{\linewidth}{%
+  {\large\bfseries\color{navy}3. Supabase e persistência}\\[2pt]
+  \labelrow{Project ref}{\texttt{dwjzjuqtsgrvbiwjvemu}}
+  \labelrow{Conexão}{Transaction Pooler \texttt{:6543}; \texttt{sslmode=require}; \texttt{prepare:false}; \texttt{max:1}}
+  \labelrow{Role}{\texttt{fiaq\_app}, permissões server-side mínimas e RLS nas 4 tabelas}
+  \labelrow{Conteúdo}{\texttt{faq\_categoria}, \texttt{faq\_entrada}}
+  \labelrow{Métricas}{\texttt{pergunta\_registrada}, \texttt{ocorrencia\_pergunta}}
+  \labelrow{Privacidade}{Sem login, sem usuário e sem histórico identificado; dúvidas similares são agrupadas por cosseno entre embeddings.}
+}
+\end{minipage}
+
+\vspace{4pt}
+{\scriptsize\color{muted}Artefatos principais: \texttt{docs/DEPLOY.md}, \texttt{docs/relatorio-executivo-arquitetura-deploy.pdf}, \texttt{db/03\_supabase\_app\_role.sql}, \texttt{fiaq-app/vercel.json}. Segredos reais ficam protegidos na Vercel e não são versionados.}
+
+\end{document}

@@ -1,5 +1,23 @@
 # Deploy gratuito do fIAq
 
+## Status atual
+
+| Item | Valor |
+|---|---|
+| Produção | <https://fiaq-app.vercel.app> |
+| Projeto Vercel | `fernandos-projects-8b069a52/fiaq-app` |
+| Root Directory | `fiaq-app` |
+| Build Command | `pnpm build` |
+| Output Directory | vazio / automático pelo Nitro |
+| Supabase Project Ref | `dwjzjuqtsgrvbiwjvemu` |
+| Role do app | `fiaq_app` |
+| Pooler | `aws-1-us-west-1.pooler.supabase.com:6543` |
+| Relatório executivo | fonte em `docs/relatorio-executivo-arquitetura-deploy.tex`; PDF local em `docs/relatorio-executivo-arquitetura-deploy.pdf` |
+
+> A chave OpenRouter e a `DATABASE_URL` real ficam em variáveis seguras da Vercel
+> e não devem ser commitadas. O PDF executivo é gerado localmente com Tectonic e
+> não é versionado.
+
 O caminho gratuito recomendado para demonstração acadêmica é:
 
 | Camada | Serviço | Motivo |
@@ -21,18 +39,21 @@ re-embedar a base.
 ```sql
 -- primeiro: db/01_faq_tabelas.sql
 -- depois:   db/02_perguntas_tabelas.sql
+-- por fim:  db/03_supabase_app_role.sql
 ```
 
 Os SQLs usam `IF NOT EXISTS`, então podem ser reaplicados durante setup sem
-falhar por tabela ou índice já existente.
+falhar por tabela ou índice já existente. O terceiro SQL habilita RLS e cria a
+role limitada `fiaq_app`; a senha dessa role deve ser definida diretamente no
+Supabase, fora do repositório.
 
 ## 2. Pegar a connection string do Supabase
 
 Para Vercel/serverless, prefira a **Transaction Pooler URI** do Supabase. Ela
-normalmente usa porta `6543`. Garanta SSL:
+normalmente usa porta `6543`. Garanta SSL e use a role limitada do app:
 
 ```env
-DATABASE_URL=postgresql://postgres.PROJECT_REF:SENHA@REGIAO.pooler.supabase.com:6543/postgres?sslmode=require
+DATABASE_URL=postgresql://fiaq_app.PROJECT_REF:SENHA@REGIAO.pooler.supabase.com:6543/postgres?sslmode=require
 ```
 
 O app usa `postgres.js` com `prepare: false`, que é necessário para operar bem
@@ -46,9 +67,9 @@ Ao importar o repositório na Vercel:
 |---|---|
 | **Root Directory** | `fiaq-app` |
 | **Framework Preset** | Nuxt (detectado automaticamente) |
-| **Build Command** | `pnpm build` (padrão) |
-| **Install Command** | `pnpm install` (padrão) |
-| **Output** | automático (preset `vercel` do Nitro) |
+| **Install Command** | `pnpm install` |
+| **Build Command** | `pnpm build` |
+| **Output Directory** | vazio / automático pelo Nitro |
 
 > ⚠️ O **Root Directory `fiaq-app`** é obrigatório — o app não está na raiz do repo.
 
@@ -57,7 +78,7 @@ Ao importar o repositório na Vercel:
 Configure em **Settings → Environment Variables**:
 
 ```env
-OPENROUTER_API_KEY      = sk-or-v1-...            (sua key — NÃO commitar)
+OPENROUTER_API_KEY      = configurada apenas na Vercel, nunca versionada
 CHAT_PROVIDER           = openrouter
 EMBED_PROVIDER          = openrouter
 OPENROUTER_CHAT_MODEL   = openrouter/owl-alpha

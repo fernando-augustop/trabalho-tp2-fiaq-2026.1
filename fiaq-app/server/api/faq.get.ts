@@ -1,5 +1,10 @@
-import { readdir, readFile } from 'fs/promises'
-import { join } from 'path'
+import atividadesDeCurso from '../../data/faq/faq-atividades-de-curso.json'
+import coordenacao from '../../data/faq/faq-coordenacao.json'
+import estruturaCurricular from '../../data/faq/faq-estrutura-curricular.json'
+import leiaMe from '../../data/faq/faq-leia-me.json'
+import matricula from '../../data/faq/faq-matricula.json'
+import organizacoesEstudantis from '../../data/faq/faq-organizacoes-estudantis.json'
+import trajetoriaAcademica from '../../data/faq/faq-trajetoria-academica.json'
 
 interface FaqItem {
   id: string
@@ -37,6 +42,16 @@ const ORDEM = [
   'leia-me'
 ]
 
+const FAQ_DATA: Array<{ slug: string, items: FaqItem[] }> = [
+  { slug: 'atividades-de-curso', items: atividadesDeCurso as FaqItem[] },
+  { slug: 'coordenacao', items: coordenacao as FaqItem[] },
+  { slug: 'estrutura-curricular', items: estruturaCurricular as FaqItem[] },
+  { slug: 'leia-me', items: leiaMe as FaqItem[] },
+  { slug: 'matricula', items: matricula as FaqItem[] },
+  { slug: 'organizacoes-estudantis', items: organizacoesEstudantis as FaqItem[] },
+  { slug: 'trajetoria-academica', items: trajetoriaAcademica as FaqItem[] }
+]
+
 function prettyTitle(slug: string): string {
   return TITULOS[slug] ?? slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
@@ -47,16 +62,12 @@ let cache: FaqCategory[] | null = null
 export default defineEventHandler(async (): Promise<FaqCategory[]> => {
   if (cache) return cache
 
-  const dir = join(process.cwd(), 'data', 'faq')
-  const files = (await readdir(dir))
-    .filter(f => f.startsWith('faq-') && f.endsWith('.json'))
-
-  const categories: FaqCategory[] = []
-  for (const file of files) {
-    const slug = file.replace(/^faq-/, '').replace(/\.json$/, '')
-    const items = JSON.parse(await readFile(join(dir, file), 'utf-8')) as FaqItem[]
-    categories.push({ slug, titulo: prettyTitle(slug), count: items.length, items })
-  }
+  const categories: FaqCategory[] = FAQ_DATA.map(({ slug, items }) => ({
+    slug,
+    titulo: prettyTitle(slug),
+    count: items.length,
+    items
+  }))
 
   categories.sort((a, b) => {
     const ia = ORDEM.indexOf(a.slug)

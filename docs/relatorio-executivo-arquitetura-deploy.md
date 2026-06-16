@@ -1,0 +1,51 @@
+# Relatório Executivo — Arquitetura e Deploy do fIAq
+
+**Status em 16/06/2026:** publicado em produção na Vercel em `https://fiaq-app.vercel.app`, com banco Supabase ativo e registro real de perguntas validado.
+
+## Visão geral
+
+O fIAq é um portal acadêmico do CIC/UnB com FAQ navegável e assistente virtual com IA. A aplicação foi organizada como um app **Nuxt 4 + Vue 3 + Nitro**, localizado em `fiaq-app/`, com APIs server-side para chat, FAQ, saúde do banco e perguntas em alta. A entrega roda no caminho gratuito **Vercel Hobby + Supabase Free + OpenRouter**, mantendo o frontend, o backend Nitro e o streaming de resposta no mesmo deploy web.
+
+## Deploy web
+
+| Item | Configuração atual |
+|---|---|
+| URL pública | `https://fiaq-app.vercel.app` |
+| Projeto Vercel | `fernandos-projects-8b069a52/fiaq-app` |
+| Repositório | `fernando-augustop/trabalho-tp2-fiaq-2026.1` |
+| Root Directory | `fiaq-app` |
+| Framework | Nuxt/Nitro |
+| Install | `pnpm install` |
+| Build | `pnpm build` |
+| Output | Vercel Build Output nativo do Nitro |
+| Funções | Nitro/Vercel Function com janela de 60s para streaming SSE |
+
+As variáveis de ambiente foram configuradas na Vercel para produção, preview e desenvolvimento. A chave do OpenRouter e a URL do banco ficam como segredos/encrypted envs, sem versionamento no repositório.
+
+## IA, modelos e RAG
+
+| Função | Provider | Modelo |
+|---|---|---|
+| Chat/geração de resposta | OpenRouter | `openrouter/owl-alpha` |
+| Embeddings/busca semântica | OpenRouter | `nvidia/llama-nemotron-embed-vl-1b-v2:free` |
+
+O enriquecimento da IA foi feito por **RAG pré-computado**. As fontes institucionais ficam em `fiaq-app/data/`: FAQ curado, páginas crawleadas da UnB/CIC e PDFs oficiais. Esse conteúdo foi transformado em chunks, embedado com o modelo de embedding acima e empacotado em `fiaq-app/server/assets/rag-index.json`. O índice atual tem **190 chunks** com vetores de **2048 dimensões**: **85 FAQ**, **90 crawl** e **15 PDF**.
+
+No runtime, `/api/chat` recebe a pergunta, gera o embedding, busca os 5 chunks mais relevantes com threshold mínimo, monta o contexto, chama o modelo de chat via OpenRouter e transmite a resposta em SSE. A resposta é obrigada pelo prompt de sistema a usar somente o contexto recuperado; links não são inventados nem escritos no texto, pois as fontes oficiais são retornadas separadamente para a interface.
+
+## Arquitetura Supabase
+
+O Supabase hospeda o Postgres de produção no projeto `dwjzjuqtsgrvbiwjvemu`. A conexão da Vercel usa o Transaction Pooler em `aws-1-us-west-1.pooler.supabase.com:6543`, com a role limitada `fiaq_app`, `sslmode=require` e `postgres.js` configurado com `prepare: false`, `max: 1`, `idle_timeout: 20` e `connect_timeout: 10`, adequado ao ambiente serverless.
+
+O schema público tem quatro tabelas:
+
+| Domínio | Tabelas | Papel |
+|---|---|---|
+| Conteúdo FAQ | `faq_categoria`, `faq_entrada` | Estrutura navegável do FAQ |
+| Métricas anônimas | `pergunta_registrada`, `ocorrencia_pergunta` | Agrupamento semântico, contagem e histórico de ocorrências |
+
+Todas as tabelas estão com RLS habilitado. A role `fiaq_app` recebe apenas `SELECT` no FAQ, `SELECT/INSERT/UPDATE` em `pergunta_registrada` e `SELECT/INSERT` em `ocorrencia_pergunta`. O app não possui login de usuário nem histórico identificado: o registro é anônimo e agregado. Perguntas semanticamente parecidas são comparadas por similaridade de cosseno entre embeddings do mesmo modelo; perguntas equivalentes incrementam `total_vezes`, e cada ocorrência guarda resposta e fontes usadas.
+
+## Organização e evidências
+
+O repositório separa app, banco e documentação: `fiaq-app/` contém frontend, APIs e RAG; `db/` contém SQL reaplicável e hardening Supabase; `docs/DEPLOY.md` documenta o caminho operacional; este relatório resume a arquitetura para entrega. A validação final confirmou `/api/health/db` OK, `/api/faq` com 7 categorias e 85 entradas, chat em produção respondendo via OpenRouter, registro da pergunta no Supabase e endpoint `/api/perguntas/em-alta` retornando a ocorrência registrada.

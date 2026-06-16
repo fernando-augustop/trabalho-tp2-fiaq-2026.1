@@ -48,7 +48,9 @@ trabalhofinal-fiaq/
 │   ├── data/                 # fontes: faq/, pdfs/, crawl/, sources/
 │   ├── scripts/              # build-faq, fetch-links, test-openrouter
 │   └── .env.example
-├── DEPLOY.md                 # guia de deploy na Vercel
+├── docs/                     # decisões, deploy e relatório executivo
+│   ├── DEPLOY.md
+│   └── relatorio-executivo-arquitetura-deploy.md
 └── README.md
 ```
 
@@ -96,8 +98,8 @@ SQLs. O setup do banco é independente do setup do app acima.
 
 ## Deploy
 
-Veja [`DEPLOY.md`](./DEPLOY.md) — na Vercel, configure **Root Directory = `fiaq-app`** e
-as variáveis de ambiente do OpenRouter.
+Veja [`docs/DEPLOY.md`](./docs/DEPLOY.md) — na Vercel, configure
+**Root Directory = `fiaq-app`** e as variáveis de ambiente do OpenRouter.
 
 ## Equipe
 

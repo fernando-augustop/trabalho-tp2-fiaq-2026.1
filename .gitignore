@@ -8,6 +8,10 @@ node_modules/
 
 # Editor / tooling
 .cursor/
+.vercel/
+
+# Local generated deliverables
+docs/relatorio-executivo-arquitetura-deploy.pdf
 
 # OS
 .DS_Store
