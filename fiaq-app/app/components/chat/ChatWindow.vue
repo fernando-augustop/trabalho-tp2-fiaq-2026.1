@@ -15,59 +15,18 @@
           stroke-width="1.6"
           viewBox="0 0 24 24"
         >
-          <rect
-            x="5"
-            y="7"
-            width="14"
-            height="10"
-            rx="2.5"
-            stroke="currentColor"
-          />
-          <circle
-            cx="9"
-            cy="11"
-            r="1.2"
-            fill="currentColor"
-            stroke="none"
-          />
-          <circle
-            cx="15"
-            cy="11"
-            r="1.2"
-            fill="currentColor"
-            stroke="none"
-          />
-          <path
-            d="M9 14.5h6"
-            stroke="currentColor"
-            stroke-linecap="round"
-          />
-          <path
-            d="M12 7V4"
-            stroke="currentColor"
-            stroke-linecap="round"
-          />
-          <circle
-            cx="12"
-            cy="3.5"
-            r="0.8"
-            fill="currentColor"
-            stroke="none"
-          />
-          <path
-            d="M5 10.5H3.5M18.5 10.5H20"
-            stroke="currentColor"
-            stroke-linecap="round"
-          />
+          <rect x="5" y="7" width="14" height="10" rx="2.5" stroke="currentColor"/>
+          <circle cx="9" cy="11" r="1.2" fill="currentColor" stroke="none"/>
+          <circle cx="15" cy="11" r="1.2" fill="currentColor" stroke="none"/>
+          <path d="M9 14.5h6" stroke="currentColor" stroke-linecap="round"/>
+          <path d="M12 7V4" stroke="currentColor" stroke-linecap="round"/>
+          <circle cx="12" cy="3.5" r="0.8" fill="currentColor" stroke="none"/>
+          <path d="M5 10.5H3.5M18.5 10.5H20" stroke="currentColor" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
-        <p class="font-bold text-[#1a2e5a] text-lg">
-          Olá! Como posso ajudar?
-        </p>
-        <p class="text-gray-400 text-sm mt-1">
-          Pergunte sobre matrícula, TCC, estágio, extensão e muito mais.
-        </p>
+        <p class="font-bold text-[#1a2e5a] text-lg">Olá! Como posso ajudar?</p>
+        <p class="text-gray-400 text-sm mt-1">Pergunte sobre matrícula, TCC, estágio, extensão e muito mais.</p>
       </div>
       <div class="flex flex-wrap gap-2 justify-center mt-2">
         <button
@@ -81,13 +40,9 @@
       </div>
     </div>
 
-    <template
-      v-for="msg in messages"
-      :key="msg.id"
-    >
+    <template v-for="msg in messages" :key="msg.id">
       <ChatMessageBubble :message="msg" />
     </template>
-
     <ChatTypingIndicator v-if="showTyping" />
   </div>
 </template>
@@ -101,7 +56,6 @@ const props = defineProps<{
   loading: boolean
 }>()
 
-// Mostra os 3 pontinhos enquanto espera (carregando OU resposta em stream ainda vazia).
 const showTyping = computed(() => {
   if (props.loading) return true
   const last = props.messages[props.messages.length - 1]
@@ -112,8 +66,6 @@ defineEmits<{
   suggest: [text: string]
 }>()
 
-// Perguntas prontas escolhidas a partir de títulos reais do FAQ e validadas
-// contra a base (a IA responde todas com fonte; ver data/faq/*.json).
 const suggestions = [
   'Quais são as etapas da matrícula?',
   'Como funciona o estágio obrigatório?',
@@ -130,6 +82,12 @@ async function scrollToBottom() {
   }
 }
 
-// Scroll whenever a new message arrives or loading starts
+// Scroll on new messages or loading state change
 watch(() => [props.messages.length, props.loading], scrollToBottom)
+
+// Scroll on every token during streaming by watching the last message's content
+watch(
+  () => props.messages[props.messages.length - 1]?.content,
+  scrollToBottom
+)
 </script>
