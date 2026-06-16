@@ -2,7 +2,7 @@
 
 ## Tabelas
 
-O banco possui quatro tabelas organizadas em dois domínios:
+O banco possui seis tabelas organizadas em três domínios:
 
 **FAQ (conteúdo)**
 | Tabela | Descrição |
@@ -10,11 +10,44 @@ O banco possui quatro tabelas organizadas em dois domínios:
 | `faq_categoria` | Categorias do FAQ (ex: Matrícula, Estrutura Curricular) |
 | `faq_entrada` | Perguntas e respostas do FAQ, vinculadas a uma categoria |
 
+**RAG (base de conhecimento)**
+| Tabela | Descrição |
+|---|---|
+| `rag_documento` | Fonte de conhecimento: FAQ, PDF ou página crawleada |
+| `rag_chunk` | Trechos indexados com embedding `pgvector` para busca semântica |
+
 **Análise de uso (anônima e agregada)**
 | Tabela | Descrição |
 |---|---|
 | `pergunta_registrada` | Agrega perguntas semanticamente similares — uma linha por "pergunta única" |
 | `ocorrencia_pergunta` | Registra cada vez que uma pergunta é feita — permite análise temporal |
+
+---
+
+## Arquitetura RAG no banco
+
+O chatbot usa uma arquitetura **DB-first**:
+
+1. `/api/chat` gera o embedding da pergunta com o modelo configurado.
+2. O backend chama `buscar_rag_chunks(...)` no Postgres.
+3. A função busca candidatos em `rag_chunk` usando cosine distance (`<=>`) com
+   `pgvector`, aplica threshold e retorna os melhores trechos.
+4. O modelo de chat (`openrouter/owl-alpha`) recebe os trechos como contexto.
+5. A pergunta e as fontes usadas são registradas nas tabelas de análise.
+
+O modelo de chat e o modelo de embedding são papéis diferentes. Owl Alpha escreve
+a resposta; o embedding model transforma perguntas e chunks em vetores. O deploy
+usa `nvidia/llama-nemotron-embed-vl-1b-v2:free`, com 2048 dimensões, por isso
+`rag_chunk.embedding` é `extensions.vector(2048)`.
+
+Para manter a busca eficiente com 2048 dimensões, `rag_chunk` também possui
+`embedding_half extensions.halfvec(2048)` gerado automaticamente. A função
+`buscar_rag_chunks(...)` usa o índice HNSW em `embedding_half` para selecionar
+candidatos e reordena pelo vetor completo dentro dessa amostra.
+
+O arquivo `fiaq-app/server/assets/rag-index.json` continua no repo apenas como
+fallback de compatibilidade caso o banco esteja indisponível durante desenvolvimento
+ou recuperação.
 
 ---
 
@@ -57,16 +90,12 @@ são comparáveis entre si** — um vetor do `nomic-embed-text` e um do `llama-n
 para o mesmo texto produzem números completamente diferentes. A comparação de
 similaridade só ocorre entre perguntas do mesmo modelo.
 
-### Evolução futura para pgvector
+### pgvector no RAG e JSONB nas métricas
 
-O volume esperado (centenas a poucos milhares de perguntas) permite carregar todos os
-vetores em memória e comparar em TypeScript — o mesmo padrão do `vectorStore.ts` da
-squad de IA. Se o volume crescer a ponto de tornar isso ineficiente, a migração natural é:
-
-1. Instalar a extensão `pgvector` no Postgres (`CREATE EXTENSION vector`)
-2. Substituir a coluna `embedding JSONB` por `embedding vector(N)` (N = dimensão do modelo)
-3. Criar índice `HNSW` ou `IVFFlat` na coluna
-4. Substituir o cálculo TypeScript por `ORDER BY embedding <=> $vetor LIMIT 1` no SQL
+O RAG usa `pgvector` porque a busca semântica precisa ser rápida e ordenável no
+banco. Já `pergunta_registrada.embedding` continua como `JSONB` porque o volume de
+métricas é pequeno e a agregação de perguntas equivalentes ainda roda em TypeScript.
+Se a tabela de métricas crescer muito, ela pode seguir a mesma estratégia do RAG.
 
 ---
 
@@ -75,6 +104,8 @@ squad de IA. Se o volume crescer a ponto de tornar isso ineficiente, a migraçã
 ```mermaid
 erDiagram
     FAQ_CATEGORIA ||--o{ FAQ_ENTRADA : "contém"
+    FAQ_ENTRADA |o--o{ RAG_CHUNK : "origina"
+    RAG_DOCUMENTO ||--o{ RAG_CHUNK : "contém"
     FAQ_ENTRADA |o--o{ PERGUNTA_REGISTRADA : "associada a"
     PERGUNTA_REGISTRADA ||--o{ OCORRENCIA_PERGUNTA : "gera"
 
@@ -95,6 +126,33 @@ erDiagram
         text conteudo
         text url_fonte
         timestamp dthr_atualizacao
+    }
+
+    RAG_DOCUMENTO {
+        int id PK
+        varchar origem
+        varchar slug
+        varchar titulo
+        text url_fonte
+        text caminho_origem
+        text checksum
+        jsonb metadados
+        boolean ativo
+    }
+
+    RAG_CHUNK {
+        int id PK
+        int id_documento FK
+        int id_faq_entrada FK
+        varchar origem
+        varchar chunk_uid
+        int ordem
+        varchar titulo
+        text conteudo
+        vector embedding
+        halfvec embedding_half
+        text modelo_embedding
+        boolean ativo
     }
 
     PERGUNTA_REGISTRADA {
@@ -126,7 +184,8 @@ erDiagram
 |---|---|---|
 | 2026-06 | Autenticação e histórico individual removidos do escopo | Por orientação do professor, o sistema não cadastra nem identifica usuários. Evita burocracia de LGPD e mantém o foco no produto (FAQ + chatbot). |
 | 2026-06 | Auth substituído por agregação anônima de perguntas | Permite detectar perguntas em alta e controlar qualidade das respostas mais frequentes sem armazenar dados pessoais. |
-| 2026-06 | `embedding JSONB` em vez de `pgvector` | Volume esperado não justifica pgvector agora. Mesma abordagem do `vectorStore.ts` da squad de IA. Migração documentada acima como evolução natural. |
+| 2026-06 | RAG migrado para `pgvector` | Organiza todo o conhecimento no banco, permite seed idempotente e deixa o JSON apenas como fallback. |
+| 2026-06 | Métricas mantêm `embedding JSONB` | A agregação anônima ainda tem baixo volume; evita complexidade extra fora do caminho crítico do RAG. |
 
 > **Autores/Decisões originais:** Gustavo Pavanelli e Lucas Centurion
 >

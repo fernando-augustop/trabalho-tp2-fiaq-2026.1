@@ -1,9 +1,11 @@
 ---
-title: Perguntas frequentes &#8211; saa
-url: https://saa.unb.br/perguntas-frequentes/
-contexto: boas-vindas
+title: Perguntas frequentes – saa
+url: https://saa.unb.br/perguntas-frequentes
+contexto: secretaria-academica
+source: unb-official-discovery
+score: 94
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
-
 Perguntas frequentes
 Aproveitamentos
 Aproveitamento de Carga Horária em Língua Estrangeira

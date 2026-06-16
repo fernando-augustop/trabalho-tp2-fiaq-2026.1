@@ -5,7 +5,6 @@ contexto: boas-vindas
 ---
 
 Página Inicial
-Home
 ESTUDANTE
 SEJA BEM-VINDO(A)
 Encontre aqui informações iniciais sobre a Universidade de Brasília

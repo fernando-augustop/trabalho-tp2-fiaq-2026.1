@@ -11,6 +11,8 @@
     "lint": "pnpm --dir fiaq-app lint",
     "typecheck": "pnpm --dir fiaq-app typecheck",
     "build:faq": "pnpm --dir fiaq-app build:faq",
+    "seed:faq": "pnpm --dir fiaq-app seed:faq",
+    "seed:knowledge": "pnpm --dir fiaq-app seed:knowledge",
     "fetch:links": "pnpm --dir fiaq-app fetch:links",
     "index:rag": "pnpm --dir fiaq-app index:rag",
     "test:openrouter": "pnpm --dir fiaq-app test:openrouter"

@@ -1,9 +1,5 @@
 import postgres from 'postgres'
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL não definida. Verifique o .env.')
-}
-
 // SSL: o postgres.js detecta o modo de SSL pela própria connection string.
 //   - Postgres local (Docker): sem parâmetros extras
 //     DATABASE_URL=postgresql://fiaq:fiaq123@localhost:5432/fiaq
@@ -16,11 +12,26 @@ if (!process.env.DATABASE_URL) {
 //
 // prepare: false mantém compatibilidade com poolers serverless, como o
 // Transaction Pooler do Supabase, que não suporta prepared statements.
-const sql = postgres(process.env.DATABASE_URL, {
-  max: 1,
-  prepare: false,
-  idle_timeout: 20,
-  connect_timeout: 10
-})
+let sql: postgres.Sql | null = null
 
-export default sql
+export function isDatabaseConfigured(): boolean {
+  return Boolean(process.env.DATABASE_URL?.trim())
+}
+
+export function getSql(): postgres.Sql {
+  const connectionString = process.env.DATABASE_URL?.trim()
+  if (!connectionString) {
+    throw new Error('DATABASE_URL não definida. Verifique o .env ou as variáveis da Vercel.')
+  }
+
+  sql ??= postgres(connectionString, {
+    max: 1,
+    prepare: false,
+    idle_timeout: 20,
+    connect_timeout: 10
+  })
+
+  return sql
+}
+
+export default getSql

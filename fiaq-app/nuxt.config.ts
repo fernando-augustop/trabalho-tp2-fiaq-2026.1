@@ -27,7 +27,7 @@ export default defineNuxtConfig({
 
   vite: {
     optimizeDeps: {
-      include: ['marked', 'sanitize-html']
+      include: ['marked', 'sanitize-html', 'jspdf']
     }
   },
 

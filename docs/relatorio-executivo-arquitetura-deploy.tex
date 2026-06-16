@@ -114,10 +114,10 @@ O fIAq é um portal do CIC/UnB com FAQ por tema e assistente virtual com IA. A a
   {\large\bfseries\color{navy}2. IA e enriquecimento}\\[2pt]
   \labelrow{Chat}{OpenRouter com \texttt{openrouter/owl-alpha}}
   \labelrow{Embeddings}{OpenRouter com \path{nvidia/llama-nemotron-embed-vl-1b-v2:free}}
-  \labelrow{Base RAG}{FAQ curado, páginas UnB/CIC crawleadas e PDFs oficiais em \texttt{fiaq-app/data/}}
-  \labelrow{Índice}{\texttt{rag-index.json}; 190 chunks; vetores de 2048 dimensões}
+  \labelrow{Base RAG}{FAQ, páginas UnB/CIC crawleadas e PDFs oficiais em \texttt{rag\_documento}/\texttt{rag\_chunk}}
+  \labelrow{Índice}{Postgres + pgvector; fallback legado em \texttt{rag-index.json}}
   \step{1}{Pergunta}{Interface envia a mensagem para \texttt{/api/chat}.}
-  \step{2}{Busca}{Embedding consulta o índice RAG pré-computado.}
+  \step{2}{Busca}{Embedding consulta \texttt{buscar\_rag\_chunks} no Supabase/pgvector.}
   \step{3}{Resposta}{OpenRouter gera resposta em SSE com fontes oficiais.}
 }
 \end{minipage}\hfill

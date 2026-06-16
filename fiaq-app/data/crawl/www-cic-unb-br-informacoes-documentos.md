@@ -81,26 +81,4 @@ Termo_de_Compromisso_de_Estagio_Obrigatorio_Supervisionado
 TERMO_DE_COMPROMISSO_DO_ESTAGIRIO_PARA_A_REALIZAO_DE_ESTGIO_CURRICULAR_SUPERVISIONADO.pdf
 Download
 Details
-Ordering
-Ordering Ascending
-Ordering Descending
-Title Ascending
-Title Descending
-Date Ascending
-Date Descending
-Filename Ascending
-Filename Descending
-Rating Count Ascending
-Rating Count Descending
-Rating Ascending
-Rating Descending
-Downloads Ascending
-Downloads Descending
-Display Num
-5
-10
-15
-20
-50
-All
 Powered by Phoca Download

@@ -1,5 +1,8 @@
 <template>
-  <div class="flex flex-col overflow-hidden" style="height: calc(100vh - var(--nav-height, 64px))">
+  <div
+    class="flex flex-col overflow-hidden"
+    style="height: calc(100vh - var(--nav-height, 64px))"
+  >
     <!-- Header -->
     <div class="bg-[#1a2e5a] px-10 pt-4 pb-6 text-center shrink-0">
       <div class="flex items-center justify-center gap-3">
@@ -15,6 +18,11 @@
     <div class="h-px bg-gray-300 mx-10 shrink-0" />
     <!-- Chat area -->
     <div class="flex-1 flex flex-col max-w-3xl w-full mx-auto px-4 py-6 gap-4 overflow-hidden">
+      <ChatConversationActions
+        :messages="messages"
+        :disabled="loading"
+        @import="replaceMessages"
+      />
       <ChatWindow
         :messages="messages"
         :loading="loading"
@@ -32,7 +40,7 @@
 import { onMounted } from 'vue'
 import { useFiaqChat } from '~/composables/useFiaqChat'
 
-const { messages, loading, sendMessage } = useFiaqChat()
+const { messages, loading, sendMessage, replaceMessages } = useFiaqChat()
 
 const route = useRoute()
 onMounted(() => {

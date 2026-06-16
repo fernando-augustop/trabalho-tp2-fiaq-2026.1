@@ -8,9 +8,6 @@ Manual para Estudantes
 Claudio Bezerra de Medeiros
 6 de março de 2025
 Sem categoria
-Home
-Sem categoria
-Manual para Estudantes
 Manual do Calouro 1/2026
 Manual para Estudante 2/2022
 Agenda do Calouro Vestibular 2025 – 1ª Chamada

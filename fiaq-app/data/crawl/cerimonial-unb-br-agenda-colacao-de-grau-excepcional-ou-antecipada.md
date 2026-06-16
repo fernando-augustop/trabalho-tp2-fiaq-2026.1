@@ -5,9 +5,6 @@ contexto: o-que-e-a-colacao-de-grau-simplificada
 ---
 
 Colação de Grau Simplificada
-Home
-Colações de Grau
-Colação de Grau Simplificada
 Outorga Simplificada – cerimônia realizada no local onde a Unidade Acadêmica designar, dispensando as vestes do rito e contando apenas com a presença do Diretor ou Vice-Diretor da Faculdade, Instituto ou Centro, podendo o formando nomear um procurador para representá-lo.
 Passo a passo para a organização de Colação de Grau Simplificada
 Para a preparação da cerimônia de outorga simplificada, recomenda-se às unidades acadêmicas e aos centros o cumprimento dos procedimentos a seguir:

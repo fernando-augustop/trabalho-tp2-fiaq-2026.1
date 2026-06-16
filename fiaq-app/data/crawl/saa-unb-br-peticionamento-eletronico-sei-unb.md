@@ -1,9 +1,11 @@
 ---
-title: Peticionamento Eletrônico (SEI-UnB) &#8211; saa
-url: https://saa.unb.br/peticionamento-eletronico-sei-unb/
-contexto: como-solicitar-a-migracao
+title: Peticionamento Eletrônico (SEI-UnB) – saa
+url: https://saa.unb.br/peticionamento-eletronico-sei-unb
+contexto: secretaria-academica
+source: unb-official-discovery
+score: 59
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
-
 Peticionamento Eletrônico (SEI-UnB)
 Forma eletrônica de solicitação via SEI – Sistema Eletrônico de Informação.
 Para iniciar o peticionamento ,   clique aqui

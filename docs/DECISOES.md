@@ -37,5 +37,5 @@ O threshold de similaridade (`THRESHOLD_MESMA_PERGUNTA = 0.92`) é um parâmetro
 de calibração a ajustar com dados reais, em conjunto com a squad de IA. O modelo
 de embedding em produção pode exigir um valor diferente do usado em desenvolvimento.
 
-O detalhamento técnico do modelo de dados — diagrama ER, estratégia de embedding,
-caminho de evolução para pgvector — está em [`db/README.md`](../db/README.md).
+O detalhamento técnico do modelo de dados — diagrama ER, RAG em pgvector e
+estratégia de embedding — está em [`db/README.md`](../db/README.md).

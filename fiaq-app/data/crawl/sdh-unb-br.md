@@ -1,11 +1,12 @@
 ---
-title: SHD &#8211; Secretaria de Direitos Humanos (SDH)
-url: http://sdh.unb.br/
-contexto: assuntos-comunitarios-direitos-humanos
+title: SHD – Secretaria de Direitos Humanos (SDH)
+url: https://sdh.unb.br/
+contexto: direitos-humanos
+source: unb-official-discovery
+score: 55
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
-
 Página Inicial
-Home
 Atendimento SDH
 Em casos de violências e violações de direitos, pessoas com vínculo com a Universidade de Brasília (UnB) podem solicitar atendimento e acolhimento à SDH. Para tanto, clique no link acima e preencha o formulário, pois nossa equipe entrará em contato muito em breve e exclusivamente por e-mail.
 Materiais Educativos para divulgação

@@ -1,4 +1,4 @@
-import { readFile, readdir, writeFile } from 'fs/promises'
+import { readdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { embedChunk } from '../utils/embeddings'
 import type { EmbeddedChunk } from '../utils/embeddings'
@@ -6,6 +6,7 @@ import { addChunk, loadChunks, getAllChunks, getStoreSize } from '../utils/vecto
 import { embedInfo } from '../utils/llmProvider'
 import { extractPdfChunks } from '../utils/pdfLoader'
 import { extractCrawlChunks } from '../utils/crawlLoader'
+import { listarFaq } from '../repositorios/faq'
 
 interface RagIndexFile {
   meta: { provider?: string, model?: string, dim?: number, count?: number, builtAt?: string }
@@ -32,7 +33,7 @@ export default defineNitroPlugin(async () => {
   const force = process.env.RAG_FORCE_REINDEX === '1'
   const cached = force ? null : await loadCachedIndex()
 
-  // Caminho rápido (produção/Vercel e dev normal): hidrata do índice pré-computado.
+  // Compatibilidade: hidrata o índice JSON usado apenas se o pgvector não estiver disponível.
   if (cached?.chunks?.length) {
     loadChunks(cached.chunks)
     if (cached.meta?.model && cached.meta.model !== embedInfo.model) {
@@ -41,7 +42,7 @@ export default defineNitroPlugin(async () => {
         + `"${embedInfo.model}". As buscas podem ficar inconsistentes — regenere o índice.`
       )
     }
-    console.log(`[RAG] Índice pré-computado carregado: ${getStoreSize()} chunks (modelo: ${cached.meta?.model ?? '?'}).`)
+    console.log(`[RAG] Fallback JSON carregado: ${getStoreSize()} chunks (modelo: ${cached.meta?.model ?? '?'}).`)
     return
   }
 
@@ -76,33 +77,27 @@ async function writeIndex(): Promise<void> {
 }
 
 async function indexFaq() {
-  const faqDir = join(process.cwd(), 'data', 'faq')
-
-  let files: string[]
   try {
-    files = await readdir(faqDir)
-  } catch {
-    console.warn('[RAG] No data/faq directory found, skipping FAQ indexing.')
-    return
-  }
+    const { categories, source } = await listarFaq()
+    console.log(`[RAG] Indexando FAQ a partir de ${source}: ${categories.length} categoria(s).`)
 
-  const jsonFiles = files.filter(f => f.endsWith('.json'))
-  console.log(`[RAG] Found ${jsonFiles.length} FAQ file(s).`)
-
-  for (const file of jsonFiles) {
-    const raw = await readFile(join(faqDir, file), 'utf-8')
-    const entries = JSON.parse(raw)
-
-    for (const entry of entries) {
-      try {
-        const embedded = await embedChunk({ ...entry, kind: 'faq' })
-        addChunk(embedded)
-      } catch (e) {
-        console.error(`[RAG] Failed to embed FAQ entry ${entry.id}:`, e)
+    for (const category of categories) {
+      for (const entry of category.items) {
+        try {
+          const embedded = await embedChunk({
+            ...entry,
+            url: entry.url ?? '',
+            kind: 'faq'
+          })
+          addChunk(embedded)
+        } catch (e) {
+          console.error(`[RAG] Failed to embed FAQ entry ${entry.id}:`, e)
+        }
       }
+      console.log(`[RAG] Indexed ${category.items.length} entries from ${category.slug}`)
     }
-
-    console.log(`[RAG] Indexed ${entries.length} entries from ${file}`)
+  } catch (e) {
+    console.warn('[RAG] No FAQ source available, skipping FAQ indexing:', e)
   }
 }
 

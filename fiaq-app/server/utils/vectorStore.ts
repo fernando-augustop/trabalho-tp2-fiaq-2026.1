@@ -22,12 +22,12 @@ export function addChunk(chunk: EmbeddedChunk): void {
   store.push(chunk)
 }
 
-// Carrega vários chunks de uma vez (usado ao hidratar o índice pré-computado).
+// Carrega vários chunks de uma vez (fallback JSON quando pgvector não estiver disponível).
 export function loadChunks(chunks: EmbeddedChunk[]): void {
   store.splice(0, store.length, ...chunks)
 }
 
-// Retorna todos os chunks indexados (usado para serializar o índice).
+// Retorna todos os chunks indexados (usado para serializar o fallback JSON).
 export function getAllChunks(): EmbeddedChunk[] {
   return store
 }

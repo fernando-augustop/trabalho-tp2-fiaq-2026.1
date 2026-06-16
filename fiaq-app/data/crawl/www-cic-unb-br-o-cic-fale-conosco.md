@@ -17,21 +17,18 @@ Secretaria de Pós-Graduação em Computação Aplicada
 Módulo 14 ICC Centro
 Horário: veja aqui .
 Tel.: +55 (61) 3107-6740 | 3107-6737
-E-mail: Este endereço de email está sendo protegido de spambots. Você precisa do JavaScript ativado para vê-lo.
 www.ppca.unb.br
 Secretaria de Pós-Graduação em Informática
 Prédio CIC/EST
 Horário:
 - segunda a sexta, 8h às 20h
 Tel.: +55 (61) 3107-3661
-E-mail: Este endereço de email está sendo protegido de spambots. Você precisa do JavaScript ativado para vê-lo.
 www.ppgi.unb.br
 Secretaria de Graduação
 Prédio CIC/EST
 Horário:
 - segunda a sexta, 8h às 20h
 Tel.: +55 (61) 3107-3661
-E-mail: Este endereço de email está sendo protegido de spambots. Você precisa do JavaScript ativado para vê-lo.
 www.cic.unb.br
 Laboratório de Informática - LINF
 Módulo 19 ICC Norte
@@ -40,5 +37,4 @@ Horário:
 - sábado, 8h às 16h, acesso restrito mediante autorização (acesso ao laboratório mediante o comprovante de matrícula).
 - domingo, acesso restrito mediante permissão.
 Tel.: +55 (61) 3107-6369 | 3107-6372
-E-mail: Este endereço de email está sendo protegido de spambots. Você precisa do JavaScript ativado para vê-lo.
 Localização

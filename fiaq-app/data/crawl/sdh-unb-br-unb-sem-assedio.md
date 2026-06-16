@@ -5,8 +5,6 @@ contexto: assuntos-comunitarios-direitos-humanos
 ---
 
 UnB SEM ASSÉDIO
-Home
-UnB SEM ASSÉDIO
 FLUXO DE ATENDIMENTO A DENÚNCIAS DE A SSÉDIO MORAL, SEXUAL, DISCRIMINAÇÃO E OUTRAS VIOLÊNCIAS
 Conheça aqui o fluxo de atendimento a denúncias de assédio moral, sexual, discriminação e outras violências, aprovado pela Câmara de Direitos Humanos (CDH) da Universidade de Brasília (UnB), em cumprimento à Resolução CAD n o 015/2023 .
 DENÚNCIA

@@ -1,11 +1,12 @@
 ---
 title: ouvidoria
 url: https://ouvidoria.unb.br/
-contexto: como-encaminho-elogio-reclamacao-sobre-infraestrutura-ensino-atendimento-procedimentos-etc
+contexto: ouvidoria
+source: unb-official-discovery
+score: 69
+discovered_at: 2026-06-16T20:44:10.782Z
 ---
-
 Página Inicial
-Home
 A Ouvidoria da UnB
 Somos um canal de diálogo e mediação de conflitos. Recepcionamos as manifestações e, por meio de uma triagem, respondemos diretamente ou encaminhamos a demanda aos setores responsáveis
 Leia mais

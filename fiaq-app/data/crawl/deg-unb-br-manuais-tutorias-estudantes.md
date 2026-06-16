@@ -8,11 +8,6 @@ Manuais e Tutoriais para Estudantes
 Cláudio Bezerra de Medeiros
 30 de agosto de 2024
 Manuais e Tutoriais
-Home
-Diretorias
-DTG
-Manuais e Tutoriais
-Manuais e Tutoriais para Estudantes
 Manuais/Tutoriais
 Estudantes – Manual do Calouro
 Estudantes – Tutorial de matrícula em telas

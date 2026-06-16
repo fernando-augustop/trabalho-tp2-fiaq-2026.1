@@ -5,7 +5,6 @@ contexto: assuntos-comunitarios-direitos-humanos
 ---
 
 Página Inicial
-Home
 Venha nos conhecer!
 Venha saber o que a DAC | DEAC | CEL tem a oferecer!
 Saiba mais!

@@ -20,8 +20,8 @@ const EMBED_PROVIDER = (process.env.EMBED_PROVIDER || 'ollama').toLowerCase()
 const APP_URL = process.env.APP_URL
   || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
-// Identifica o modelo de embedding ativo — usado para gravar/validar o índice
-// pré-computado (embeddings de modelos diferentes são incompatíveis entre si).
+// Identifica o modelo de embedding ativo — usado para gravar/consultar o RAG
+// no banco e validar o fallback JSON (modelos diferentes são incompatíveis).
 export const embedInfo = {
   provider: EMBED_PROVIDER,
   model: EMBED_PROVIDER === 'openrouter' ? OPENROUTER_EMBED_MODEL : EMBED_MODEL

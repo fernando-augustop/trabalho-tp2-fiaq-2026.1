@@ -1,0 +1,111 @@
+{
+  "descricao": "Sementes oficiais para ampliar o RAG com paginas da Universidade de Brasilia. O crawler segue apenas dominios *.unb.br e prioriza paginas uteis para estudantes.",
+  "seedUrls": [
+    {
+      "url": "https://www.unb.br/",
+      "categoria": "portal"
+    },
+    {
+      "url": "https://www.unb.br/estudante",
+      "categoria": "estudante"
+    },
+    {
+      "url": "https://boasvindas.unb.br/",
+      "categoria": "boas-vindas"
+    },
+    {
+      "url": "https://saa.unb.br/",
+      "categoria": "secretaria-academica"
+    },
+    {
+      "url": "https://saa.unb.br/perguntas-frequentes",
+      "categoria": "secretaria-academica"
+    },
+    {
+      "url": "https://saa.unb.br/calendario-academico",
+      "categoria": "calendario-academico"
+    },
+    {
+      "url": "https://deg.unb.br/estudante",
+      "categoria": "graduacao"
+    },
+    {
+      "url": "https://dac.unb.br/",
+      "categoria": "assistencia-estudantil"
+    },
+    {
+      "url": "https://dds.dac.unb.br/",
+      "categoria": "assistencia-estudantil"
+    },
+    {
+      "url": "https://dasu.unb.br/",
+      "categoria": "saude"
+    },
+    {
+      "url": "https://acessibilidade.unb.br/",
+      "categoria": "acessibilidade"
+    },
+    {
+      "url": "https://sdh.unb.br/",
+      "categoria": "direitos-humanos"
+    },
+    {
+      "url": "https://sti.unb.br/estudante-unb",
+      "categoria": "tecnologia"
+    },
+    {
+      "url": "https://biblioteca.unb.br/",
+      "categoria": "biblioteca"
+    },
+    {
+      "url": "https://ru.unb.br/",
+      "categoria": "restaurante-universitario"
+    },
+    {
+      "url": "https://int.unb.br/",
+      "categoria": "internacionalizacao"
+    },
+    {
+      "url": "https://dex.unb.br/",
+      "categoria": "extensao"
+    },
+    {
+      "url": "https://proic.unb.br/",
+      "categoria": "pesquisa"
+    },
+    {
+      "url": "https://ouvidoria.unb.br/",
+      "categoria": "ouvidoria"
+    }
+  ],
+  "focusTerms": [
+    "estudante",
+    "graduacao",
+    "matricula",
+    "calendario",
+    "disciplina",
+    "trancamento",
+    "aproveitamento",
+    "monitoria",
+    "estagio",
+    "extensao",
+    "pesquisa",
+    "iniciacao cientifica",
+    "assistencia estudantil",
+    "auxilio",
+    "bolsa",
+    "moradia",
+    "restaurante universitario",
+    "saude",
+    "acessibilidade",
+    "direitos humanos",
+    "ouvidoria",
+    "biblioteca",
+    "campus",
+    "transporte",
+    "internacional",
+    "email institucional",
+    "sigaa",
+    "sei"
+  ]
+}

@@ -6,7 +6,7 @@
 //
 // Sem dependências externas (usa fetch nativo do Node). Uso: node scripts/fetch-links.mjs
 
-import { readFile, writeFile, readdir, unlink, mkdir } from 'fs/promises'
+import { readFile, writeFile, unlink, mkdir } from 'fs/promises'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -15,6 +15,7 @@ const ROOT = join(__dirname, '..')
 const SOURCES_DIR = join(ROOT, 'data', 'sources', 'faq-cic-unb')
 const LINKS_MD = join(SOURCES_DIR, '02-links.md')
 const CRAWL_DIR = join(ROOT, 'data', 'crawl')
+const EMAIL_PROTECTION_MESSAGE = /Este endereço de email está sendo protegido de spambots\.\s*Você precisa do JavaScript ativado para vê-lo\./gi
 
 // Domínios/padrões cujo conteúdo NÃO é útil crawlear (mas entram no registro de links).
 const SKIP_FETCH = [
@@ -62,9 +63,8 @@ function htmlToText(html) {
   if (main) body = main[0]
 
   return body
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
+    .replace(/<(script|style|noscript|nav|aside|footer|form)\b[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<span[^>]*class=["'][^"']*sbi-screenreader[^"']*["'][\s\S]*?<\/span>/gi, ' ')
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<\/(p|div|li|h[1-6]|tr|section|article)>/gi, '\n')
     .replace(/<br\s*\/?>/gi, '\n')
@@ -76,8 +76,15 @@ function htmlToText(html) {
     .replace(/&quot;/gi, '"')
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
     .replace(/&[a-z]+;/gi, ' ')
+    .replace(EMAIL_PROTECTION_MESSAGE, ' ')
+    .replace(/>\s*['"]?;\s*['"]?>/g, ' ')
+    .replace(/\bpara\s+para\b/gi, 'para')
+    .replace(/obtidasde/gi, 'obtidas de')
     .replace(/[ \t]+/g, ' ')
-    .split('\n').map(l => l.trim()).filter(Boolean).join('\n')
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l && !/^(Nome|E-?mail|Opinião|Tipo)\s*(?:\*|:)?\s*$/i.test(l) && !/^\*\s*Campos obrigatórios$/i.test(l))
+    .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
@@ -142,12 +149,8 @@ async function main() {
   await writeFile(join(SOURCES_DIR, 'links-registry.json'), JSON.stringify(registry, null, 2) + '\n', 'utf-8')
   console.log(`Registro: links-registry.json com ${registry.length} grupos de contexto.`)
 
-  // 2) crawl das páginas HTML
-  await mkdir(CRAWL_DIR, { recursive: true })
-  for (const f of await readdir(CRAWL_DIR).catch(() => [])) {
-    if (f.endsWith('.md')) await unlink(join(CRAWL_DIR, f))
-  }
-
+  // 2) crawl das páginas HTML. Remove apenas os arquivos que este inventário
+  // pode gerar, preservando outras fontes de RAG em data/crawl.
   const seen = new Set()
   const toFetch = []
   for (const r of rows) {
@@ -157,6 +160,15 @@ async function main() {
     seen.add(r.url)
     toFetch.push(r)
   }
+
+  await mkdir(CRAWL_DIR, { recursive: true })
+  for (const r of toFetch) {
+    await unlink(join(CRAWL_DIR, slugify(r.url) + '.md')).catch((error) => {
+      if (error?.code === 'ENOENT') return
+      throw error
+    })
+  }
+
   console.log(`Crawl: ${toFetch.length} páginas HTML a buscar...\n`)
 
   let ok = 0, fail = 0

@@ -5,9 +5,6 @@ contexto: o-que-e-a-colacao-de-grau-simplificada
 ---
 
 Colação de Grau Excepcional ou Antecipada
-Home
-Colações de Grau
-Colação de Grau Excepcional ou Antecipada
 Cerimônia pré-agendada devido à necessidade do aluno em antecipar sua colação de grau, nos seguintes casos:
 I. Aprovação em processo de admissão em programa de pós-graduação, ou inscrição em processo seletivo de igual grau, mediante comprovação da obrigatoriedade da outorga por parte da instituição para a qual o formando pretende se submeter;
 II. Posse em cargo ou emprego público, com publicação de resultado no Diário Oficial da respectiva nomeação ou convocação da instituição para etapas classificatórias subsequentes;

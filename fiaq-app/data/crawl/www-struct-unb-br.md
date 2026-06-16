@@ -4,15 +4,7 @@ url: https://www.struct.unb.br/
 contexto: empresas-juniores
 ---
 
-Struct - Empresa Junior de Engenharia de Computação { struct }
-Serviços
-Portfólio
-Sobre nós
-Contato
-{ struct }
-Loading...
-{ struct }
-Copyright © 2024 | Created by Us
+Struct - Empresa Junior de Engenharia de Computação
 Docker
 React
 Tailwind
@@ -49,12 +41,6 @@ Restaurante Roma
 website
 Contato
 Peça um orçamento
-Nome
-Email
-Telefone
-Serviço Selecione um tipo de serviço
-Descrição
-Enviar
 Como nos encontrar
 Quem Somos
 A Struct é a Empresa Junior (EJ) do curso Engenharia de Computação da Universidade de Brasília. Desde 2014, buscamos proporcionar soluções com as tecnologias mais atualizadas no mercado, prezando sempre pela qualidade e satisfação do cliente.
