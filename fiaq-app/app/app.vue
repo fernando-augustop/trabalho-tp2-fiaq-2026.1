@@ -1,6 +1,7 @@
 <script setup>
 const criticalCss = `
 *,::before,::after{box-sizing:border-box}
+:root{--nav-height:68px}
 html{font-family:"Public Sans",Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 body{margin:0;background:#f4f4f4;color:#1a2e5a}
 a{color:inherit;text-decoration:none}
@@ -30,7 +31,7 @@ button,input{font:inherit}
 .fiaq-faq-icon{display:flex;width:3rem;height:3rem;align-items:center;justify-content:center;flex-shrink:0;border-radius:.75rem;background:#f3f4f6;color:#1a2e5a}
 .fiaq-faq-title{margin:0;color:#1a2e5a;font-size:.875rem;font-weight:800}
 .fiaq-faq-count{margin:.125rem 0 0;color:#9ca3af;font-size:.75rem}
-@media (min-width:640px){.fiaq-nav{padding-left:2.5rem;padding-right:2.5rem}.fiaq-logo{font-size:3rem}.fiaq-nav-links{gap:2rem}.fiaq-home-title{font-size:2.25rem;line-height:2.5rem}.fiaq-faq-section{padding-left:2.5rem;padding-right:2.5rem}.fiaq-faq-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:640px){:root{--nav-height:80px}.fiaq-nav{padding-left:2.5rem;padding-right:2.5rem}.fiaq-logo{font-size:3rem}.fiaq-nav-links{gap:2rem}.fiaq-home-title{font-size:2.25rem;line-height:2.5rem}.fiaq-faq-section{padding-left:2.5rem;padding-right:2.5rem}.fiaq-faq-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1024px){.fiaq-faq-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 `
 

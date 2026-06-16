@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+:root {
+  --nav-height: 68px;
+}
+
 @theme static {
   --font-sans: 'Public Sans', sans-serif;
 
@@ -15,4 +19,10 @@
   --color-green-800: #016538;
   --color-green-900: #0A5331;
   --color-green-950: #052E16;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --nav-height: 80px;
+  }
 }

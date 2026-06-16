@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 export type MessageRole = 'user' | 'assistant'
 
@@ -19,10 +19,81 @@ export interface Message {
 export type MessageDraft = Omit<Message, 'id'> & { id?: number }
 
 let msgId = 0
+const STORAGE_KEY = 'fiaq:temporary-conversation:v1'
+
+function normalizeMessages(nextMessages: MessageDraft[]): Message[] {
+  return nextMessages
+    .map((message): Message | null => {
+      const content = String(message.content ?? '').trim()
+      if (!content) return null
+
+      const sources = (message.sources ?? [])
+        .filter((source) => {
+          const titulo = String(source.titulo || '').trim()
+          const url = String(source.url || '').trim()
+          return Boolean(titulo || url)
+        })
+        .map(source => ({
+          id: String(source.id || source.url || source.titulo || 'fonte'),
+          titulo: String(source.titulo || 'Fonte oficial').trim() || 'Fonte oficial',
+          url: String(source.url || '').trim()
+        }))
+
+      return {
+        id: ++msgId,
+        role: message.role === 'assistant' ? 'assistant' : 'user',
+        content,
+        streaming: false,
+        sources: sources.length ? sources : undefined
+      }
+    })
+    .filter((message): message is Message => Boolean(message))
+}
 
 export function useFiaqChat() {
   const messages = ref<Message[]>([])
   const loading = ref(false)
+
+  onMounted(() => {
+    const saved = sessionStorage.getItem(STORAGE_KEY)
+    if (!saved) return
+
+    try {
+      const parsed = JSON.parse(saved)
+      const rawMessages = Array.isArray(parsed) ? parsed : parsed?.messages
+      if (Array.isArray(rawMessages)) messages.value = normalizeMessages(rawMessages)
+    } catch {
+      sessionStorage.removeItem(STORAGE_KEY)
+    }
+  })
+
+  if (import.meta.client) {
+    watch(
+      messages,
+      (nextMessages) => {
+        const stableMessages = nextMessages
+          .filter(message => message.content.trim())
+          .map(message => ({
+            role: message.role,
+            content: message.content,
+            sources: message.sources
+          }))
+
+        if (!stableMessages.length) {
+          sessionStorage.removeItem(STORAGE_KEY)
+          return
+        }
+
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+          app: 'fiaq',
+          kind: 'temporary-conversation',
+          version: 1,
+          messages: stableMessages
+        }))
+      },
+      { deep: true }
+    )
+  }
 
   function updateLastAssistantMessage(patch: Partial<Message>) {
     const idx = messages.value.length - 1
@@ -111,35 +182,13 @@ export function useFiaqChat() {
   }
 
   function replaceMessages(nextMessages: MessageDraft[]) {
-    const normalized = nextMessages
-      .map((message): Message | null => {
-        const content = String(message.content ?? '').trim()
-        if (!content) return null
-
-        const sources = (message.sources ?? [])
-          .filter((source) => {
-            const titulo = String(source.titulo || '').trim()
-            const url = String(source.url || '').trim()
-            return Boolean(titulo || url)
-          })
-          .map(source => ({
-            id: String(source.id || source.url || source.titulo || 'fonte'),
-            titulo: String(source.titulo || 'Fonte oficial').trim() || 'Fonte oficial',
-            url: String(source.url || '').trim()
-          }))
-
-        return {
-          id: ++msgId,
-          role: message.role === 'assistant' ? 'assistant' : 'user',
-          content,
-          streaming: false,
-          sources: sources.length ? sources : undefined
-        }
-      })
-      .filter((message): message is Message => Boolean(message))
-
-    messages.value = normalized
+    messages.value = normalizeMessages(nextMessages)
   }
 
-  return { messages, loading, sendMessage, replaceMessages }
+  function clearMessages() {
+    messages.value = []
+    sessionStorage.removeItem(STORAGE_KEY)
+  }
+
+  return { messages, loading, sendMessage, replaceMessages, clearMessages }
 }

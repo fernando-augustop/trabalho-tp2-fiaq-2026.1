@@ -1,98 +1,67 @@
 <template>
-  <div
-    ref="messagesEl"
-    class="flex-1 overflow-y-auto flex flex-col gap-4 pr-1"
-  >
+  <div class="relative min-h-0 flex-1">
     <div
-      v-if="messages.length === 0"
-      class="flex flex-col items-center justify-center h-full gap-4 text-center py-12"
+      ref="messagesEl"
+      class="fiaq-chat-scroll flex h-full flex-col gap-4 overflow-y-auto rounded-2xl border border-slate-200 bg-white/70 px-3 py-4 shadow-sm ring-1 ring-white/60 sm:px-5"
+      @scroll="handleScroll"
     >
-      <div class="w-16 h-16 bg-[#1a2e5a] rounded-2xl flex items-center justify-center shadow-md">
-        <svg
-          class="w-9 h-9 text-green-400"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.6"
-          viewBox="0 0 24 24"
-        >
-          <rect
-            x="5"
-            y="7"
-            width="14"
-            height="10"
-            rx="2.5"
-            stroke="currentColor"
+      <div
+        v-if="messages.length === 0"
+        class="flex h-full flex-col items-center justify-center gap-4 py-12 text-center"
+      >
+        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1a2e5a] text-green-300 shadow-md">
+          <UIcon
+            name="i-lucide-bot"
+            class="h-8 w-8"
           />
-          <circle
-            cx="9"
-            cy="11"
-            r="1.2"
-            fill="currentColor"
-            stroke="none"
-          />
-          <circle
-            cx="15"
-            cy="11"
-            r="1.2"
-            fill="currentColor"
-            stroke="none"
-          />
-          <path
-            d="M9 14.5h6"
-            stroke="currentColor"
-            stroke-linecap="round"
-          />
-          <path
-            d="M12 7V4"
-            stroke="currentColor"
-            stroke-linecap="round"
-          />
-          <circle
-            cx="12"
-            cy="3.5"
-            r="0.8"
-            fill="currentColor"
-            stroke="none"
-          />
-          <path
-            d="M5 10.5H3.5M18.5 10.5H20"
-            stroke="currentColor"
-            stroke-linecap="round"
-          />
-        </svg>
+        </div>
+        <div>
+          <p class="text-lg font-bold text-[#1a2e5a]">
+            Olá! Como posso ajudar?
+          </p>
+          <p class="mt-1 text-sm text-gray-500">
+            Pergunte sobre matrícula, TCC, estágio, extensão e muito mais.
+          </p>
+        </div>
+        <div class="mt-2 flex max-w-2xl flex-wrap justify-center gap-2">
+          <button
+            v-for="suggestion in suggestions"
+            :key="suggestion"
+            class="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-[#1a2e5a] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#1a2e5a] hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+            @click="$emit('suggest', suggestion)"
+          >
+            {{ suggestion }}
+          </button>
+        </div>
       </div>
-      <div>
-        <p class="font-bold text-[#1a2e5a] text-lg">
-          Olá! Como posso ajudar?
-        </p>
-        <p class="text-gray-400 text-sm mt-1">
-          Pergunte sobre matrícula, TCC, estágio, extensão e muito mais.
-        </p>
-      </div>
-      <div class="flex flex-wrap gap-2 justify-center mt-2">
-        <button
-          v-for="suggestion in suggestions"
-          :key="suggestion"
-          class="bg-white border border-gray-200 rounded-full px-4 py-2 text-xs text-[#1a2e5a] font-medium hover:border-[#1a2e5a] hover:bg-blue-50 transition-all duration-200 shadow-sm"
-          @click="$emit('suggest', suggestion)"
-        >
-          {{ suggestion }}
-        </button>
-      </div>
+
+      <template
+        v-for="msg in messages"
+        :key="msg.id"
+      >
+        <ChatMessageBubble :message="msg" />
+      </template>
+      <ChatTypingIndicator v-if="showTyping" />
     </div>
 
-    <template
-      v-for="msg in messages"
-      :key="msg.id"
+    <button
+      v-if="showJumpToBottom"
+      type="button"
+      title="Ir para o fim da conversa"
+      class="absolute bottom-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#1a2e5a] px-4 py-2 text-xs font-bold text-white shadow-lg ring-1 ring-white/20 transition-all hover:bg-[#243d75] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+      @click="scrollToBottom('smooth')"
     >
-      <ChatMessageBubble :message="msg" />
-    </template>
-    <ChatTypingIndicator v-if="showTyping" />
+      <UIcon
+        name="i-lucide-arrow-down"
+        class="h-4 w-4"
+      />
+      Última resposta
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import type { Message } from '~/composables/useFiaqChat'
 
 const props = defineProps<{
@@ -118,20 +87,68 @@ const suggestions = [
 ]
 
 const messagesEl = ref<HTMLElement | null>(null)
+const isNearBottom = ref(true)
+const showJumpToBottom = computed(() => props.messages.length > 0 && !isNearBottom.value)
 
-async function scrollToBottom() {
+function measureBottomDistance() {
+  const el = messagesEl.value
+  if (!el) return 0
+  return el.scrollHeight - el.scrollTop - el.clientHeight
+}
+
+function handleScroll() {
+  isNearBottom.value = measureBottomDistance() < 120
+}
+
+async function scrollToBottom(behavior: ScrollBehavior = 'auto') {
   await nextTick()
   if (messagesEl.value) {
-    messagesEl.value.scrollTop = messagesEl.value.scrollHeight
+    messagesEl.value.scrollTo({ top: messagesEl.value.scrollHeight, behavior })
+    isNearBottom.value = true
   }
 }
 
-// Scroll on new messages or loading state change
-watch(() => [props.messages.length, props.loading], scrollToBottom)
+onMounted(() => {
+  scrollToBottom('auto')
+})
+
+watch(
+  () => props.messages.length,
+  () => {
+    scrollToBottom(props.messages.length > 1 ? 'smooth' : 'auto')
+  }
+)
+
+watch(
+  () => props.loading,
+  () => {
+    if (isNearBottom.value) scrollToBottom('smooth')
+  }
+)
 
 // Scroll on every token during streaming by watching the last message's content
 watch(
   () => props.messages[props.messages.length - 1]?.content,
-  scrollToBottom
+  () => {
+    if (isNearBottom.value) scrollToBottom('auto')
+  }
 )
 </script>
+
+<style scoped>
+.fiaq-chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent;
+}
+
+.fiaq-chat-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.fiaq-chat-scroll::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: content-box;
+}
+</style>

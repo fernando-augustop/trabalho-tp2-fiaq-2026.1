@@ -44,6 +44,8 @@ const BRAND_NAVY = '#1a2e5a'
 const BRAND_GREEN = '#00DC82'
 const TEXT_SLATE = '#24324a'
 const MUTED_SLATE = '#64748b'
+const BORDER_SLATE = '#e2e8f0'
+const SURFACE_SLATE = '#f8fafc'
 
 function exportableMessages(messages: Message[]): Message[] {
   return messages
@@ -75,6 +77,24 @@ function plainText(text: string): string {
     .replace(/\r\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
+}
+
+function pdfSafeText(text: string): string {
+  return text
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, '\'')
+    .replace(/[–—]/g, '-')
+    .replace(/→/g, '->')
+    .replace(/←/g, '<-')
+    .replace(/≤/g, '<=')
+    .replace(/≥/g, '>=')
+    .replace(/⁂/g, '')
+    .split('')
+    .filter((char) => {
+      const code = char.charCodeAt(0)
+      return code === 9 || code === 10 || code === 13 || code >= 32
+    })
+    .join('')
 }
 
 function sourceKey(source: Source): string {
@@ -259,7 +279,7 @@ function addWrappedText(
   maxWidth: number,
   lineHeight: number
 ): number {
-  const paragraphs = plainText(text).split('\n')
+  const paragraphs = pdfSafeText(plainText(text)).split('\n')
   let cursorY = y
 
   for (const paragraph of paragraphs) {
@@ -287,6 +307,78 @@ function ensurePdfSpace(
   return 92
 }
 
+function sourceHost(source: Source): string {
+  try {
+    return new URL(source.url).hostname.replace(/^www\./, '')
+  } catch {
+    return 'fonte oficial'
+  }
+}
+
+function drawPdfPill(
+  doc: InstanceType<typeof import('jspdf').jsPDF>,
+  label: string,
+  x: number,
+  y: number,
+  tone: 'navy' | 'green' | 'slate' = 'slate'
+) {
+  const width = doc.getTextWidth(label) + 15
+  const fill = tone === 'navy' ? BRAND_NAVY : tone === 'green' ? '#dcfce7' : '#f1f5f9'
+  const text = tone === 'navy' ? '#ffffff' : tone === 'green' ? '#047857' : MUTED_SLATE
+
+  doc.setFillColor(fill)
+  doc.roundedRect(x, y - 11, width, 18, 9, 9, 'F')
+  doc.setTextColor(text)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(8)
+  doc.text(label, x + 7.5, y + 1)
+
+  return width
+}
+
+function drawPdfRefLinks(
+  doc: InstanceType<typeof import('jspdf').jsPDF>,
+  refs: number[],
+  x: number,
+  y: number,
+  maxWidth: number,
+  refLinks: PdfRefLink[]
+): number {
+  let cursorX = x
+  let cursorY = y
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(8.5)
+  doc.setTextColor(MUTED_SLATE)
+  doc.text('Fontes', cursorX, cursorY)
+  cursorX += doc.getTextWidth('Fontes') + 8
+
+  for (const ref of refs) {
+    const label = `[${ref}]`
+    const width = doc.getTextWidth(label) + 16
+    if (cursorX + width > x + maxWidth) {
+      cursorX = x
+      cursorY += 22
+    }
+
+    doc.setFillColor('#e0f2fe')
+    doc.roundedRect(cursorX, cursorY - 12, width, 18, 9, 9, 'F')
+    doc.setTextColor(BRAND_NAVY)
+    doc.text(label, cursorX + 8, cursorY)
+    refLinks.push({
+      page: doc.getCurrentPageInfo().pageNumber,
+      x: cursorX,
+      y: cursorY - 12,
+      width,
+      height: 18,
+      sourceIndex: ref
+    })
+    cursorX += width + 6
+  }
+
+  return cursorY + 22
+}
+
 function drawPdfShell(doc: InstanceType<typeof import('jspdf').jsPDF>, title: string) {
   const pages = doc.getNumberOfPages()
   const width = doc.internal.pageSize.getWidth()
@@ -294,27 +386,32 @@ function drawPdfShell(doc: InstanceType<typeof import('jspdf').jsPDF>, title: st
 
   for (let page = 1; page <= pages; page++) {
     doc.setPage(page)
-    doc.setFillColor(BRAND_NAVY)
-    doc.roundedRect(42, 30, 30, 30, 6, 6, 'F')
-    doc.setTextColor(BRAND_GREEN)
+    doc.setFillColor('#ffffff')
+    doc.rect(0, 0, width, 78, 'F')
+
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(10)
-    doc.text('f', 53, 49)
+    doc.setFontSize(20)
+    doc.setTextColor(BRAND_NAVY)
+    doc.text('f', 42, 49)
+    doc.setTextColor(BRAND_GREEN)
+    doc.text('IA', 52, 49)
+    doc.setTextColor(BRAND_NAVY)
+    doc.text('q', 77, 49)
 
     doc.setTextColor(BRAND_NAVY)
-    doc.setFontSize(17)
-    doc.text('fIAq', 82, 43)
+    doc.setFontSize(9)
+    doc.text('Assistente Virtual UnB', width - 144, 42)
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
     doc.setTextColor(MUTED_SLATE)
-    doc.text('Assistente Virtual UnB', 82, 57)
+    doc.text('Conversa exportada', width - 144, 55)
 
-    doc.setDrawColor(226, 232, 240)
+    doc.setDrawColor(BORDER_SLATE)
     doc.line(42, 72, width - 42, 72)
 
     doc.setFontSize(8)
     doc.setTextColor(MUTED_SLATE)
-    doc.text(title, 42, height - 34, { maxWidth: width - 140 })
+    doc.text(pdfSafeText(title), 42, height - 34, { maxWidth: width - 140 })
     doc.text(`${page}/${pages}`, width - 64, height - 34)
   }
 }
@@ -333,108 +430,123 @@ async function exportPdf(messages: Message[], filename: string) {
   let answer = 0
   const title = conversationTitle(messages)
 
+  doc.setProperties({
+    title,
+    subject: 'Conversa exportada pelo fIAq',
+    author: 'fIAq'
+  })
+
+  doc.setFillColor(SURFACE_SLATE)
+  doc.roundedRect(marginX, y - 18, contentWidth, 92, 16, 16, 'F')
+  drawPdfPill(doc, 'Conversa fIAq', marginX + 18, y + 2, 'green')
   doc.setTextColor(BRAND_NAVY)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(18)
-  y = addWrappedText(doc, title, marginX, y, contentWidth, 22) + 14
+  y = addWrappedText(doc, title, marginX + 18, y + 30, contentWidth - 36, 20) + 6
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.setTextColor(MUTED_SLATE)
-  doc.text(`Exportado em ${new Date().toLocaleString('pt-BR')}`, marginX, y)
-  y += 28
+  doc.text(`Exportado em ${new Date().toLocaleString('pt-BR')}`, marginX + 18, y)
+  y += 42
 
   for (const message of messages) {
     y = ensurePdfSpace(doc, y, 72)
 
     if (message.role === 'user') {
       question++
+      doc.setDrawColor(BRAND_GREEN)
+      doc.setLineWidth(2)
+      doc.line(marginX, y - 2, marginX, y + 42)
       doc.setFont('helvetica', 'bold')
-      doc.setFontSize(10)
-      doc.setTextColor(BRAND_NAVY)
-      doc.text(`Pergunta ${question}`, marginX, y)
-      y += 18
+      drawPdfPill(doc, `Pergunta ${question}`, marginX + 12, y, 'navy')
+      y += 22
 
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(11)
       doc.setTextColor(TEXT_SLATE)
-      y = addWrappedText(doc, message.content, marginX, y, contentWidth, 15) + 14
+      y = addWrappedText(doc, message.content, marginX + 12, y, contentWidth - 12, 15) + 18
       continue
     }
 
     answer++
+    doc.setDrawColor(BORDER_SLATE)
+    doc.setLineWidth(1)
+    doc.line(marginX, y - 2, marginX, y + 42)
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(10)
-    doc.setTextColor(BRAND_NAVY)
-    doc.text(`Resposta ${answer}`, marginX, y)
-    y += 18
+    drawPdfPill(doc, `Resposta ${answer}`, marginX + 12, y, 'slate')
+    y += 22
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(10.5)
     doc.setTextColor(TEXT_SLATE)
-    y = addWrappedText(doc, message.content, marginX, y, contentWidth, 15)
+    y = addWrappedText(doc, message.content, marginX + 12, y, contentWidth - 12, 15)
 
     const refs = registry.byMessageId.get(message.id) ?? []
     if (refs.length) {
       y = ensurePdfSpace(doc, y, 24)
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(9)
-      doc.setTextColor(MUTED_SLATE)
-      doc.text('Fontes:', marginX, y)
-      let x = marginX + doc.getTextWidth('Fontes:') + 8
-
-      for (const ref of refs) {
-        const label = `[${ref}]`
-        const labelWidth = doc.getTextWidth(label)
-        doc.setTextColor(BRAND_NAVY)
-        doc.text(label, x, y)
-        refLinks.push({
-          page: doc.getCurrentPageInfo().pageNumber,
-          x,
-          y: y - 10,
-          width: labelWidth,
-          height: 13,
-          sourceIndex: ref
-        })
-        x += labelWidth + 7
-      }
-      y += 24
+      y = drawPdfRefLinks(doc, refs, marginX + 12, y, contentWidth - 12, refLinks)
     }
 
-    y += 8
+    y += 12
   }
 
   if (registry.records.length) {
     doc.addPage()
     y = 104
+    doc.setFillColor(SURFACE_SLATE)
+    doc.roundedRect(marginX, y - 18, contentWidth, 70, 16, 16, 'F')
+    drawPdfPill(doc, 'Referências', marginX + 18, y + 2, 'green')
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(16)
+    doc.setFontSize(18)
     doc.setTextColor(BRAND_NAVY)
-    doc.text('Fontes oficiais', marginX, y)
-    y += 30
+    doc.text('Fontes oficiais', marginX + 18, y + 32)
+    y += 78
 
     for (const record of registry.records) {
-      y = ensurePdfSpace(doc, y, 58)
+      const sourceTitle = pdfSafeText(record.source.titulo)
+      const sourceUrl = pdfSafeText(record.source.url)
+      const titleLines = doc.splitTextToSize(sourceTitle, contentWidth - 92) as string[]
+      const urlLines = sourceUrl ? doc.splitTextToSize(sourceUrl, contentWidth - 92) as string[] : []
+      const visibleUrlLines = urlLines.slice(0, 2)
+      const cardHeight = Math.max(78, 42 + titleLines.length * 12 + visibleUrlLines.length * 10)
+      y = ensurePdfSpace(doc, y, cardHeight + 18)
       sourceTargets.set(record.index, { page: doc.getCurrentPageInfo().pageNumber })
 
+      doc.setFillColor('#ffffff')
+      doc.setDrawColor(BORDER_SLATE)
+      doc.roundedRect(marginX, y, contentWidth, cardHeight, 14, 14, 'FD')
+
+      doc.setFillColor(BRAND_NAVY)
+      doc.roundedRect(marginX + 16, y + 18, 36, 30, 8, 8, 'F')
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(10)
+      doc.setTextColor('#ffffff')
+      doc.text(`[${record.index}]`, marginX + 25, y + 37)
+
+      doc.setFontSize(8)
+      doc.setTextColor(MUTED_SLATE)
+      doc.text('fonte oficial', marginX + 66, y + 22)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(10.5)
       doc.setTextColor(BRAND_NAVY)
-      doc.text(`[${record.index}] ${record.source.titulo}`, marginX, y, { maxWidth: contentWidth })
-      y += 16
+      doc.text(titleLines, marginX + 66, y + 38)
 
       if (record.source.url) {
         doc.setFont('helvetica', 'normal')
         doc.setFontSize(8.5)
         doc.setTextColor(37, 99, 235)
-        const urlLines = doc.splitTextToSize(record.source.url, contentWidth) as string[]
-        for (const line of urlLines) {
-          doc.text(line, marginX, y)
-          doc.link(marginX, y - 9, Math.min(doc.getTextWidth(line), contentWidth), 11, { url: record.source.url })
-          y += 12
+        doc.text(pdfSafeText(sourceHost(record.source)), marginX + 66, y + cardHeight - 26)
+        doc.setTextColor(MUTED_SLATE)
+        let urlY = y + cardHeight - 13
+        for (const line of visibleUrlLines) {
+          doc.text(line, marginX + 66, urlY)
+          doc.link(marginX + 66, urlY - 9, Math.min(doc.getTextWidth(line), contentWidth - 92), 11, { url: record.source.url })
+          urlY += 10
         }
+        doc.link(marginX, y, contentWidth, cardHeight, { url: record.source.url })
       }
-      y += 12
+      y += cardHeight + 12
     }
   }
 

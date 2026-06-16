@@ -5,7 +5,7 @@
     v-if="message.role === 'user'"
     class="flex justify-end"
   >
-    <div class="bg-[#1a2e5a] text-white rounded-2xl rounded-br-sm px-5 py-3 max-w-[75%] text-sm leading-relaxed shadow-sm">
+    <div class="max-w-[88%] rounded-2xl rounded-br-sm bg-[#1a2e5a] px-5 py-3 text-sm leading-relaxed text-white shadow-sm sm:max-w-[75%]">
       {{ message.content }}
     </div>
   </div>
@@ -16,59 +16,16 @@
     v-else-if="showBody"
     class="flex justify-start gap-3"
   >
-    <div class="w-8 h-8 bg-[#1a2e5a] rounded-xl flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-      <svg
-        class="w-4 h-4 text-green-400"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.8"
-        viewBox="0 0 24 24"
-      >
-        <rect
-          x="5"
-          y="7"
-          width="14"
-          height="10"
-          rx="2.5"
-          stroke="currentColor"
-        />
-        <circle
-          cx="9"
-          cy="11"
-          r="1.2"
-          fill="currentColor"
-          stroke="none"
-        />
-        <circle
-          cx="15"
-          cy="11"
-          r="1.2"
-          fill="currentColor"
-          stroke="none"
-        />
-        <path
-          d="M9 14.5h6"
-          stroke="currentColor"
-          stroke-linecap="round"
-        />
-        <path
-          d="M12 7V4"
-          stroke="currentColor"
-          stroke-linecap="round"
-        />
-        <circle
-          cx="12"
-          cy="3.5"
-          r="0.8"
-          fill="currentColor"
-          stroke="none"
-        />
-      </svg>
+    <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#1a2e5a] text-green-300 shadow-sm">
+      <UIcon
+        name="i-lucide-bot"
+        class="h-4 w-4"
+      />
     </div>
 
-    <div class="flex flex-col gap-2 max-w-[75%]">
+    <div class="flex max-w-[88%] flex-col gap-2 sm:max-w-[78%]">
       <!-- Message content -->
-      <div class="bg-white border border-gray-200 text-[#1a2e5a] rounded-2xl rounded-bl-sm px-5 py-3 text-sm leading-relaxed shadow-sm">
+      <div class="rounded-2xl rounded-bl-sm border border-gray-200 bg-white px-5 py-3 text-sm leading-relaxed text-[#1a2e5a] shadow-sm">
         <div
           class="fiaq-prose"
           v-html="renderedContent"
@@ -77,6 +34,27 @@
           v-if="message.streaming"
           class="inline-block w-1.5 h-3.5 bg-[#1a2e5a] ml-0.5 align-middle animate-pulse"
         />
+      </div>
+
+      <div
+        v-if="!message.streaming"
+        class="flex items-center gap-2 px-1"
+      >
+        <button
+          type="button"
+          :title="copyTitle"
+          class="inline-flex h-8 items-center gap-1.5 rounded-lg border bg-white px-2.5 text-[11px] font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+          :class="copyStatus === 'error'
+            ? 'border-red-200 text-red-600 hover:border-red-300'
+            : 'border-slate-200 text-slate-600 hover:border-[#1a2e5a] hover:text-[#1a2e5a]'"
+          @click="copyMessage"
+        >
+          <UIcon
+            :name="copyIcon"
+            class="h-3.5 w-3.5"
+          />
+          {{ copyLabel }}
+        </button>
       </div>
 
       <!-- Sources -->
@@ -102,11 +80,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import type { Message } from '~/composables/useFiaqChat'
 import { renderMarkdown } from '~/utils/markdown'
 
 const props = defineProps<{ message: Message }>()
+const copyStatus = ref<'idle' | 'copied' | 'error'>('idle')
+let copyResetTimeout: number | null = null
 
 // Só mostra a bolha do assistente quando há texto (ou quando o stream terminou).
 const showBody = computed(() => (props.message.content?.trim().length ?? 0) > 0 || !props.message.streaming)
@@ -127,6 +107,80 @@ const renderedContent = computed(() => {
   const clean = stripLinks(props.message.content ?? '')
   return renderMarkdown(clean)
 })
+
+const copyTitle = computed(() => {
+  if (copyStatus.value === 'copied') return 'Copiado'
+  if (copyStatus.value === 'error') return 'Não foi possível copiar'
+  return 'Copiar resposta'
+})
+
+const copyIcon = computed(() => {
+  if (copyStatus.value === 'copied') return 'i-lucide-check'
+  if (copyStatus.value === 'error') return 'i-lucide-circle-alert'
+  return 'i-lucide-copy'
+})
+
+const copyLabel = computed(() => {
+  if (copyStatus.value === 'copied') return 'Copiado'
+  if (copyStatus.value === 'error') return 'Erro'
+  return 'Copiar'
+})
+
+function clearCopyResetTimeout() {
+  if (copyResetTimeout === null) return
+  window.clearTimeout(copyResetTimeout)
+  copyResetTimeout = null
+}
+
+function scheduleCopyReset() {
+  clearCopyResetTimeout()
+  copyResetTimeout = window.setTimeout(() => {
+    copyStatus.value = 'idle'
+    copyResetTimeout = null
+  }, 1600)
+}
+
+function fallbackCopy(text: string): boolean {
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.left = '-9999px'
+  document.body.appendChild(textarea)
+  textarea.select()
+
+  try {
+    return document.execCommand('copy')
+  } catch {
+    return false
+  } finally {
+    textarea.remove()
+  }
+}
+
+async function copyMessage() {
+  const text = plainCopy.value
+  if (!text) return
+
+  clearCopyResetTimeout()
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    } else if (!fallbackCopy(text)) {
+      throw new Error('COPY_FAILED')
+    }
+    copyStatus.value = 'copied'
+    scheduleCopyReset()
+  } catch {
+    copyStatus.value = fallbackCopy(text) ? 'copied' : 'error'
+    scheduleCopyReset()
+  }
+}
+
+const plainCopy = computed(() => stripLinks(props.message.content ?? '').trim())
+
+onBeforeUnmount(clearCopyResetTimeout)
 </script>
 
 <style scoped>
