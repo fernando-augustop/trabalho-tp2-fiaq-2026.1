@@ -5,7 +5,7 @@
 -- A similaridade é calculada por cosseno em TypeScript — mesmo padrão do
 -- vectorStore da squad de IA. Migração natural para pgvector se o volume
 -- crescer (ver db/README.md).
-CREATE TABLE pergunta_registrada (
+CREATE TABLE IF NOT EXISTS pergunta_registrada (
     id                SERIAL PRIMARY KEY,
     texto_original    TEXT NOT NULL,
     texto_normalizado TEXT NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE pergunta_registrada (
 
 -- Uma linha por ocorrência individual — permite análise temporal (picos por
 -- semana/mês) além do contador agregado em pergunta_registrada.
-CREATE TABLE ocorrencia_pergunta (
+CREATE TABLE IF NOT EXISTS ocorrencia_pergunta (
     id                     SERIAL PRIMARY KEY,
     id_pergunta_registrada INT NOT NULL
                            REFERENCES pergunta_registrada(id) ON DELETE CASCADE,
@@ -28,7 +28,7 @@ CREATE TABLE ocorrencia_pergunta (
     dthr_ocorrencia        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_pergunta_total       ON pergunta_registrada(total_vezes DESC);
-CREATE INDEX idx_pergunta_modelo      ON pergunta_registrada(modelo_embedding);
-CREATE INDEX idx_ocorrencia_pergunta  ON ocorrencia_pergunta(id_pergunta_registrada);
-CREATE INDEX idx_ocorrencia_dthr      ON ocorrencia_pergunta(dthr_ocorrencia);
+CREATE INDEX IF NOT EXISTS idx_pergunta_total       ON pergunta_registrada(total_vezes DESC);
+CREATE INDEX IF NOT EXISTS idx_pergunta_modelo      ON pergunta_registrada(modelo_embedding);
+CREATE INDEX IF NOT EXISTS idx_ocorrencia_pergunta  ON ocorrencia_pergunta(id_pergunta_registrada);
+CREATE INDEX IF NOT EXISTS idx_ocorrencia_dthr      ON ocorrencia_pergunta(dthr_ocorrencia);

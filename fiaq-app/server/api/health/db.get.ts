@@ -5,6 +5,6 @@ export default defineEventHandler(async () => {
   await sql`SELECT 1`
   return {
     ok: true,
-    latency_ms: Date.now() - start,
+    latency_ms: Date.now() - start
   }
 })

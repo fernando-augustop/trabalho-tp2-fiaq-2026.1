@@ -13,10 +13,14 @@ if (!process.env.DATABASE_URL) {
 // max: 1 é o padrão recomendado para Vercel Functions (serverless):
 // cada instância da função mantém no máximo 1 conexão aberta,
 // que é encerrada após idle_timeout segundos de inatividade.
+//
+// prepare: false mantém compatibilidade com poolers serverless, como o
+// Transaction Pooler do Supabase, que não suporta prepared statements.
 const sql = postgres(process.env.DATABASE_URL, {
   max: 1,
+  prepare: false,
   idle_timeout: 20,
-  connect_timeout: 10,
+  connect_timeout: 10
 })
 
 export default sql
