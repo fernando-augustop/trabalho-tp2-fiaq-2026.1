@@ -23,6 +23,7 @@
     "@iconify-json/lucide": "^1.2.102",
     "@iconify-json/simple-icons": "^1.2.78",
     "@nuxt/ui": "^4.6.1",
+    "jspdf": "^4.2.1",
     "marked": "^18.0.4",
     "nuxt": "^4.4.2",
     "pdf-parse": "^2.4.5",

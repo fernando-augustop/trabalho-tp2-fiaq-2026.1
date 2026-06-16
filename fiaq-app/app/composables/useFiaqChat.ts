@@ -16,6 +16,8 @@ export interface Message {
   sources?: Source[]
 }
 
+export type MessageDraft = Omit<Message, 'id'> & { id?: number }
+
 let msgId = 0
 
 export function useFiaqChat() {
@@ -108,5 +110,32 @@ export function useFiaqChat() {
     }
   }
 
-  return { messages, loading, sendMessage }
+  function replaceMessages(nextMessages: MessageDraft[]) {
+    const normalized = nextMessages
+      .map((message): Message | null => {
+        const content = String(message.content ?? '').trim()
+        if (!content) return null
+
+        const sources = (message.sources ?? [])
+          .map(source => ({
+            id: String(source.id || source.url || source.titulo || 'fonte'),
+            titulo: String(source.titulo || 'Fonte oficial').trim() || 'Fonte oficial',
+            url: String(source.url || '').trim()
+          }))
+          .filter(source => source.titulo || source.url)
+
+        return {
+          id: ++msgId,
+          role: message.role === 'assistant' ? 'assistant' : 'user',
+          content,
+          streaming: false,
+          sources: sources.length ? sources : undefined
+        }
+      })
+      .filter((message): message is Message => Boolean(message))
+
+    messages.value = normalized
+  }
+
+  return { messages, loading, sendMessage, replaceMessages }
 }
