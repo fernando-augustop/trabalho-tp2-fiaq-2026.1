@@ -1,5 +1,8 @@
 <template>
-  <div class="flex flex-col overflow-hidden" style="height: calc(100vh - var(--nav-height, 64px))">
+  <div
+    class="flex flex-col overflow-hidden"
+    style="height: calc(100vh - var(--nav-height, 64px))"
+  >
     <!-- Header -->
     <div class="bg-[#1a2e5a] px-10 pt-4 pb-6 text-center shrink-0">
       <div class="flex items-center justify-center gap-3">

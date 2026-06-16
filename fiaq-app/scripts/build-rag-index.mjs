@@ -1,4 +1,5 @@
-// Gera server/assets/rag-index.json sem precisar subir o Nuxt.
+// Gera o fallback legado server/assets/rag-index.json sem precisar subir o Nuxt.
+// O caminho principal do RAG usa Postgres/pgvector via pnpm seed:knowledge.
 // Uso: pnpm index:rag
 import { readFile, readdir, writeFile } from 'node:fs/promises'
 import { readFileSync } from 'node:fs'

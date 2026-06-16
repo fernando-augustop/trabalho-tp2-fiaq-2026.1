@@ -1,10 +1,21 @@
-import sql from '../../db/index'
+import { getSql, isDatabaseConfigured } from '../../db/index'
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  if (!isDatabaseConfigured()) {
+    setResponseStatus(event, 503)
+    return {
+      ok: false,
+      configured: false,
+      message: 'DATABASE_URL não configurada'
+    }
+  }
+
   const start = Date.now()
+  const sql = getSql()
   await sql`SELECT 1`
   return {
     ok: true,
+    configured: true,
     latency_ms: Date.now() - start
   }
 })

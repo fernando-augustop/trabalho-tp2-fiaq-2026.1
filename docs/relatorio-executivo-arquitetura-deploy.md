@@ -29,22 +29,23 @@ As variáveis de ambiente foram configuradas na Vercel para produção, preview 
 | Chat/geração de resposta | OpenRouter | `openrouter/owl-alpha` |
 | Embeddings/busca semântica | OpenRouter | `nvidia/llama-nemotron-embed-vl-1b-v2:free` |
 
-O enriquecimento da IA foi feito por **RAG pré-computado**. As fontes institucionais ficam em `fiaq-app/data/`: FAQ curado, páginas crawleadas da UnB/CIC e PDFs oficiais. Esse conteúdo foi transformado em chunks, embedado com o modelo de embedding acima e empacotado em `fiaq-app/server/assets/rag-index.json`. O índice atual tem **190 chunks** com vetores de **2048 dimensões**: **85 FAQ**, **90 crawl** e **15 PDF**.
+O enriquecimento da IA é feito por **RAG em Postgres/pgvector**. As fontes institucionais ficam em `fiaq-app/data/`: FAQ curado, páginas crawleadas da UnB/CIC e PDFs oficiais. O seed `pnpm seed:knowledge` transforma esse conteúdo em documentos e chunks, gera embeddings com o modelo acima e grava tudo em `rag_documento`/`rag_chunk`. O fallback `fiaq-app/server/assets/rag-index.json` continua versionado apenas para desenvolvimento ou recuperação se o banco estiver indisponível.
 
-No runtime, `/api/chat` recebe a pergunta, gera o embedding, busca os 5 chunks mais relevantes com threshold mínimo, monta o contexto, chama o modelo de chat via OpenRouter e transmite a resposta em SSE. A resposta é obrigada pelo prompt de sistema a usar somente o contexto recuperado; links não são inventados nem escritos no texto, pois as fontes oficiais são retornadas separadamente para a interface.
+No runtime, `/api/chat` recebe a pergunta, gera o embedding, busca os 5 chunks mais relevantes no banco por cosine distance via `buscar_rag_chunks`, monta o contexto, chama o modelo de chat via OpenRouter e transmite a resposta em SSE. A resposta é obrigada pelo prompt de sistema a usar somente o contexto recuperado; links não são inventados nem escritos no texto, pois as fontes oficiais são retornadas separadamente para a interface.
 
 ## Arquitetura Supabase
 
 O Supabase hospeda o Postgres de produção no projeto `dwjzjuqtsgrvbiwjvemu`. A conexão da Vercel usa o Transaction Pooler em `aws-1-us-west-1.pooler.supabase.com:6543`, com a role limitada `fiaq_app`, `sslmode=require` e `postgres.js` configurado com `prepare: false`, `max: 1`, `idle_timeout: 20` e `connect_timeout: 10`, adequado ao ambiente serverless.
 
-O schema público tem quatro tabelas:
+O schema público tem seis tabelas:
 
 | Domínio | Tabelas | Papel |
 |---|---|---|
 | Conteúdo FAQ | `faq_categoria`, `faq_entrada` | Estrutura navegável do FAQ |
+| Conhecimento RAG | `rag_documento`, `rag_chunk` | Chunks com embeddings pgvector para busca semântica |
 | Métricas anônimas | `pergunta_registrada`, `ocorrencia_pergunta` | Agrupamento semântico, contagem e histórico de ocorrências |
 
-Todas as tabelas estão com RLS habilitado. A role `fiaq_app` recebe apenas `SELECT` no FAQ, `SELECT/INSERT/UPDATE` em `pergunta_registrada` e `SELECT/INSERT` em `ocorrencia_pergunta`. O app não possui login de usuário nem histórico identificado: o registro é anônimo e agregado. Perguntas semanticamente parecidas são comparadas por similaridade de cosseno entre embeddings do mesmo modelo; perguntas equivalentes incrementam `total_vezes`, e cada ocorrência guarda resposta e fontes usadas.
+Todas as tabelas estão com RLS habilitado. A role `fiaq_app` recebe apenas `SELECT` no FAQ/RAG, `EXECUTE` na função `buscar_rag_chunks`, `SELECT/INSERT/UPDATE` em `pergunta_registrada` e `SELECT/INSERT` em `ocorrencia_pergunta`. O app não possui login de usuário nem histórico identificado: o registro é anônimo e agregado. Perguntas semanticamente parecidas são comparadas por similaridade de cosseno entre embeddings do mesmo modelo; perguntas equivalentes incrementam `total_vezes`, e cada ocorrência guarda resposta e fontes usadas.
 
 ## Organização e evidências
 

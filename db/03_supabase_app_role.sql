@@ -23,14 +23,19 @@ END
 $$;
 
 GRANT USAGE ON SCHEMA public TO fiaq_app;
+GRANT USAGE ON SCHEMA extensions TO fiaq_app;
 
 GRANT SELECT ON faq_categoria, faq_entrada TO fiaq_app;
+GRANT SELECT ON rag_documento, rag_chunk TO fiaq_app;
 GRANT SELECT, INSERT, UPDATE ON pergunta_registrada TO fiaq_app;
 GRANT SELECT, INSERT ON ocorrencia_pergunta TO fiaq_app;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO fiaq_app;
+GRANT EXECUTE ON FUNCTION buscar_rag_chunks(extensions.vector(2048), TEXT, DOUBLE PRECISION, INT) TO fiaq_app;
 
 ALTER TABLE faq_categoria ENABLE ROW LEVEL SECURITY;
 ALTER TABLE faq_entrada ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rag_documento ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rag_chunk ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pergunta_registrada ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ocorrencia_pergunta ENABLE ROW LEVEL SECURITY;
 
@@ -60,6 +65,40 @@ BEGIN
       FOR SELECT
       TO fiaq_app
       USING (true);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'rag_documento'
+      AND policyname = 'fiaq_app_select_rag_documento'
+  ) THEN
+    CREATE POLICY fiaq_app_select_rag_documento
+      ON rag_documento
+      FOR SELECT
+      TO fiaq_app
+      USING (ativo = TRUE);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'rag_chunk'
+      AND policyname = 'fiaq_app_select_rag_chunk'
+  ) THEN
+    CREATE POLICY fiaq_app_select_rag_chunk
+      ON rag_chunk
+      FOR SELECT
+      TO fiaq_app
+      USING (
+        ativo = TRUE
+        AND EXISTS (
+          SELECT 1
+          FROM rag_documento rd
+          WHERE rd.id = rag_chunk.id_documento
+            AND rd.ativo = TRUE
+        )
+      );
   END IF;
 
   IF NOT EXISTS (

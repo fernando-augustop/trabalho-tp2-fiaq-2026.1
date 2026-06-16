@@ -1,8 +1,7 @@
-import type { H3Event } from 'h3'
 import { embedQuery } from '../utils/embeddings'
-import { topKFiltered } from '../utils/vectorStore'
 import { chatStream, embedInfo } from '../utils/llmProvider'
 import { registrarPergunta } from '../repositorios/pergunta'
+import { buscarRag } from '../repositorios/rag'
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
@@ -90,7 +89,7 @@ function sendEvent(res: NodeJS.WritableStream, data: object): void {
   res.write(`data: ${JSON.stringify(data)}\n\n`)
 }
 
-export default defineEventHandler(async (event: H3Event) => {
+export default defineEventHandler(async (event) => {
   const body = await readBody<RequestBody>(event)
 
   if (!body?.messages || !Array.isArray(body.messages) || body.messages.length === 0) {
@@ -125,7 +124,8 @@ export default defineEventHandler(async (event: H3Event) => {
       return
     }
 
-    const results = topKFiltered(queryVector, 5, 0.45)
+    const { results, source: ragSource } = await buscarRag(queryVector, embedInfo.model, 5, 0.45)
+    console.log(`[chat.post] Contexto RAG carregado de ${ragSource}.`)
 
     const context = results.length > 0
       ? results.map(r => `[${r.titulo}]\n${stripLinks(r.conteudo)}`).join('\n\n')

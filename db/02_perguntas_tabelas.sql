@@ -2,9 +2,9 @@
 -- pergunta_registrada tem FK opcional para faq_entrada (criada no 01_).
 
 -- Uma linha por "pergunta única", identificada por similaridade de embedding.
--- A similaridade é calculada por cosseno em TypeScript — mesmo padrão do
--- vectorStore da squad de IA. Migração natural para pgvector se o volume
--- crescer (ver db/README.md).
+-- A similaridade de métricas é calculada por cosseno em TypeScript. O caminho
+-- crítico do RAG usa pgvector em rag_chunk; aqui mantemos JSONB porque o volume
+-- esperado de perguntas agregadas é baixo (ver db/README.md).
 CREATE TABLE IF NOT EXISTS pergunta_registrada (
     id                SERIAL PRIMARY KEY,
     texto_original    TEXT NOT NULL,

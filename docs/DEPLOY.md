@@ -23,12 +23,13 @@ O caminho gratuito recomendado para demonstração acadêmica é:
 | Camada | Serviço | Motivo |
 |---|---|---|
 | App Nuxt/Nitro | Vercel Hobby | Deploy simples via GitHub, HTTPS automático e suporte a Functions/SSE |
-| Postgres | Supabase Free | Banco gerenciado suficiente para métricas anônimas de perguntas |
+| Postgres | Supabase Free | FAQ, RAG com pgvector e métricas anônimas |
 | IA | OpenRouter | Já é o provider usado pelo RAG; o modelo `:free` serve para demonstração |
 
-O fIAq é um app **Nuxt 4** (em `fiaq-app/`) com RAG via **OpenRouter**. O índice
-da base é **pré-computado** e empacotado no build, então o cold start não precisa
-re-embedar a base.
+O fIAq é um app **Nuxt 4** (em `fiaq-app/`) com RAG via **OpenRouter**. O
+conhecimento principal fica no **Supabase Postgres com pgvector**: FAQ, PDFs e
+páginas crawleadas são armazenados em `rag_documento`/`rag_chunk`. O arquivo
+`rag-index.json` continua versionado apenas como fallback de compatibilidade.
 
 ## 1. Criar o banco no Supabase
 
@@ -39,15 +40,37 @@ re-embedar a base.
 ```sql
 -- primeiro: db/01_faq_tabelas.sql
 -- depois:   db/02_perguntas_tabelas.sql
+-- depois:   db/04_rag_pgvector.sql
 -- por fim:  db/03_supabase_app_role.sql
 ```
 
 Os SQLs usam `IF NOT EXISTS`, então podem ser reaplicados durante setup sem
-falhar por tabela ou índice já existente. O terceiro SQL habilita RLS e cria a
-role limitada `fiaq_app`; a senha dessa role deve ser definida diretamente no
+falhar por tabela ou índice já existente. O `04_` ativa `pgvector`, cria as
+tabelas RAG e a função `buscar_rag_chunks`. O `03_` habilita RLS e cria a role
+limitada `fiaq_app`; a senha dessa role deve ser definida diretamente no
 Supabase, fora do repositório.
 
-## 2. Pegar a connection string do Supabase
+## 2. Popular o conhecimento no banco
+
+Depois de criar as tabelas, rode o seed a partir da raiz do repositório usando
+uma connection string com permissão de escrita nas tabelas de FAQ e RAG:
+
+```bash
+DATABASE_URL="postgresql://postgres:..." \
+OPENROUTER_API_KEY="..." \
+CHAT_PROVIDER=openrouter \
+EMBED_PROVIDER=openrouter \
+OPENROUTER_EMBED_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free \
+pnpm seed:knowledge
+```
+
+O seed lê `fiaq-app/data/faq/*.json`, `fiaq-app/data/pdfs/` e
+`fiaq-app/data/crawl/`, gera embeddings e faz upsert idempotente em
+`faq_categoria`, `faq_entrada`, `rag_documento` e `rag_chunk`. Para o runtime da
+Vercel, continue usando a role limitada `fiaq_app`; ela só precisa de `SELECT`
+no conhecimento e permissões de escrita apenas nas métricas anônimas.
+
+## 3. Pegar a connection string do Supabase
 
 Para Vercel/serverless, prefira a **Transaction Pooler URI** do Supabase. Ela
 normalmente usa porta `6543`. Garanta SSL e use a role limitada do app:
@@ -59,7 +82,7 @@ DATABASE_URL=postgresql://fiaq_app.PROJECT_REF:SENHA@REGIAO.pooler.supabase.com:
 O app usa `postgres.js` com `prepare: false`, que é necessário para operar bem
 através de poolers que não suportam prepared statements.
 
-## 3. Configurar o projeto na Vercel
+## 4. Configurar o projeto na Vercel
 
 Ao importar o repositório na Vercel:
 
@@ -73,7 +96,7 @@ Ao importar o repositório na Vercel:
 
 > ⚠️ O **Root Directory `fiaq-app`** é obrigatório — o app não está na raiz do repo.
 
-## 4. Variáveis de ambiente na Vercel
+## 5. Variáveis de ambiente na Vercel
 
 Configure em **Settings → Environment Variables**:
 
@@ -87,10 +110,10 @@ DATABASE_URL            = postgresql://...supabase...:6543/postgres?sslmode=requ
 ```
 
 > O modelo de embedding **precisa ser o mesmo** usado para gerar o índice
-> pré-computado (`fiaq-app/server/assets/rag-index.json`), senão as buscas ficam
-> inconsistentes. O app emite um warning no log se detectar divergência.
+> salvo em `rag_chunk.embedding`, senão as buscas ficam inconsistentes. Owl Alpha
+> é o modelo de chat; o Nemotron continua necessário para embeddings.
 
-## 5. Validar antes de subir
+## 6. Validar antes de subir
 
 Da raiz do repositório:
 
@@ -108,28 +131,39 @@ curl https://SEU-DOMINIO/api/health/db
 curl https://SEU-DOMINIO/api/faq
 ```
 
+Para validar a base RAG no Supabase:
+
+```sql
+SELECT origem, COUNT(*)
+FROM rag_chunk
+WHERE ativo = TRUE
+GROUP BY origem;
+```
+
 E envie uma pergunta pelo chat para confirmar o fluxo completo:
 
 1. OpenRouter responde.
-2. O RAG retorna fontes.
+2. O RAG retorna fontes vindas de `rag_chunk`.
 3. A pergunta é gravada no Supabase.
 4. `/api/perguntas/em-alta?dias=7&limite=5` mostra a pergunta.
 
-## 6. Como o índice é gerado / regenerado
+## 7. Como a base RAG é regenerada
 
-O índice vive em `fiaq-app/server/assets/rag-index.json` (commitado) e é
-carregado no boot. Para **regenerá-lo** após alterar `data/` (FAQ, PDFs, crawl):
+Após alterar FAQ, PDFs ou crawl:
 
 ```bash
-cd fiaq-app
-RAG_FORCE_REINDEX=1 pnpm dev      # indexa ao vivo via OpenRouter e regrava o JSON
-# aguarde "[RAG] Índice gravado ..." e então Ctrl+C
-git add server/assets/rag-index.json && git commit -m "chore: regenerar índice RAG"
+pnpm build:faq      # se os markdowns fonte do FAQ mudaram
+pnpm fetch:links    # se quiser atualizar o crawl institucional
+DATABASE_URL="postgresql://postgres:..." OPENROUTER_API_KEY="..." pnpm seed:knowledge
 ```
+
+O `rag-index.json` ainda pode ser regenerado com `pnpm index:rag`, mas ele é
+fallback legado. O caminho principal do chatbot em produção consulta o banco via
+pgvector.
 
 Para atualizar o crawl institucional antes: `pnpm fetch:links` (re-busca as páginas).
 
-## 7. Limitações do caminho gratuito
+## 8. Limitações do caminho gratuito
 
 - O modelo gratuito `:free` do OpenRouter **loga todos os prompts/respostas** e é
   marcado como "não usar em produção". Adequado para **teste/demonstração**, não

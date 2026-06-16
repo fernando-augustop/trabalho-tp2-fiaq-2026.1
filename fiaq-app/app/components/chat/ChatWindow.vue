@@ -15,18 +15,59 @@
           stroke-width="1.6"
           viewBox="0 0 24 24"
         >
-          <rect x="5" y="7" width="14" height="10" rx="2.5" stroke="currentColor"/>
-          <circle cx="9" cy="11" r="1.2" fill="currentColor" stroke="none"/>
-          <circle cx="15" cy="11" r="1.2" fill="currentColor" stroke="none"/>
-          <path d="M9 14.5h6" stroke="currentColor" stroke-linecap="round"/>
-          <path d="M12 7V4" stroke="currentColor" stroke-linecap="round"/>
-          <circle cx="12" cy="3.5" r="0.8" fill="currentColor" stroke="none"/>
-          <path d="M5 10.5H3.5M18.5 10.5H20" stroke="currentColor" stroke-linecap="round"/>
+          <rect
+            x="5"
+            y="7"
+            width="14"
+            height="10"
+            rx="2.5"
+            stroke="currentColor"
+          />
+          <circle
+            cx="9"
+            cy="11"
+            r="1.2"
+            fill="currentColor"
+            stroke="none"
+          />
+          <circle
+            cx="15"
+            cy="11"
+            r="1.2"
+            fill="currentColor"
+            stroke="none"
+          />
+          <path
+            d="M9 14.5h6"
+            stroke="currentColor"
+            stroke-linecap="round"
+          />
+          <path
+            d="M12 7V4"
+            stroke="currentColor"
+            stroke-linecap="round"
+          />
+          <circle
+            cx="12"
+            cy="3.5"
+            r="0.8"
+            fill="currentColor"
+            stroke="none"
+          />
+          <path
+            d="M5 10.5H3.5M18.5 10.5H20"
+            stroke="currentColor"
+            stroke-linecap="round"
+          />
         </svg>
       </div>
       <div>
-        <p class="font-bold text-[#1a2e5a] text-lg">Olá! Como posso ajudar?</p>
-        <p class="text-gray-400 text-sm mt-1">Pergunte sobre matrícula, TCC, estágio, extensão e muito mais.</p>
+        <p class="font-bold text-[#1a2e5a] text-lg">
+          Olá! Como posso ajudar?
+        </p>
+        <p class="text-gray-400 text-sm mt-1">
+          Pergunte sobre matrícula, TCC, estágio, extensão e muito mais.
+        </p>
       </div>
       <div class="flex flex-wrap gap-2 justify-center mt-2">
         <button
@@ -40,7 +81,10 @@
       </div>
     </div>
 
-    <template v-for="msg in messages" :key="msg.id">
+    <template
+      v-for="msg in messages"
+      :key="msg.id"
+    >
       <ChatMessageBubble :message="msg" />
     </template>
     <ChatTypingIndicator v-if="showTyping" />

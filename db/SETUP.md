@@ -10,9 +10,11 @@
 |---|---|---|
 | `01_faq_tabelas.sql` | Tabelas do FAQ (faq_categoria, faq_entrada) | 1º |
 | `02_perguntas_tabelas.sql` | Tabelas de análise (pergunta_registrada, ocorrencia_pergunta) | 2º |
+| `04_rag_pgvector.sql` | Extensão pgvector, tabelas RAG e função de busca | 3º |
+| `03_supabase_app_role.sql` | Role limitada, grants e RLS | 4º |
 
-`02_perguntas_tabelas.sql` tem FK para `faq_entrada` e por isso **precisa** ser
-executado depois do `01_`.
+`02_perguntas_tabelas.sql` e `04_rag_pgvector.sql` dependem de `faq_entrada`.
+O `03_` deve rodar por último para conceder permissões nas tabelas já criadas.
 
 ## Variáveis de ambiente
 
@@ -42,7 +44,7 @@ docker run -d \
   -e POSTGRES_PASSWORD=fiaq123 \
   -e POSTGRES_DB=fiaq \
   -p 5432:5432 \
-  postgres:16
+  pgvector/pgvector:pg16
 ```
 
 #### Windows (PowerShell)
@@ -54,7 +56,7 @@ docker run -d `
   -e POSTGRES_PASSWORD=fiaq123 `
   -e POSTGRES_DB=fiaq `
   -p 5432:5432 `
-  postgres:16
+  pgvector/pgvector:pg16
 ```
 
 Aguarde ~5 segundos e verifique se subiu (igual nos dois sistemas):
@@ -91,7 +93,7 @@ no Passo 1, use os seus valores aqui.
 
 ### Passo 3 — Aplicar os SQLs
 
-Execute os dois comandos abaixo a partir da pasta `db/` do repositório,
+Execute os comandos abaixo a partir da pasta `db/` do repositório,
 **nesta ordem**.
 
 #### Linux/Mac
@@ -99,6 +101,8 @@ Execute os dois comandos abaixo a partir da pasta `db/` do repositório,
 ```bash
 docker exec -i fiaq-postgres psql -U fiaq -d fiaq < 01_faq_tabelas.sql
 docker exec -i fiaq-postgres psql -U fiaq -d fiaq < 02_perguntas_tabelas.sql
+docker exec -i fiaq-postgres psql -U fiaq -d fiaq < 04_rag_pgvector.sql
+docker exec -i fiaq-postgres psql -U fiaq -d fiaq < 03_supabase_app_role.sql
 ```
 
 #### Windows (PowerShell)
@@ -109,6 +113,8 @@ Use `Get-Content` como alternativa segura:
 ```powershell
 Get-Content 01_faq_tabelas.sql | docker exec -i fiaq-postgres psql -U fiaq -d fiaq
 Get-Content 02_perguntas_tabelas.sql | docker exec -i fiaq-postgres psql -U fiaq -d fiaq
+Get-Content 04_rag_pgvector.sql | docker exec -i fiaq-postgres psql -U fiaq -d fiaq
+Get-Content 03_supabase_app_role.sql | docker exec -i fiaq-postgres psql -U fiaq -d fiaq
 ```
 
 ---
@@ -121,7 +127,7 @@ Igual nos dois sistemas:
 docker exec -it fiaq-postgres psql -U fiaq -d fiaq -c "\dt"
 ```
 
-Saída esperada — 4 tabelas:
+Saída esperada — 6 tabelas:
 
 ```
               List of relations
@@ -131,6 +137,19 @@ Saída esperada — 4 tabelas:
  public | faq_entrada           | table | fiaq
  public | ocorrencia_pergunta   | table | fiaq
  public | pergunta_registrada   | table | fiaq
+ public | rag_chunk             | table | fiaq
+ public | rag_documento         | table | fiaq
+```
+
+Para popular FAQ e RAG localmente:
+
+```bash
+cd ..
+DATABASE_URL=postgresql://fiaq:fiaq123@localhost:5432/fiaq \
+OPENROUTER_API_KEY=... \
+CHAT_PROVIDER=openrouter \
+EMBED_PROVIDER=openrouter \
+pnpm seed:knowledge
 ```
 
 ---
@@ -205,6 +224,9 @@ Requer o cliente `psql` instalado na máquina. Execute a partir da pasta `db/`:
 ```bash
 psql $DATABASE_URL -f 01_faq_tabelas.sql
 psql $DATABASE_URL -f 02_perguntas_tabelas.sql
+psql $DATABASE_URL -f 04_rag_pgvector.sql
+psql $DATABASE_URL -f 03_supabase_app_role.sql
 ```
 
-A ordem importa: `02_` tem FK para `faq_entrada`, criada pelo `01_`.
+A ordem importa: `02_` e `04_` usam objetos criados pelo `01_`; `03_` concede
+permissões e políticas para todos os objetos.

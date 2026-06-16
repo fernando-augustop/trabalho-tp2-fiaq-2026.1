@@ -14,8 +14,9 @@ Trabalho da disciplina de **Técnicas de Programação 2** — UnB, 2026.1.
   atividades de curso, trajetória acadêmica, organizações estudantis, coordenação).
 - **Assistente Virtual (RAG)** — responde dúvidas com base na base oficial; cita as
   fontes e não inventa links (URLs são removidas do texto e exibidas como chips de fonte).
-- **Base pré-computada** — o índice de embeddings é gerado offline e empacotado no build,
-  então o cold start em produção é instantâneo (sem re-embedar a base).
+- **Conhecimento no banco** — FAQ, páginas crawleadas e PDFs são indexados em
+  PostgreSQL/Supabase com `pgvector`; o JSON pré-computado fica apenas como fallback
+  de compatibilidade.
 - **Responsivo e acessível** — interface adaptada para mobile.
 
 ## Stack
@@ -25,6 +26,7 @@ Trabalho da disciplina de **Técnicas de Programação 2** — UnB, 2026.1.
 | Framework | [Nuxt 4](https://nuxt.com) (Vue 3 + Nitro) |
 | UI | [Nuxt UI 4](https://ui.nuxt.com) + [Tailwind CSS 4](https://tailwindcss.com) |
 | IA (chat + embeddings) | [OpenRouter](https://openrouter.ai) (ou [Ollama](https://ollama.ai) local) |
+| Banco / RAG | PostgreSQL + pgvector (Supabase no deploy) |
 | Linguagem | TypeScript |
 | Gerenciador | pnpm |
 | Deploy | Vercel (preset Nitro `vercel`) |
@@ -42,9 +44,10 @@ trabalhofinal-fiaq/
 │   ├── app/                  # frontend (pages, components, composables)
 │   ├── server/               # API (/api/chat, /api/faq), RAG e utils
 │   │   ├── api/
-│   │   ├── plugins/          # bootstrap do índice RAG
-│   │   ├── utils/            # embeddings, vectorStore, loaders, providers
-│   │   └── assets/rag-index.json   # índice de embeddings pré-computado
+│   │   ├── repositorios/     # acesso a FAQ, RAG pgvector e métricas
+│   │   ├── plugins/          # carrega fallback JSON de compatibilidade
+│   │   ├── utils/            # embeddings, loaders e providers
+│   │   └── assets/rag-index.json   # fallback legado do RAG
 │   ├── data/                 # fontes: faq/, pdfs/, crawl/, sources/
 │   ├── scripts/              # build-faq, fetch-links, test-openrouter
 │   └── .env.example
@@ -79,19 +82,21 @@ Para validar a chave do OpenRouter (chat + embeddings): `pnpm test:openrouter`.
 ```bash
 pnpm build:faq                # gera data/faq/*.json a partir das fontes em data/sources/
 pnpm fetch:links              # re-crawleia as páginas institucionais (data/crawl/)
-pnpm index:rag                # re-embeda e regrava server/assets/rag-index.json
+DATABASE_URL="postgresql://..." pnpm seed:knowledge # popula FAQ + RAG pgvector
+pnpm index:rag                # opcional: regrava fallback server/assets/rag-index.json
 ```
 
-> O índice precisa ser gerado com o **mesmo modelo de embedding** usado em produção,
-> senão as buscas ficam inconsistentes (o app emite um warning no log se detectar divergência).
+> O seed de conhecimento precisa usar o **mesmo modelo de embedding** configurado
+> no runtime. O deploy atual usa `nvidia/llama-nemotron-embed-vl-1b-v2:free`
+> para embeddings e `openrouter/owl-alpha` para o chat.
 
 ## Banco de Dados
 
-O app usa **PostgreSQL** para registro anônimo e agregado das perguntas feitas ao
-chatbot — sem cadastro, sem login, sem dados pessoais. Perguntas semanticamente
-similares são agrupadas por similaridade de embedding e incrementam um contador de
-frequência. O objetivo é detectar perguntas em alta (ex: matrícula em período de
-matrícula) e apoiar o controle de qualidade das respostas geradas.
+O app usa **PostgreSQL** para servir o FAQ navegável, armazenar os chunks RAG com
+`pgvector` e registrar, de forma anônima e agregada, as perguntas feitas ao chatbot
+— sem cadastro, sem login, sem dados pessoais. A consulta do chat é DB-first:
+gera embedding da pergunta, busca em `rag_chunk` via `buscar_rag_chunks(...)` e
+só usa o `rag-index.json` se o banco/pgvector não estiver disponível.
 
 Siga [`db/SETUP.md`](./db/SETUP.md) para subir o Postgres localmente e aplicar os
 SQLs. O setup do banco é independente do setup do app acima.
