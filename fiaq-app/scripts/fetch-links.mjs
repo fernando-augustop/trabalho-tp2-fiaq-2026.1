@@ -6,7 +6,7 @@
 //
 // Sem dependências externas (usa fetch nativo do Node). Uso: node scripts/fetch-links.mjs
 
-import { readFile, writeFile, readdir, unlink, mkdir } from 'fs/promises'
+import { readFile, writeFile, unlink, mkdir } from 'fs/promises'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -142,12 +142,8 @@ async function main() {
   await writeFile(join(SOURCES_DIR, 'links-registry.json'), JSON.stringify(registry, null, 2) + '\n', 'utf-8')
   console.log(`Registro: links-registry.json com ${registry.length} grupos de contexto.`)
 
-  // 2) crawl das páginas HTML
-  await mkdir(CRAWL_DIR, { recursive: true })
-  for (const f of await readdir(CRAWL_DIR).catch(() => [])) {
-    if (f.endsWith('.md')) await unlink(join(CRAWL_DIR, f))
-  }
-
+  // 2) crawl das páginas HTML. Remove apenas os arquivos que este inventário
+  // pode gerar, preservando outras fontes de RAG em data/crawl.
   const seen = new Set()
   const toFetch = []
   for (const r of rows) {
@@ -157,6 +153,12 @@ async function main() {
     seen.add(r.url)
     toFetch.push(r)
   }
+
+  await mkdir(CRAWL_DIR, { recursive: true })
+  for (const r of toFetch) {
+    await unlink(join(CRAWL_DIR, slugify(r.url) + '.md')).catch(() => {})
+  }
+
   console.log(`Crawl: ${toFetch.length} páginas HTML a buscar...\n`)
 
   let ok = 0, fail = 0

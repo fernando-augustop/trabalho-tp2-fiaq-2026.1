@@ -1,9 +1,11 @@
 ---
-title: Estudante &#8211; DEG
+title: Estudante – DEG
 url: https://deg.unb.br/estudante
-contexto: boas-vindas
+contexto: graduacao
+source: unb-official-discovery
+score: 78
+discovered_at: 2026-06-16T20:00:11.917Z
 ---
-
 Estudante
 Home
 Estudante

@@ -1,9 +1,11 @@
 ---
-title: DDS &#8211; Diretoria de Desenvolvimento Social
-url: http://dds.dac.unb.br/
-contexto: assuntos-comunitarios-direitos-humanos
+title: DDS – Diretoria de Desenvolvimento Social
+url: https://dds.dac.unb.br/
+contexto: assistencia-estudantil
+source: unb-official-discovery
+score: 65
+discovered_at: 2026-06-16T20:00:11.917Z
 ---
-
 Página Inicial
 EDITAIS
 Clique Aqui
@@ -15,7 +17,7 @@ E-mail: coae.dds@unb.br
 DDS/COGEM
 E-mail: cogem.dds@unb.br
 Últimas Notícias
-Homologação das inscroções BOLSA MEC
+Homologação das inscrições BOLSA MEC
 Saiu o resultado da homologação das inscrições do Edital n. 12/2026/DAC Para acessar o arquivo...
 Leia mais
 28 de maio de 2026

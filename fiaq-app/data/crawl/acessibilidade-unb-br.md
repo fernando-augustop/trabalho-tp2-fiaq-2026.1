@@ -1,9 +1,11 @@
 ---
 title: acessibilidade
-url: http://acessibilidade.unb.br/
-contexto: assuntos-comunitarios-direitos-humanos
+url: https://acessibilidade.unb.br/
+contexto: acessibilidade
+source: unb-official-discovery
+score: 83
+discovered_at: 2026-06-16T20:00:11.917Z
 ---
-
 Página Inicial
 Home
 Diretoria de Acessibilidade
@@ -15,10 +17,10 @@ Preciso de Tutor
 Quero ser Tutor (PTA)
 Preciso de Ledor/Transcritor
 Preciso de Intérprete de Libras
-Mudança de sala e alocação de mobília
-Tecnologia Assistiva
-Transporte no Campus (Somente Darcy)
+Preciso de Mudança de sala e alocação de mobília
 Política de Acessibilidade da UnB
+Preciso de Transporte no Campus (Somente Darcy)
+Normativas da UnB
 Sou Professor
 Entenda as Orientações Técnico Educacionais
 Tutorial SIGAA
@@ -39,7 +41,7 @@ Publicado em 07/05/2026
 Acessar PDF
 Últimas Notícias
 Veja todas as notícias →
-Exata Falada – Projeto de extensão abre inscrições para novos participantes em 2026
-1 de agosto de 2023
-Interessados devem acessar a inscriução via SIGAA O projeto é destinado à produção de ferramentas de leitura acessível para computadores etc
+Inscrições de editais voltadas à acessibilidade começam nesta segunda
+22 de maio de 2026
+Auxílios promovem acessibilidade, inclusão e permanência estudantil na Universidade Os editais são destinados a estudantes com deficiência, transtorno do espectro autista, altas habilidades ou superdotação.
 Leia mais »

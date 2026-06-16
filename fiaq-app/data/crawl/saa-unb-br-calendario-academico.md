@@ -1,15 +1,18 @@
 ---
-title: Calendário Acadêmico de Graduação &#8211; saa
-url: https://saa.unb.br/calendario-academico/
-contexto: como-faco-matricula-em-estagio-obrigatorio
+title: Calendário Acadêmico de Graduação – saa
+url: https://saa.unb.br/calendario-academico
+contexto: calendario-academico
+source: unb-official-discovery
+score: 68
+discovered_at: 2026-06-16T20:00:11.917Z
 ---
-
 Calendário Acadêmico de Graduação
 Tipos
 Calendário de Verão
 Calendário de Verão de 2026 – 2025.4 (29/12/2025)
 Calendário de Verão de 2024 – 2023.4 (07/12/2023)
 Calendário por Atividade
+Calendário por Atividades 2026.2 (15/06/2026)
 Calendário por Atividades 2026.1 (27/02/2026)
 Calendário por Atividades 2025.2 (06/10/2025)
 Calendário por Atividades 2025.1 (30/07/2025)
@@ -18,6 +21,7 @@ Calendário por Atividades 2024.1 (23/09/2024)
 Calendário por Atividades 2023.2 (15/12/2023)
 Calendário por Atividades 2023.1 (04/05/2023)
 Calendário de Matrícula
+Calendário de Matrícula 2026.2 (15/06/2026)
 Calendário de Matrícula 2026.1 (27/02/2026)
 Calendário de Matrícula 2025.2 (31/07/2025)
 Calendário de Matrícula 2025.1 (02/12/2024)

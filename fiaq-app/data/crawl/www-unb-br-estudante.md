@@ -1,9 +1,11 @@
 ---
 title: Universidade de Brasília - Estudante
 url: https://www.unb.br/estudante
-contexto: boas-vindas
+contexto: estudante
+source: unb-official-discovery
+score: 153
+discovered_at: 2026-06-16T20:00:11.917Z
 ---
-
 Pular menu lateral
 Institucional A UnB História
 Missão

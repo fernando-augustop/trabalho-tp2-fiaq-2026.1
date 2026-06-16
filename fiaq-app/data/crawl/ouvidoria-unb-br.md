@@ -1,9 +1,11 @@
 ---
 title: ouvidoria
 url: https://ouvidoria.unb.br/
-contexto: como-encaminho-elogio-reclamacao-sobre-infraestrutura-ensino-atendimento-procedimentos-etc
+contexto: ouvidoria
+source: unb-official-discovery
+score: 69
+discovered_at: 2026-06-16T20:00:11.917Z
 ---
-
 Página Inicial
 Home
 A Ouvidoria da UnB
