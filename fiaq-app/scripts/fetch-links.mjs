@@ -83,7 +83,7 @@ function htmlToText(html) {
     .replace(/[ \t]+/g, ' ')
     .split('\n')
     .map(l => l.trim())
-    .filter(l => l && !/^(Nome|Email|Opinião|Tipo)\s*\*$/i.test(l) && !/^\*\s*Campos obrigatórios$/i.test(l))
+    .filter(l => l && !/^(Nome|E-?mail|Opinião|Tipo)\s*(?:\*|:)?\s*$/i.test(l) && !/^\*\s*Campos obrigatórios$/i.test(l))
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
@@ -163,7 +163,10 @@ async function main() {
 
   await mkdir(CRAWL_DIR, { recursive: true })
   for (const r of toFetch) {
-    await unlink(join(CRAWL_DIR, slugify(r.url) + '.md')).catch(() => {})
+    await unlink(join(CRAWL_DIR, slugify(r.url) + '.md')).catch((error) => {
+      if (error?.code === 'ENOENT') return
+      throw error
+    })
   }
 
   console.log(`Crawl: ${toFetch.length} páginas HTML a buscar...\n`)

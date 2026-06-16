@@ -4,7 +4,7 @@ url: https://www.struct.unb.br/
 contexto: empresas-juniores
 ---
 
-Struct - Empresa Junior de Engenharia de Computação Loading...
+Struct - Empresa Junior de Engenharia de Computação
 Docker
 React
 Tailwind

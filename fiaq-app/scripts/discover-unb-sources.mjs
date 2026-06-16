@@ -118,7 +118,7 @@ function htmlToText(html) {
     .replace(/[ \t]+/g, ' ')
     .split('\n')
     .map(line => line.trim())
-    .filter(line => line && !/^(Nome|Email|Opinião|Tipo)\s*\*$/i.test(line) && !/^\*\s*Campos obrigatórios$/i.test(line))
+    .filter(line => line && !/^(Nome|E-?mail|Opinião|Tipo)\s*(?:\*|:)?\s*$/i.test(line) && !/^\*\s*Campos obrigatórios$/i.test(line))
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
