@@ -51,31 +51,32 @@ trabalhofinal-fiaq/
 │   ├── data/                 # fontes: faq/, pdfs/, crawl/, sources/
 │   ├── scripts/              # build-faq, fetch-links, test-openrouter
 │   └── .env.example
-├── docs/                     # decisões, deploy e relatório executivo
+├── docs/                     # decisões, desenvolvimento, deploy e relatório executivo
+│   ├── DESENVOLVIMENTO.md
 │   ├── DEPLOY.md
 │   └── relatorio-executivo-arquitetura-deploy.md
 └── README.md
 ```
 
-## Como rodar localmente
+## Como desenvolver localmente
 
 > Requisitos: Node.js ≥ 20 e [pnpm](https://pnpm.io). O app está em `fiaq-app/`.
 
 ```bash
-cd fiaq-app
-cp .env.example .env          # preencha OPENROUTER_API_KEY e use CHAT/EMBED_PROVIDER=openrouter
 pnpm install
-pnpm dev                      # http://localhost:3000
+pnpm dev
 ```
 
-Também é possível rodar pela raiz do repositório:
+O comando acima roda o frontend Nuxt e as APIs Nitro usando as variáveis de
+`fiaq-app/.env`. Com `DATABASE_URL` do Supabase e providers OpenRouter
+preenchidos, ele reproduz localmente a suite principal do deploy Vercel:
+FAQ/RAG no Supabase, chat por OpenRouter e registro anônimo de perguntas.
 
-```bash
-pnpm install
-pnpm dev                      # http://localhost:3000
-```
+O Nuxt tenta abrir `http://localhost:3000/`; se a porta estiver ocupada, use a
+URL alternativa impressa no terminal.
 
-Para validar a chave do OpenRouter (chat + embeddings): `pnpm test:openrouter`.
+Guia completo: [`docs/DESENVOLVIMENTO.md`](./docs/DESENVOLVIMENTO.md).
+Para validar a chave do OpenRouter isoladamente: `pnpm test:openrouter`.
 
 ### Regenerar a base de conhecimento
 
@@ -98,13 +99,16 @@ O app usa **PostgreSQL** para servir o FAQ navegável, armazenar os chunks RAG c
 gera embedding da pergunta, busca em `rag_chunk` via `buscar_rag_chunks(...)` e
 só usa o `rag-index.json` se o banco/pgvector não estiver disponível.
 
-Siga [`db/SETUP.md`](./db/SETUP.md) para subir o Postgres localmente e aplicar os
-SQLs. O setup do banco é independente do setup do app acima.
+Para o fluxo mais parecido com produção, use Supabase via `DATABASE_URL`,
+conforme [`docs/DESENVOLVIMENTO.md`](./docs/DESENVOLVIMENTO.md). Para desenvolver
+sem Supabase remoto, siga [`db/SETUP.md`](./db/SETUP.md) e suba o Postgres local
+com Docker.
 
 ## Deploy
 
 Veja [`docs/DEPLOY.md`](./docs/DEPLOY.md) — na Vercel, configure
-**Root Directory = `fiaq-app`** e as variáveis de ambiente do OpenRouter.
+**Root Directory = `fiaq-app`** e as variáveis de ambiente do OpenRouter e do
+Supabase.
 
 ## Equipe
 

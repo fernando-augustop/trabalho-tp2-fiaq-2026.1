@@ -31,6 +31,11 @@ conhecimento principal fica no **Supabase Postgres com pgvector**: FAQ, PDFs e
 páginas crawleadas são armazenados em `rag_documento`/`rag_chunk`. O arquivo
 `rag-index.json` continua versionado apenas como fallback de compatibilidade.
 
+Para rodar a mesma stack em desenvolvimento local, use
+[`docs/DESENVOLVIMENTO.md`](./DESENVOLVIMENTO.md). O comando diário é
+`pnpm dev` na raiz do repositório, usando `fiaq-app/.env` com `DATABASE_URL` do
+Supabase e variáveis do OpenRouter.
+
 ## 1. Criar o banco no Supabase
 
 1. Crie um projeto no Supabase.
