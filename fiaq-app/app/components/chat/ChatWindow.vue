@@ -45,8 +45,7 @@
       </template>
       <ChatTypingIndicator v-if="showTyping" />
       <div
-        ref="bottomEl"
-        class="chat-bottom-anchor h-1"
+        class="h-1"
         aria-hidden="true"
       />
     </div>
@@ -94,7 +93,6 @@ const suggestions = [
 ]
 
 const messagesEl = ref<HTMLElement | null>(null)
-const bottomEl = ref<HTMLElement | null>(null)
 const isNearBottom = ref(true)
 const showJumpToBottom = computed(() => props.messages.length > 0 && !isNearBottom.value)
 
@@ -110,9 +108,7 @@ function handleScroll() {
 
 async function scrollToBottom(behavior: ScrollBehavior = 'auto') {
   await nextTick()
-  const target = bottomEl.value ?? messagesEl.value
-  if (target) target.scrollIntoView({ block: 'end', behavior })
-  else window.scrollTo({ top: document.documentElement.scrollHeight, behavior })
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior })
   isNearBottom.value = true
 }
 
@@ -153,9 +149,3 @@ watch(
   }
 )
 </script>
-
-<style scoped>
-.chat-bottom-anchor {
-  scroll-margin-bottom: 9rem;
-}
-</style>
