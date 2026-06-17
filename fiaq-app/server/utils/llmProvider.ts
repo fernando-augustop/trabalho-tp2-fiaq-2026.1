@@ -29,6 +29,7 @@ const OPENROUTER_CHAT_ATTEMPTS = readPositiveInt(
 )
 const OPENROUTER_CHAT_MAX_TOKENS = readPositiveInt(process.env.OPENROUTER_CHAT_MAX_TOKENS, 650)
 const OPENROUTER_CHAT_TEMPERATURE = readTemperature(process.env.OPENROUTER_CHAT_TEMPERATURE, 0.2)
+const OPENROUTER_STREAM_PREFLIGHT_CHARS = 32
 
 const CHAT_PROVIDER = (process.env.CHAT_PROVIDER || 'ollama').toLowerCase()
 const EMBED_PROVIDER = (process.env.EMBED_PROVIDER || 'ollama').toLowerCase()
@@ -183,13 +184,47 @@ export async function chatStream(messages: ChatMessage[]): Promise<ReadableStrea
 async function openRouterChatStream(messages: ChatMessage[]): Promise<ReadableStream<string>> {
   return new ReadableStream<string>({
     async start(controller) {
-      try {
-        const text = await openRouterChatText(messages, false)
-        controller.enqueue(text)
-        controller.close()
-      } catch (e) {
-        controller.error(e)
+      let lastErr: unknown
+
+      for (const model of OPENROUTER_CHAT_MODELS) {
+        for (let attempt = 1; attempt <= OPENROUTER_CHAT_ATTEMPTS; attempt++) {
+          let emitted = false
+
+          try {
+            const result = await openRouterStreamOnce(model, messages, (chunk) => {
+              controller.enqueue(chunk)
+              emitted = true
+            })
+
+            if (!result.unusable) {
+              controller.close()
+              return
+            }
+
+            lastErr = new Error('OpenRouter retornou conteúdo inválido para resposta final')
+            warnInvalidOpenRouterText(model, attempt, result.text)
+
+            if (emitted) {
+              controller.error(lastErr)
+              return
+            }
+          } catch (e) {
+            lastErr = e
+            console.warn(`[OpenRouter] Falha em ${model} no streaming attempt ${attempt}:`, e)
+
+            if (emitted) {
+              controller.error(e)
+              return
+            }
+          }
+
+          if (attempt < OPENROUTER_CHAT_ATTEMPTS) {
+            await sleep(600 * attempt)
+          }
+        }
       }
+
+      controller.error(lastErr)
     }
   })
 }
@@ -295,7 +330,7 @@ async function openRouterChatText(messages: ChatMessage[], stream: boolean): Pro
         }
 
         lastErr = new Error('OpenRouter retornou conteúdo inválido para resposta final')
-        console.warn(`[OpenRouter] Resposta de ${model} descartada no attempt ${attempt}: ${JSON.stringify(text.trim())}`)
+        warnInvalidOpenRouterText(model, attempt, text)
       } catch (e) {
         lastErr = e
         console.warn(`[OpenRouter] Falha em ${model} no attempt ${attempt}:`, e)
@@ -354,13 +389,66 @@ async function openRouterStreamTextOnce(model: string, messages: ChatMessage[]):
   return text
 }
 
+async function openRouterStreamOnce(
+  model: string,
+  messages: ChatMessage[],
+  enqueue: (chunk: string) => void
+): Promise<{ text: string, emitted: boolean, unusable: boolean }> {
+  const stream = await openRouterRawChatStream(model, messages)
+  const reader = stream.getReader()
+  let text = ''
+  let emitted = false
+
+  while (true) {
+    const { done, value } = await reader.read()
+
+    if (done) {
+      const unusable = isUnusableOpenRouterText(text)
+      if (!unusable && !emitted && text) {
+        enqueue(text)
+        emitted = true
+      }
+      return { text, emitted, unusable }
+    }
+
+    text += value
+
+    if (hasCjkText(value)) {
+      await reader.cancel().catch(() => {})
+      return { text, emitted, unusable: true }
+    }
+
+    if (!emitted && text.trim().length < OPENROUTER_STREAM_PREFLIGHT_CHARS) continue
+
+    enqueue(emitted ? value : text)
+    emitted = true
+  }
+}
+
 function isUnusableOpenRouterText(text: string): boolean {
   const trimmed = text.trim()
   if (!trimmed) return true
-  if (/[\u3400-\u9FFF\uF900-\uFAFF]/.test(trimmed)) return true
+  if (hasCjkText(trimmed)) return true
 
-  return /^(?:user|assistant)\s+safety\s*:\s*(?:safe|unsafe)$/i.test(trimmed)
+  return isSafetyClassifierText(trimmed)
     || /^(?:safe|unsafe)$/i.test(trimmed)
+}
+
+function hasCjkText(text: string): boolean {
+  return /[\u3400-\u9FFF\uF900-\uFAFF]/.test(text)
+}
+
+function isSafetyClassifierText(text: string): boolean {
+  return /^(?:user|assistant)\s+safety\s*:\s*(?:safe|unsafe)$/i.test(text)
+}
+
+function warnInvalidOpenRouterText(model: string, attempt: number, text: string): void {
+  const trimmed = text.trim()
+  console.warn(
+    `[OpenRouter] Resposta de ${model} descartada no attempt ${attempt}: `
+    + `length=${trimmed.length}, hasCjk=${hasCjkText(trimmed)}, `
+    + `isSafetyClassifier=${isSafetyClassifierText(trimmed) || /^(?:safe|unsafe)$/i.test(trimmed)}`
+  )
 }
 
 // ─── Embeddings ───────────────────────────────────────────────────────────────

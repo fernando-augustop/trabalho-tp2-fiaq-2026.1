@@ -76,7 +76,10 @@
           {{ copyLabel }}
         </button>
 
-        <div class="relative">
+        <div
+          class="relative"
+          @keydown.escape="showExportMenu = false"
+        >
           <button
             type="button"
             :disabled="exportBusy"
@@ -85,7 +88,6 @@
             title="Baixar conversa"
             class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#1a2e5a] hover:text-[#1a2e5a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50"
             @click.stop="showExportMenu = !showExportMenu"
-            @keydown.escape="showExportMenu = false"
           >
             <UIcon
               name="i-lucide-download"
@@ -133,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { Message } from '~/composables/useFiaqChat'
 import { renderMarkdown } from '~/utils/markdown'
 import {
@@ -287,8 +289,9 @@ function handleDocumentClick(event: MouseEvent) {
 
 const plainCopy = computed(() => stripLinks(props.message.content ?? '').trim())
 
-onMounted(() => {
-  document.addEventListener('click', handleDocumentClick)
+watch(showExportMenu, (isOpen) => {
+  if (isOpen) document.addEventListener('click', handleDocumentClick)
+  else document.removeEventListener('click', handleDocumentClick)
 })
 
 onBeforeUnmount(() => {
