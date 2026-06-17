@@ -5,6 +5,7 @@
   "git": {
     "deploymentEnabled": {
       "main": true,
+      "codex/*": false,
       "*": false
     }
   }
