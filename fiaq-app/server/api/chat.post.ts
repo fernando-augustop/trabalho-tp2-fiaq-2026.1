@@ -1,7 +1,7 @@
 import { embedQuery } from '../utils/embeddings'
 import { chatStream, embedInfo } from '../utils/llmProvider'
 import { registrarPergunta } from '../repositorios/pergunta'
-import { buscarRag } from '../repositorios/rag'
+import { buscarRag, type SearchResult } from '../repositorios/rag'
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
@@ -18,6 +18,7 @@ COMPORTAMENTO GERAL:
 
 * Cumprimentos e saudações devem ser respondidos de forma amigável e natural.
 * Responda SEMPRE em português brasileiro, de forma clara, direta e acolhedora.
+* É proibido responder em chinês, inglês ou qualquer outro idioma. Se algum trecho do contexto estiver em outro idioma, ignore esse idioma e responda em português brasileiro.
 * Responda DIRETAMENTE ao aluno. NUNCA simule diálogos nem use prefixos como "Aluno:" ou "Assistente:".
 * Priorize ajudar o aluno a resolver a dúvida.
 * Seja conciso, mas complete. Quando a pergunta envolver procedimentos, explique todas as etapas necessárias.
@@ -28,6 +29,7 @@ AO USAR O CONTEXTO:
 * Se o contexto contiver a resposta completa, responda com base nele.
 * Se o contexto contiver apenas parte da resposta, utilize as informações disponíveis e complemente a explicação de forma coerente.
 * Considere que informações relevantes podem estar distribuídas em vários trechos do contexto. Combine os trechos antes de responder.
+* Escolha os trechos que correspondem à pergunta feita. Se a pergunta for genérica e o contexto trouxer um subtópico específico, como estágio obrigatório, migração ou classificação, não trate esse subtópico como resposta principal a menos que o aluno tenha perguntado por ele.
 * Extraia e utilize detalhes específicos presentes no contexto: prazos, documentos, requisitos, sistemas (SIGAA, SAA etc.), formulários, setores responsáveis e procedimentos.
 * Quando o contexto mencionar um processo acadêmico, explique o procedimento passo a passo em vez de apenas resumir as regras.
 * Sempre prefira fornecer uma orientação útil a responder que não possui informação suficiente.
@@ -85,6 +87,50 @@ function stripLinks(text: string): string {
     .replace(/[ \t]+([.,;:!?])/g, '$1')
 }
 
+const STOPWORDS = new Set([
+  'a', 'ao', 'aos', 'as', 'como', 'com', 'da', 'das', 'de', 'do', 'dos', 'e',
+  'em', 'eu', 'fazer', 'isso', 'me', 'na', 'no', 'o', 'os', 'ou', 'para',
+  'posso', 'que', 'quero', 'sao', 'se', 'um', 'uma', 'unb'
+])
+
+function terms(text: string): string[] {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(term => term.length >= 3 && !STOPWORDS.has(term))
+}
+
+function rankContextResults(question: string, results: SearchResult[]): SearchResult[] {
+  const queryTerms = new Set(terms(question))
+  if (!queryTerms.size) return results
+
+  return [...results]
+    .map((result, index) => {
+      const titleTerms = terms(result.titulo)
+      const contentTerms = new Set(terms(result.conteudo).slice(0, 120))
+      const titleOverlap = titleTerms.filter(term => queryTerms.has(term)).length
+      const contentOverlap = [...queryTerms].filter(term => contentTerms.has(term)).length
+      const missingTitleTerms = titleTerms.filter(term => !queryTerms.has(term)).length
+      const exactShortTitle = titleTerms.length > 0
+        && titleTerms.length <= 3
+        && titleTerms.every(term => queryTerms.has(term))
+
+      const rank = result.score
+        + titleOverlap * 0.09
+        + contentOverlap * 0.015
+        + (exactShortTitle ? 0.12 : 0)
+        - Math.min(missingTitleTerms, 4) * 0.035
+        - index * 0.001
+
+      return { result, rank }
+    })
+    .sort((a, b) => b.rank - a.rank)
+    .map(item => item.result)
+}
+
 function sendEvent(res: NodeJS.WritableStream, data: object): void {
   res.write(`data: ${JSON.stringify(data)}\n\n`)
 }
@@ -124,7 +170,8 @@ export default defineEventHandler(async (event) => {
       return
     }
 
-    const { results, source: ragSource } = await buscarRag(queryVector, embedInfo.model, 5, 0.45)
+    const { results: rawResults, source: ragSource } = await buscarRag(queryVector, embedInfo.model, 5, 0.45)
+    const results = rankContextResults(question, rawResults)
     console.log(`[chat.post] Contexto RAG carregado de ${ragSource}.`)
 
     const context = results.length > 0

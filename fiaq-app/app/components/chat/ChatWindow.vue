@@ -2,7 +2,7 @@
   <div class="relative">
     <div
       ref="messagesEl"
-      class="fiaq-chat-stream flex min-h-[46vh] flex-col gap-4 rounded-lg border border-slate-200 bg-white/70 px-3 py-4 shadow-sm ring-1 ring-white/60 sm:px-5"
+      class="fiaq-chat-stream mx-auto flex min-h-[calc(100dvh-18rem)] w-full max-w-7xl flex-col gap-5 bg-white px-4 pb-32 pt-5 sm:px-6 lg:px-8"
     >
       <div
         v-if="messages.length === 0"
@@ -38,7 +38,10 @@
         v-for="msg in messages"
         :key="msg.id"
       >
-        <ChatMessageBubble :message="msg" />
+        <ChatMessageBubble
+          :message="msg"
+          :all-messages="messages"
+        />
       </template>
       <ChatTypingIndicator v-if="showTyping" />
       <div
@@ -117,7 +120,7 @@ onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
   window.addEventListener('resize', handleScroll)
   handleScroll()
-  scrollToBottom('auto')
+  if (props.loading) scrollToBottom('auto')
 })
 
 onBeforeUnmount(() => {
@@ -128,7 +131,10 @@ onBeforeUnmount(() => {
 watch(
   () => props.messages.length,
   () => {
-    scrollToBottom(props.messages.length > 1 ? 'smooth' : 'auto')
+    const last = props.messages[props.messages.length - 1]
+    if (props.loading || last?.streaming) {
+      scrollToBottom(props.messages.length > 1 ? 'smooth' : 'auto')
+    }
   }
 )
 

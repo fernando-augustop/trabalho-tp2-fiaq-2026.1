@@ -26,7 +26,7 @@ As variáveis de ambiente foram configuradas na Vercel para produção, preview 
 
 | Função | Provider | Modelo |
 |---|---|---|
-| Chat/geração de resposta | OpenRouter | `openrouter/free` |
+| Chat/geração de resposta | OpenRouter | `google/gemma-4-31b-it:free` |
 | Embeddings/busca semântica | OpenRouter | `nvidia/llama-nemotron-embed-vl-1b-v2:free` |
 
 O enriquecimento da IA é feito por **RAG em Postgres/pgvector**. As fontes institucionais ficam em `fiaq-app/data/`: FAQ curado, páginas crawleadas da UnB/CIC e PDFs oficiais. O seed `pnpm seed:knowledge` transforma esse conteúdo em documentos e chunks, gera embeddings com o modelo acima e grava tudo em `rag_documento`/`rag_chunk`. O fallback `fiaq-app/server/assets/rag-index.json` continua versionado apenas para desenvolvimento ou recuperação se o banco estiver indisponível.

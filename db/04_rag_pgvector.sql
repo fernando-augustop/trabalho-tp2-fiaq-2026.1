@@ -4,8 +4,9 @@
 -- O modelo de embedding usado no deploy atual gera 2048 dimensoes:
 --   nvidia/llama-nemotron-embed-vl-1b-v2:free
 --
--- openrouter/free e o roteador de chat. A busca semantica precisa de um modelo
--- de embedding separado e do mesmo modelo para indexar e consultar.
+-- O modelo de chat gratuito fixo e google/gemma-4-31b-it:free.
+-- A busca semantica precisa de um modelo de embedding separado e do mesmo modelo
+-- para indexar e consultar.
 
 CREATE SCHEMA IF NOT EXISTS extensions;
 
