@@ -1,9 +1,8 @@
 <template>
-  <div class="relative min-h-0 flex-1">
+  <div class="relative">
     <div
       ref="messagesEl"
-      class="fiaq-chat-scroll flex h-full flex-col gap-4 overflow-y-auto rounded-2xl border border-slate-200 bg-white/70 px-3 py-4 shadow-sm ring-1 ring-white/60 sm:px-5"
-      @scroll="handleScroll"
+      class="fiaq-chat-stream flex min-h-[46vh] flex-col gap-4 rounded-lg border border-slate-200 bg-white/70 px-3 py-4 shadow-sm ring-1 ring-white/60 sm:px-5"
     >
       <div
         v-if="messages.length === 0"
@@ -42,13 +41,18 @@
         <ChatMessageBubble :message="msg" />
       </template>
       <ChatTypingIndicator v-if="showTyping" />
+      <div
+        ref="bottomEl"
+        class="h-1"
+        aria-hidden="true"
+      />
     </div>
 
     <button
       v-if="showJumpToBottom"
       type="button"
       title="Ir para o fim da conversa"
-      class="absolute bottom-4 left-1/2 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#1a2e5a] px-4 py-2 text-xs font-bold text-white shadow-lg ring-1 ring-white/20 transition-all hover:bg-[#243d75] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+      class="fixed bottom-28 left-1/2 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#1a2e5a] px-4 py-2 text-xs font-bold text-white shadow-lg ring-1 ring-white/20 transition-all hover:bg-[#243d75] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
       @click="scrollToBottom('smooth')"
     >
       <UIcon
@@ -61,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import type { Message } from '~/composables/useFiaqChat'
 
 const props = defineProps<{
@@ -87,13 +91,14 @@ const suggestions = [
 ]
 
 const messagesEl = ref<HTMLElement | null>(null)
+const bottomEl = ref<HTMLElement | null>(null)
 const isNearBottom = ref(true)
 const showJumpToBottom = computed(() => props.messages.length > 0 && !isNearBottom.value)
 
 function measureBottomDistance() {
-  const el = messagesEl.value
-  if (!el) return 0
-  return el.scrollHeight - el.scrollTop - el.clientHeight
+  if (!import.meta.client) return 0
+  const doc = document.documentElement
+  return doc.scrollHeight - window.scrollY - window.innerHeight
 }
 
 function handleScroll() {
@@ -102,14 +107,22 @@ function handleScroll() {
 
 async function scrollToBottom(behavior: ScrollBehavior = 'auto') {
   await nextTick()
-  if (messagesEl.value) {
-    messagesEl.value.scrollTo({ top: messagesEl.value.scrollHeight, behavior })
-    isNearBottom.value = true
-  }
+  const target = bottomEl.value ?? messagesEl.value
+  if (target) target.scrollIntoView({ block: 'end', behavior })
+  else window.scrollTo({ top: document.documentElement.scrollHeight, behavior })
+  isNearBottom.value = true
 }
 
 onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  window.addEventListener('resize', handleScroll)
+  handleScroll()
   scrollToBottom('auto')
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('resize', handleScroll)
 })
 
 watch(
@@ -136,19 +149,7 @@ watch(
 </script>
 
 <style scoped>
-.fiaq-chat-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #94a3b8 transparent;
-}
-
-.fiaq-chat-scroll::-webkit-scrollbar {
-  width: 10px;
-}
-
-.fiaq-chat-scroll::-webkit-scrollbar-thumb {
-  background: #94a3b8;
-  border: 3px solid transparent;
-  border-radius: 999px;
-  background-clip: content-box;
+.fiaq-chat-stream {
+  scroll-margin-bottom: 9rem;
 }
 </style>

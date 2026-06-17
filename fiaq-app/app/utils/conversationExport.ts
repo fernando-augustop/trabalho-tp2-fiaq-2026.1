@@ -1,6 +1,6 @@
 import type { Message, MessageDraft, Source } from '~/composables/useFiaqChat'
 
-export type ConversationExportFormat = 'json' | 'txt' | 'md' | 'pdf'
+export type ConversationExportFormat = 'json' | 'txt' | 'md' | 'pdf' | 'xls'
 
 interface PortableConversation {
   app: 'fiaq'
@@ -77,6 +77,19 @@ function plainText(text: string): string {
     .replace(/\r\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function htmlCell(text: string): string {
+  return escapeHtml(text).replace(/\n/g, '<br>')
 }
 
 function pdfSafeText(text: string): string {
@@ -269,6 +282,70 @@ function buildMarkdown(messages: Message[]): string {
   }
 
   return `${lines.join('\n')}\n`
+}
+
+function buildExcelHtml(messages: Message[]): string {
+  const registry = createSourceRegistry(messages)
+  const sourcesByIndex = new Map(registry.records.map(record => [record.index, record.source]))
+  const rows = [
+    '<tr><th>Ordem</th><th>Tipo</th><th>Conteudo</th><th>Fontes</th></tr>'
+  ]
+
+  messages.forEach((message, index) => {
+    const refs = registry.byMessageId.get(message.id) ?? []
+    const sources = refs
+      .map((ref) => {
+        const source = sourcesByIndex.get(ref)
+        if (!source) return ''
+        return `[${ref}] ${source.titulo}${source.url ? ` - ${source.url}` : ''}`
+      })
+      .filter(Boolean)
+      .join('\n')
+
+    rows.push(
+      '<tr>'
+      + `<td>${index + 1}</td>`
+      + `<td>${message.role === 'user' ? 'Pergunta' : 'Resposta'}</td>`
+      + `<td>${htmlCell(plainText(message.content))}</td>`
+      + `<td>${htmlCell(sources)}</td>`
+      + '</tr>'
+    )
+  })
+
+  if (registry.records.length) {
+    rows.push('<tr><td></td><td>Fontes oficiais</td><td></td><td></td></tr>')
+    for (const record of registry.records) {
+      rows.push(
+        '<tr>'
+        + `<td>${record.index}</td>`
+        + '<td>Fonte</td>'
+        + `<td>${htmlCell(record.source.titulo)}</td>`
+        + `<td>${htmlCell(record.source.url)}</td>`
+        + '</tr>'
+      )
+    }
+  }
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    table { border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; }
+    th { background: #1a2e5a; color: #ffffff; text-align: left; }
+    th, td { border: 1px solid #cbd5e1; padding: 8px; vertical-align: top; mso-number-format: "\\@"; }
+    td:nth-child(1) { width: 48px; }
+    td:nth-child(2) { width: 96px; font-weight: 700; }
+    td:nth-child(3) { width: 560px; }
+    td:nth-child(4) { width: 360px; color: #334155; }
+  </style>
+</head>
+<body>
+  <table>
+    ${rows.join('\n    ')}
+  </table>
+</body>
+</html>`
 }
 
 function addWrappedText(
@@ -580,6 +657,14 @@ export async function exportConversation(messages: Message[], format: Conversati
 
   if (format === 'md') {
     downloadBlob(new Blob([buildMarkdown(cleanMessages)], { type: 'text/markdown;charset=utf-8' }), safeFilename(title, 'md'))
+    return
+  }
+
+  if (format === 'xls') {
+    downloadBlob(
+      new Blob([buildExcelHtml(cleanMessages)], { type: 'application/vnd.ms-excel;charset=utf-8' }),
+      safeFilename(title, 'xls')
+    )
     return
   }
 

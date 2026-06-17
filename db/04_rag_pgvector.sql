@@ -95,6 +95,7 @@ RETURNS TABLE (
 )
 LANGUAGE sql
 STABLE
+SET search_path = public, extensions
 AS $$
   WITH candidatos AS (
     SELECT
@@ -109,8 +110,8 @@ AS $$
         WHEN 'pdf' THEN 0.02
         ELSE 0
       END AS boost
-    FROM rag_chunk rc
-    JOIN rag_documento rd ON rd.id = rc.id_documento
+    FROM public.rag_chunk rc
+    JOIN public.rag_documento rd ON rd.id = rc.id_documento
     WHERE rc.ativo = TRUE
       AND rd.ativo = TRUE
       AND rc.modelo_embedding = p_modelo_embedding

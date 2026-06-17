@@ -46,13 +46,15 @@ Supabase e variáveis do OpenRouter.
 -- primeiro: db/01_faq_tabelas.sql
 -- depois:   db/02_perguntas_tabelas.sql
 -- depois:   db/04_rag_pgvector.sql
+-- depois:   db/05_supabase_rag_search_hardening.sql
 -- por fim:  db/03_supabase_app_role.sql
 ```
 
 Os SQLs usam `IF NOT EXISTS`, então podem ser reaplicados durante setup sem
 falhar por tabela ou índice já existente. O `04_` ativa `pgvector`, cria as
-tabelas RAG e a função `buscar_rag_chunks`. O `03_` habilita RLS e cria a role
-limitada `fiaq_app`; a senha dessa role deve ser definida diretamente no
+tabelas RAG e a função `buscar_rag_chunks`. O `05_` reaplica a função com
+`search_path` fixo para bancos já existentes. O `03_` habilita RLS e cria a
+role limitada `fiaq_app`; a senha dessa role deve ser definida diretamente no
 Supabase, fora do repositório.
 
 ## 2. Popular o conhecimento no banco
