@@ -5,7 +5,9 @@ export type { FaqCategory }
 // O FAQ muda apenas por seed/deploy; cache por instância evita consulta repetida.
 let cache: FaqCategory[] | null = null
 
-export default defineEventHandler(async (): Promise<FaqCategory[]> => {
+export default defineEventHandler(async (event): Promise<FaqCategory[]> => {
+  setResponseHeader(event, 'Cache-Control', 'public, max-age=300, stale-while-revalidate=86400')
+
   if (cache) return cache
 
   const { categories, source } = await listarFaq()

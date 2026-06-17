@@ -42,7 +42,8 @@ Transaction Pooler URI do Supabase:
 CHAT_PROVIDER=openrouter
 EMBED_PROVIDER=openrouter
 OPENROUTER_API_KEY=...
-OPENROUTER_CHAT_MODEL=openrouter/owl-alpha
+OPENROUTER_CHAT_MODEL=google/gemma-4-31b-it:free
+OPENROUTER_CHAT_FALLBACK_MODELS=nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3-super-120b-a12b:free
 OPENROUTER_EMBED_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
 DATABASE_URL=postgresql://fiaq_app.PROJECT_REF:SENHA@REGIAO.pooler.supabase.com:6543/postgres?sslmode=require
 ```
@@ -53,6 +54,9 @@ Notas importantes:
 - A URI do pooler deve usar porta `6543` e `sslmode=require`.
 - O app usa `postgres.js` com `prepare: false`, compatível com o pooler do
   Supabase em ambiente serverless.
+- Prefira modelo gratuito fixo em `OPENROUTER_CHAT_MODEL`; `openrouter/free`
+  roteia aleatoriamente e pode escolher um modelo menos adequado para português.
+- Embeddings precisam continuar no mesmo modelo usado no seed do RAG.
 - Nunca commite `OPENROUTER_API_KEY`, senha do banco ou connection string real.
 
 ## Validar a suite completa

@@ -1,5 +1,5 @@
 <template>
-  <nav class="fiaq-nav bg-[#1a2e5a] px-6 sm:px-10 py-4 flex items-center justify-between shrink-0">
+  <nav class="fiaq-nav sticky top-0 z-50 bg-[#1a2e5a] px-6 sm:px-10 py-4 flex items-center justify-between shrink-0">
     <NuxtLink
       to="/"
       class="fiaq-logo text-white text-4xl sm:text-5xl font-black tracking-tight"

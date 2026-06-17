@@ -89,7 +89,10 @@ pnpm index:rag                # opcional: regrava fallback server/assets/rag-ind
 
 > O seed de conhecimento precisa usar o **mesmo modelo de embedding** configurado
 > no runtime. O deploy atual usa `nvidia/llama-nemotron-embed-vl-1b-v2:free`
-> para embeddings e `openrouter/owl-alpha` para o chat.
+> para embeddings e `google/gemma-4-31b-it:free` para o chat, com
+> `nvidia/nemotron-3-ultra-550b-a55b:free` e
+> `nvidia/nemotron-3-super-120b-a12b:free` como fallbacks. Não use
+> `openrouter/free` como embedding: ele é roteador aleatório de chat/texto.
 
 ## Banco de Dados
 

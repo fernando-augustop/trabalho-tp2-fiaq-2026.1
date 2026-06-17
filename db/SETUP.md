@@ -11,10 +11,12 @@
 | `01_faq_tabelas.sql` | Tabelas do FAQ (faq_categoria, faq_entrada) | 1º |
 | `02_perguntas_tabelas.sql` | Tabelas de análise (pergunta_registrada, ocorrencia_pergunta) | 2º |
 | `04_rag_pgvector.sql` | Extensão pgvector, tabelas RAG e função de busca | 3º |
-| `03_supabase_app_role.sql` | Role limitada, grants e RLS | 4º |
+| `05_supabase_rag_search_hardening.sql` | Hardening idempotente da função RAG | 4º |
+| `03_supabase_app_role.sql` | Role limitada, grants e RLS | 5º |
 
 `02_perguntas_tabelas.sql` e `04_rag_pgvector.sql` dependem de `faq_entrada`.
-O `03_` deve rodar por último para conceder permissões nas tabelas já criadas.
+O `03_` deve rodar por último para conceder permissões nas tabelas e funções já
+criadas.
 
 ## Variáveis de ambiente
 
@@ -102,6 +104,7 @@ Execute os comandos abaixo a partir da pasta `db/` do repositório,
 docker exec -i fiaq-postgres psql -U fiaq -d fiaq < 01_faq_tabelas.sql
 docker exec -i fiaq-postgres psql -U fiaq -d fiaq < 02_perguntas_tabelas.sql
 docker exec -i fiaq-postgres psql -U fiaq -d fiaq < 04_rag_pgvector.sql
+docker exec -i fiaq-postgres psql -U fiaq -d fiaq < 05_supabase_rag_search_hardening.sql
 docker exec -i fiaq-postgres psql -U fiaq -d fiaq < 03_supabase_app_role.sql
 ```
 
@@ -114,6 +117,7 @@ Use `Get-Content` como alternativa segura:
 Get-Content 01_faq_tabelas.sql | docker exec -i fiaq-postgres psql -U fiaq -d fiaq
 Get-Content 02_perguntas_tabelas.sql | docker exec -i fiaq-postgres psql -U fiaq -d fiaq
 Get-Content 04_rag_pgvector.sql | docker exec -i fiaq-postgres psql -U fiaq -d fiaq
+Get-Content 05_supabase_rag_search_hardening.sql | docker exec -i fiaq-postgres psql -U fiaq -d fiaq
 Get-Content 03_supabase_app_role.sql | docker exec -i fiaq-postgres psql -U fiaq -d fiaq
 ```
 

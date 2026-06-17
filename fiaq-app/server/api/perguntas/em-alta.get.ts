@@ -13,5 +13,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Parâmetro "limite" deve ser inteiro entre 1 e 20.' })
   }
 
+  setResponseHeader(event, 'Cache-Control', 'public, max-age=60, stale-while-revalidate=300')
+
   return listarEmAlta(dias, limite)
 })

@@ -4,8 +4,9 @@
 -- O modelo de embedding usado no deploy atual gera 2048 dimensoes:
 --   nvidia/llama-nemotron-embed-vl-1b-v2:free
 --
--- Owl Alpha continua sendo o modelo de chat. A busca semantica precisa de um
--- modelo de embedding separado e do mesmo modelo para indexar e consultar.
+-- O modelo de chat gratuito fixo e google/gemma-4-31b-it:free.
+-- A busca semantica precisa de um modelo de embedding separado e do mesmo modelo
+-- para indexar e consultar.
 
 CREATE SCHEMA IF NOT EXISTS extensions;
 
@@ -95,6 +96,7 @@ RETURNS TABLE (
 )
 LANGUAGE sql
 STABLE
+SET search_path = public, extensions
 AS $$
   WITH candidatos AS (
     SELECT
@@ -109,8 +111,8 @@ AS $$
         WHEN 'pdf' THEN 0.02
         ELSE 0
       END AS boost
-    FROM rag_chunk rc
-    JOIN rag_documento rd ON rd.id = rc.id_documento
+    FROM public.rag_chunk rc
+    JOIN public.rag_documento rd ON rd.id = rc.id_documento
     WHERE rc.ativo = TRUE
       AND rd.ativo = TRUE
       AND rc.modelo_embedding = p_modelo_embedding

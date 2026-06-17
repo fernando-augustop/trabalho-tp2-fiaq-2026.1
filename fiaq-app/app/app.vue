@@ -8,7 +8,7 @@ a{color:inherit;text-decoration:none}
 button,input{font:inherit}
 #__nuxt{min-height:100vh}
 .fiaq-shell{min-height:100vh;background:#f4f4f4;display:flex;flex-direction:column}
-.fiaq-nav{background:#1a2e5a;display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;flex-shrink:0}
+.fiaq-nav{background:#1a2e5a;display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;flex-shrink:0;position:sticky;top:0;z-index:50}
 .fiaq-logo{color:#fff;font-size:2.25rem;line-height:1;font-weight:900;letter-spacing:-.025em}
 .fiaq-logo-accent{color:#00a155}
 .fiaq-nav-links{display:flex;gap:1.5rem;color:#fff;font-size:.875rem;font-weight:500}

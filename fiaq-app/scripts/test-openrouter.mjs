@@ -16,8 +16,19 @@ loadEnv()
 
 const URL_BASE = 'https://openrouter.ai/api/v1'
 const KEY = process.env.OPENROUTER_API_KEY
-const CHAT_MODEL = process.env.OPENROUTER_CHAT_MODEL || 'openrouter/owl-alpha'
-const EMBED_MODEL = process.env.OPENROUTER_EMBED_MODEL || 'nvidia/llama-nemotron-embed-vl-1b-v2:free'
+const DEFAULT_CHAT_MODEL = 'google/gemma-4-31b-it:free'
+const DEFAULT_FALLBACK_CHAT_MODEL = 'nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3-super-120b-a12b:free'
+const ROUTER_CHAT_MODEL = 'openrouter/free'
+const COMPATIBLE_EMBED_MODEL = 'nvidia/llama-nemotron-embed-vl-1b-v2:free'
+const CHAT_MODEL = (process.env.OPENROUTER_CHAT_MODEL || DEFAULT_CHAT_MODEL).trim()
+const FALLBACK_CHAT_MODELS = process.env.OPENROUTER_CHAT_FALLBACK_MODELS || DEFAULT_FALLBACK_CHAT_MODEL
+const RAW_EMBED_MODEL = (process.env.OPENROUTER_EMBED_MODEL || COMPATIBLE_EMBED_MODEL).trim()
+const CHAT_ONLY_MODELS = new Set([
+  ROUTER_CHAT_MODEL,
+  CHAT_MODEL,
+  ...FALLBACK_CHAT_MODELS.split(',').map(model => model.trim()).filter(Boolean)
+].map(model => model.toLowerCase()))
+const EMBED_MODEL = CHAT_ONLY_MODELS.has(RAW_EMBED_MODEL.toLowerCase()) ? COMPATIBLE_EMBED_MODEL : RAW_EMBED_MODEL
 
 const headers = {
   'Content-Type': 'application/json',
@@ -32,6 +43,9 @@ if (!KEY || KEY === 'COLE_SUA_KEY_AQUI') {
 }
 
 console.log('🔑 Key detectada:', KEY.slice(0, 12) + '…\n')
+if (CHAT_ONLY_MODELS.has(RAW_EMBED_MODEL)) {
+  console.log(`⚠️  ${RAW_EMBED_MODEL} é modelo de chat; embeddings serão testados com ${COMPATIBLE_EMBED_MODEL}.\n`)
+}
 
 // ── 1) Chat ──────────────────────────────────────────────────────────────────
 console.log(`💬 Testando CHAT (${CHAT_MODEL})…`)
@@ -41,6 +55,8 @@ try {
     headers,
     body: JSON.stringify({
       model: CHAT_MODEL,
+      temperature: 0.2,
+      max_tokens: 120,
       messages: [{ role: 'user', content: 'Responda apenas: ok' }]
     })
   })

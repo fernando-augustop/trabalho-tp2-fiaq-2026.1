@@ -54,7 +54,10 @@ def make_llm():
 
     if os.getenv("OPENROUTER_API_KEY"):
         return ChatOpenAI(
-            model=os.getenv("BROWSER_USE_OPENROUTER_MODEL", os.getenv("OPENROUTER_CHAT_MODEL", "openai/gpt-4.1-mini")),
+            model=os.getenv(
+                "BROWSER_USE_OPENROUTER_MODEL",
+                os.getenv("OPENROUTER_CHAT_MODEL", "google/gemma-4-31b-it:free"),
+            ),
             api_key=os.environ["OPENROUTER_API_KEY"],
             base_url="https://openrouter.ai/api/v1",
         )

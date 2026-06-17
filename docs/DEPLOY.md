@@ -46,13 +46,15 @@ Supabase e variáveis do OpenRouter.
 -- primeiro: db/01_faq_tabelas.sql
 -- depois:   db/02_perguntas_tabelas.sql
 -- depois:   db/04_rag_pgvector.sql
+-- depois:   db/05_supabase_rag_search_hardening.sql
 -- por fim:  db/03_supabase_app_role.sql
 ```
 
 Os SQLs usam `IF NOT EXISTS`, então podem ser reaplicados durante setup sem
 falhar por tabela ou índice já existente. O `04_` ativa `pgvector`, cria as
-tabelas RAG e a função `buscar_rag_chunks`. O `03_` habilita RLS e cria a role
-limitada `fiaq_app`; a senha dessa role deve ser definida diretamente no
+tabelas RAG e a função `buscar_rag_chunks`. O `05_` reaplica a função com
+`search_path` fixo para bancos já existentes. O `03_` habilita RLS e cria a
+role limitada `fiaq_app`; a senha dessa role deve ser definida diretamente no
 Supabase, fora do repositório.
 
 ## 2. Popular o conhecimento no banco
@@ -109,14 +111,16 @@ Configure em **Settings → Environment Variables**:
 OPENROUTER_API_KEY      = configurada apenas na Vercel, nunca versionada
 CHAT_PROVIDER           = openrouter
 EMBED_PROVIDER          = openrouter
-OPENROUTER_CHAT_MODEL   = openrouter/owl-alpha
+OPENROUTER_CHAT_MODEL   = google/gemma-4-31b-it:free
+OPENROUTER_CHAT_FALLBACK_MODELS = nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3-super-120b-a12b:free
 OPENROUTER_EMBED_MODEL  = nvidia/llama-nemotron-embed-vl-1b-v2:free
 DATABASE_URL            = postgresql://...supabase...:6543/postgres?sslmode=require
 ```
 
 > O modelo de embedding **precisa ser o mesmo** usado para gerar o índice
-> salvo em `rag_chunk.embedding`, senão as buscas ficam inconsistentes. Owl Alpha
-> é o modelo de chat; o Nemotron continua necessário para embeddings.
+> salvo em `rag_chunk.embedding`, senão as buscas ficam inconsistentes. O chat
+> usa um modelo gratuito fixo para evitar a rotação aleatória do `openrouter/free`;
+> o Nemotron Embed continua necessário para embeddings.
 
 ## 6. Validar antes de subir
 

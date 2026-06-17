@@ -23,7 +23,7 @@
       />
     </div>
 
-    <div class="flex max-w-[88%] flex-col gap-2 sm:max-w-[78%]">
+    <div class="flex w-full max-w-[min(56rem,92vw)] flex-col gap-2">
       <!-- Message content -->
       <div class="rounded-2xl rounded-bl-sm border border-gray-200 bg-white px-5 py-3 text-sm leading-relaxed text-[#1a2e5a] shadow-sm">
         <div
@@ -34,27 +34,6 @@
           v-if="message.streaming"
           class="inline-block w-1.5 h-3.5 bg-[#1a2e5a] ml-0.5 align-middle animate-pulse"
         />
-      </div>
-
-      <div
-        v-if="!message.streaming"
-        class="flex items-center gap-2 px-1"
-      >
-        <button
-          type="button"
-          :title="copyTitle"
-          class="inline-flex h-8 items-center gap-1.5 rounded-lg border bg-white px-2.5 text-[11px] font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
-          :class="copyStatus === 'error'
-            ? 'border-red-200 text-red-600 hover:border-red-300'
-            : 'border-slate-200 text-slate-600 hover:border-[#1a2e5a] hover:text-[#1a2e5a]'"
-          @click="copyMessage"
-        >
-          <UIcon
-            :name="copyIcon"
-            class="h-3.5 w-3.5"
-          />
-          {{ copyLabel }}
-        </button>
       </div>
 
       <!-- Sources -->
@@ -75,17 +54,105 @@
           :source="source"
         />
       </div>
+
+      <div
+        v-if="!message.streaming"
+        ref="actionsEl"
+        class="flex flex-wrap items-center gap-2 px-1 pt-1"
+      >
+        <button
+          type="button"
+          :title="copyTitle"
+          class="inline-flex h-8 items-center gap-1.5 rounded-lg border bg-white px-2.5 text-[11px] font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+          :class="copyStatus === 'error'
+            ? 'border-red-200 text-red-600 hover:border-red-300'
+            : 'border-slate-200 text-slate-600 hover:border-[#1a2e5a] hover:text-[#1a2e5a]'"
+          @click="copyMessage"
+        >
+          <UIcon
+            :name="copyIcon"
+            class="h-3.5 w-3.5"
+          />
+          {{ copyLabel }}
+        </button>
+
+        <div
+          class="relative"
+          @keydown.escape="showExportMenu = false"
+        >
+          <button
+            type="button"
+            :disabled="exportBusy"
+            :aria-expanded="showExportMenu"
+            aria-haspopup="menu"
+            title="Baixar conversa"
+            class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#1a2e5a] hover:text-[#1a2e5a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+            @click.stop="showExportMenu = !showExportMenu"
+          >
+            <UIcon
+              name="i-lucide-download"
+              class="h-3.5 w-3.5"
+            />
+            Baixar
+            <UIcon
+              name="i-lucide-chevron-down"
+              class="h-3 w-3"
+            />
+          </button>
+
+          <div
+            v-if="showExportMenu"
+            role="menu"
+            class="absolute bottom-full left-0 z-30 mb-2 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl ring-1 ring-slate-900/5"
+          >
+            <button
+              v-for="option in exportOptions"
+              :key="option.format"
+              type="button"
+              role="menuitem"
+              class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 hover:text-[#1a2e5a] focus:bg-slate-100 focus:outline-none"
+              @click="handleExport(option.format)"
+            >
+              <UIcon
+                :name="option.icon"
+                class="h-4 w-4"
+              />
+              {{ option.label }}
+            </button>
+          </div>
+        </div>
+
+        <span
+          v-if="actionStatus"
+          class="text-[11px] font-medium"
+          :class="actionStatusKind === 'error' ? 'text-red-600' : 'text-slate-500'"
+        >
+          {{ actionStatus }}
+        </span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { Message } from '~/composables/useFiaqChat'
 import { renderMarkdown } from '~/utils/markdown'
+import {
+  exportConversation,
+  type ConversationExportFormat
+} from '~/utils/conversationExport'
 
-const props = defineProps<{ message: Message }>()
+const props = defineProps<{
+  message: Message
+  allMessages: Message[]
+}>()
 const copyStatus = ref<'idle' | 'copied' | 'error'>('idle')
+const actionStatus = ref('')
+const actionStatusKind = ref<'info' | 'error'>('info')
+const exportBusy = ref(false)
+const showExportMenu = ref(false)
+const actionsEl = ref<HTMLElement | null>(null)
 let copyResetTimeout: number | null = null
 
 // Só mostra a bolha do assistente quando há texto (ou quando o stream terminou).
@@ -111,7 +178,7 @@ const renderedContent = computed(() => {
 const copyTitle = computed(() => {
   if (copyStatus.value === 'copied') return 'Copiado'
   if (copyStatus.value === 'error') return 'Não foi possível copiar'
-  return 'Copiar resposta'
+  return 'Copiar mensagem'
 })
 
 const copyIcon = computed(() => {
@@ -123,8 +190,20 @@ const copyIcon = computed(() => {
 const copyLabel = computed(() => {
   if (copyStatus.value === 'copied') return 'Copiado'
   if (copyStatus.value === 'error') return 'Erro'
-  return 'Copiar'
+  return 'Copiar mensagem'
 })
+
+const exportOptions: Array<{
+  format: ConversationExportFormat
+  label: string
+  icon: string
+}> = [
+  { format: 'pdf', label: 'PDF', icon: 'i-lucide-file-down' },
+  { format: 'xls', label: 'Excel', icon: 'i-lucide-table' },
+  { format: 'md', label: 'Markdown', icon: 'i-lucide-file-code' },
+  { format: 'json', label: 'JSON', icon: 'i-lucide-file-json' },
+  { format: 'txt', label: 'Texto', icon: 'i-lucide-file-text' }
+]
 
 function clearCopyResetTimeout() {
   if (copyResetTimeout === null) return
@@ -136,6 +215,7 @@ function scheduleCopyReset() {
   clearCopyResetTimeout()
   copyResetTimeout = window.setTimeout(() => {
     copyStatus.value = 'idle'
+    actionStatus.value = ''
     copyResetTimeout = null
   }, 1600)
 }
@@ -171,16 +251,53 @@ async function copyMessage() {
       throw new Error('COPY_FAILED')
     }
     copyStatus.value = 'copied'
+    actionStatus.value = 'Copiado.'
+    actionStatusKind.value = 'info'
     scheduleCopyReset()
   } catch {
     copyStatus.value = fallbackCopy(text) ? 'copied' : 'error'
+    actionStatus.value = copyStatus.value === 'copied' ? 'Copiado.' : 'Não foi possível copiar.'
+    actionStatusKind.value = copyStatus.value === 'copied' ? 'info' : 'error'
     scheduleCopyReset()
   }
 }
 
+async function handleExport(format: ConversationExportFormat) {
+  if (exportBusy.value) return
+
+  showExportMenu.value = false
+  actionStatus.value = ''
+  exportBusy.value = true
+
+  try {
+    await exportConversation(props.allMessages, format)
+    actionStatus.value = 'Baixado.'
+    actionStatusKind.value = 'info'
+  } catch {
+    actionStatus.value = 'Não foi possível baixar.'
+    actionStatusKind.value = 'error'
+  } finally {
+    exportBusy.value = false
+  }
+}
+
+function handleDocumentClick(event: MouseEvent) {
+  const target = event.target
+  if (!(target instanceof Node) || actionsEl.value?.contains(target)) return
+  showExportMenu.value = false
+}
+
 const plainCopy = computed(() => stripLinks(props.message.content ?? '').trim())
 
-onBeforeUnmount(clearCopyResetTimeout)
+watch(showExportMenu, (isOpen) => {
+  if (isOpen) document.addEventListener('click', handleDocumentClick)
+  else document.removeEventListener('click', handleDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleDocumentClick)
+  clearCopyResetTimeout()
+})
 </script>
 
 <style scoped>
