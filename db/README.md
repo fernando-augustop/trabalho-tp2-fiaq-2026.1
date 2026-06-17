@@ -32,12 +32,13 @@ O chatbot usa uma arquitetura **DB-first**:
 2. O backend chama `buscar_rag_chunks(...)` no Postgres.
 3. A função busca candidatos em `rag_chunk` usando cosine distance (`<=>`) com
    `pgvector`, aplica threshold e retorna os melhores trechos.
-4. O modelo de chat (`openrouter/owl-alpha`) recebe os trechos como contexto.
+4. O modelo de chat (`openrouter/free`) recebe os trechos como contexto.
 5. A pergunta e as fontes usadas são registradas nas tabelas de análise.
 
-O modelo de chat e o modelo de embedding são papéis diferentes. Owl Alpha escreve
-a resposta; o embedding model transforma perguntas e chunks em vetores. O deploy
-usa `nvidia/llama-nemotron-embed-vl-1b-v2:free`, com 2048 dimensões, por isso
+O modelo de chat e o modelo de embedding são papéis diferentes. `openrouter/free`
+roteia a escrita da resposta entre modelos gratuitos; o embedding model transforma
+perguntas e chunks em vetores. O deploy usa
+`nvidia/llama-nemotron-embed-vl-1b-v2:free`, com 2048 dimensões, por isso
 `rag_chunk.embedding` é `extensions.vector(2048)`.
 
 Para manter a busca eficiente com 2048 dimensões, `rag_chunk` também possui

@@ -111,14 +111,15 @@ Configure em **Settings → Environment Variables**:
 OPENROUTER_API_KEY      = configurada apenas na Vercel, nunca versionada
 CHAT_PROVIDER           = openrouter
 EMBED_PROVIDER          = openrouter
-OPENROUTER_CHAT_MODEL   = openrouter/owl-alpha
+OPENROUTER_CHAT_MODEL   = openrouter/free
 OPENROUTER_EMBED_MODEL  = nvidia/llama-nemotron-embed-vl-1b-v2:free
 DATABASE_URL            = postgresql://...supabase...:6543/postgres?sslmode=require
 ```
 
 > O modelo de embedding **precisa ser o mesmo** usado para gerar o índice
-> salvo em `rag_chunk.embedding`, senão as buscas ficam inconsistentes. Owl Alpha
-> é o modelo de chat; o Nemotron continua necessário para embeddings.
+> salvo em `rag_chunk.embedding`, senão as buscas ficam inconsistentes.
+> `openrouter/free` é roteador de chat/texto; o Nemotron continua necessário
+> para embeddings.
 
 ## 6. Validar antes de subir
 

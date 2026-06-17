@@ -9,8 +9,15 @@ const EMBED_MODEL = process.env.OLLAMA_EMBED_MODEL || 'nomic-embed-text'
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1'
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || ''
-const OPENROUTER_CHAT_MODEL = process.env.OPENROUTER_CHAT_MODEL || 'openrouter/owl-alpha'
-const OPENROUTER_EMBED_MODEL = process.env.OPENROUTER_EMBED_MODEL || 'nvidia/llama-nemotron-embed-vl-1b-v2:free'
+const OPENROUTER_FREE_CHAT_MODEL = 'openrouter/free'
+const OPENROUTER_COMPATIBLE_EMBED_MODEL = 'nvidia/llama-nemotron-embed-vl-1b-v2:free'
+const OPENROUTER_CHAT_MODEL = process.env.OPENROUTER_CHAT_MODEL || OPENROUTER_FREE_CHAT_MODEL
+const RAW_OPENROUTER_EMBED_MODEL = process.env.OPENROUTER_EMBED_MODEL || OPENROUTER_COMPATIBLE_EMBED_MODEL
+const OPENROUTER_CHAT_TIMEOUT_MS = readPositiveInt(process.env.OPENROUTER_CHAT_TIMEOUT_MS, 25000)
+const OPENROUTER_CHAT_ATTEMPTS = readPositiveInt(
+  process.env.OPENROUTER_CHAT_ATTEMPTS,
+  OPENROUTER_CHAT_MODEL === OPENROUTER_FREE_CHAT_MODEL ? 3 : 1
+)
 
 const CHAT_PROVIDER = (process.env.CHAT_PROVIDER || 'ollama').toLowerCase()
 const EMBED_PROVIDER = (process.env.EMBED_PROVIDER || 'ollama').toLowerCase()
@@ -19,6 +26,27 @@ const EMBED_PROVIDER = (process.env.EMBED_PROVIDER || 'ollama').toLowerCase()
 // Na Vercel usa VERCEL_URL automaticamente; localmente cai no localhost.
 const APP_URL = process.env.APP_URL
   || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
+function readPositiveInt(value: string | undefined, fallback: number): number {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback
+}
+
+function openRouterEmbedModel(): string {
+  const model = RAW_OPENROUTER_EMBED_MODEL.trim() || OPENROUTER_COMPATIBLE_EMBED_MODEL
+
+  if (model === OPENROUTER_FREE_CHAT_MODEL) {
+    console.warn(
+      `[OpenRouter] ${OPENROUTER_FREE_CHAT_MODEL} é um roteador de chat, não de embeddings. `
+      + `Usando ${OPENROUTER_COMPATIBLE_EMBED_MODEL} para manter o RAG/pgvector compatível.`
+    )
+    return OPENROUTER_COMPATIBLE_EMBED_MODEL
+  }
+
+  return model
+}
+
+const OPENROUTER_EMBED_MODEL = openRouterEmbedModel()
 
 // Identifica o modelo de embedding ativo — usado para gravar/consultar o RAG
 // no banco e validar o fallback JSON (modelos diferentes são incompatíveis).
@@ -48,14 +76,7 @@ export interface ChatMessage {
 // ─── Chat (não-streaming) ─────────────────────────────────────────────────────
 export async function chat(messages: ChatMessage[]): Promise<string> {
   if (CHAT_PROVIDER === 'openrouter') {
-    const res = await fetch(`${OPENROUTER_URL}/chat/completions`, {
-      method: 'POST',
-      headers: openRouterHeaders(),
-      body: JSON.stringify({ model: OPENROUTER_CHAT_MODEL, messages, stream: false })
-    })
-    if (!res.ok) throw new Error(`OpenRouter chat error: ${res.status} ${await res.text()}`)
-    const data = await res.json()
-    return data.choices?.[0]?.message?.content ?? ''
+    return openRouterChatText(messages, false)
   }
 
   const res = await fetch(`${OLLAMA_URL}/api/chat`, {
@@ -131,14 +152,49 @@ export async function chatStream(messages: ChatMessage[]): Promise<ReadableStrea
 //   data: {"choices":[{"delta":{"content":"..."}}]}\n\n
 //   data: [DONE]
 async function openRouterChatStream(messages: ChatMessage[]): Promise<ReadableStream<string>> {
-  const res = await fetch(`${OPENROUTER_URL}/chat/completions`, {
-    method: 'POST',
-    headers: openRouterHeaders(),
-    body: JSON.stringify({ model: OPENROUTER_CHAT_MODEL, messages, stream: true })
-  })
+  if (OPENROUTER_CHAT_MODEL === OPENROUTER_FREE_CHAT_MODEL) {
+    return new ReadableStream<string>({
+      async start(controller) {
+        try {
+          const text = await openRouterChatText(messages, true)
+          controller.enqueue(text)
+          controller.close()
+        } catch (e) {
+          controller.error(e)
+        }
+      }
+    })
+  }
 
-  if (!res.ok) throw new Error(`OpenRouter stream error: ${res.status} ${await res.text()}`)
-  if (!res.body) throw new Error('No response body')
+  return openRouterRawChatStream(messages)
+}
+
+async function openRouterRawChatStream(messages: ChatMessage[]): Promise<ReadableStream<string>> {
+  const abort = new AbortController()
+  const timeout = setTimeout(() => abort.abort(), OPENROUTER_CHAT_TIMEOUT_MS)
+
+  let res: Response
+  try {
+    res = await fetch(`${OPENROUTER_URL}/chat/completions`, {
+      method: 'POST',
+      headers: openRouterHeaders(),
+      signal: abort.signal,
+      body: JSON.stringify({ model: OPENROUTER_CHAT_MODEL, messages, stream: true })
+    })
+  } catch (e) {
+    clearTimeout(timeout)
+    throw e
+  }
+
+  if (!res.ok) {
+    const body = await res.text()
+    clearTimeout(timeout)
+    throw new Error(`OpenRouter stream error: ${res.status} ${body}`)
+  }
+  if (!res.body) {
+    clearTimeout(timeout)
+    throw new Error('No response body')
+  }
 
   const reader = res.body.getReader()
   const decoder = new TextDecoder()
@@ -146,46 +202,127 @@ async function openRouterChatStream(messages: ChatMessage[]): Promise<ReadableSt
 
   return new ReadableStream<string>({
     async pull(controller) {
-      while (true) {
-        const { done, value } = await reader.read()
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
 
-        if (done) {
-          controller.close()
-          return
-        }
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-
-        buffer = lines.pop() ?? ''
-        let enqueued = false
-
-        for (const line of lines) {
-          const trimmed = line.trim()
-          if (!trimmed || !trimmed.startsWith('data:')) continue
-
-          const payload = trimmed.slice(5).trim()
-          if (payload === '[DONE]') {
+          if (done) {
+            clearTimeout(timeout)
             controller.close()
             return
           }
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
 
-          try {
-            const json = JSON.parse(payload)
-            const content = json.choices?.[0]?.delta?.content
+          buffer = lines.pop() ?? ''
+          let enqueued = false
 
-            if (content) {
-              controller.enqueue(content)
-              enqueued = true
+          for (const line of lines) {
+            const trimmed = line.trim()
+            if (!trimmed || !trimmed.startsWith('data:')) continue
+
+            const payload = trimmed.slice(5).trim()
+            if (payload === '[DONE]') {
+              clearTimeout(timeout)
+              controller.close()
+              return
             }
-          } catch {
-            // chunk SSE parcial — ignora e aguarda completar no próximo read
-          }
-        }
 
-        if (enqueued) return
+            try {
+              const json = JSON.parse(payload)
+              const content = json.choices?.[0]?.delta?.content
+
+              if (content) {
+                controller.enqueue(content)
+                enqueued = true
+              }
+            } catch {
+              // chunk SSE parcial — ignora e aguarda completar no próximo read
+            }
+          }
+
+          if (enqueued) return
+        }
+      } catch (e) {
+        clearTimeout(timeout)
+        controller.error(e)
       }
+    },
+    cancel() {
+      clearTimeout(timeout)
+      abort.abort()
     }
   })
+}
+
+async function openRouterChatText(messages: ChatMessage[], stream: boolean): Promise<string> {
+  let lastErr: unknown
+
+  for (let attempt = 1; attempt <= OPENROUTER_CHAT_ATTEMPTS; attempt++) {
+    try {
+      const text = stream
+        ? await openRouterStreamTextOnce(messages)
+        : await openRouterChatTextOnce(messages)
+
+      if (!isUnusableOpenRouterText(text)) {
+        return text
+      }
+
+      lastErr = new Error('OpenRouter retornou conteúdo inválido para resposta final')
+      console.warn(`[OpenRouter] Resposta descartada no attempt ${attempt}: ${JSON.stringify(text.trim())}`)
+    } catch (e) {
+      lastErr = e
+      console.warn(`[OpenRouter] Falha no attempt ${attempt}:`, e)
+    }
+
+    if (attempt < OPENROUTER_CHAT_ATTEMPTS) {
+      await sleep(600 * attempt)
+    }
+  }
+
+  throw lastErr
+}
+
+async function openRouterChatTextOnce(messages: ChatMessage[]): Promise<string> {
+  const abort = new AbortController()
+  const timeout = setTimeout(() => abort.abort(), OPENROUTER_CHAT_TIMEOUT_MS)
+
+  try {
+    const res = await fetch(`${OPENROUTER_URL}/chat/completions`, {
+      method: 'POST',
+      headers: openRouterHeaders(),
+      signal: abort.signal,
+      body: JSON.stringify({ model: OPENROUTER_CHAT_MODEL, messages, stream: false })
+    })
+
+    if (!res.ok) throw new Error(`OpenRouter chat error: ${res.status} ${await res.text()}`)
+    const data = await res.json()
+    return data.choices?.[0]?.message?.content ?? ''
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+async function openRouterStreamTextOnce(messages: ChatMessage[]): Promise<string> {
+  const stream = await openRouterRawChatStream(messages)
+  const reader = stream.getReader()
+  let text = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    text += value
+  }
+
+  return text
+}
+
+function isUnusableOpenRouterText(text: string): boolean {
+  const trimmed = text.trim()
+  if (!trimmed) return true
+
+  return /^(?:user|assistant)\s+safety\s*:\s*(?:safe|unsafe)$/i.test(trimmed)
+    || /^(?:safe|unsafe)$/i.test(trimmed)
 }
 
 // ─── Embeddings ───────────────────────────────────────────────────────────────

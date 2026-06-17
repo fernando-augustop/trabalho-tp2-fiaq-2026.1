@@ -4,8 +4,8 @@
 -- O modelo de embedding usado no deploy atual gera 2048 dimensoes:
 --   nvidia/llama-nemotron-embed-vl-1b-v2:free
 --
--- Owl Alpha continua sendo o modelo de chat. A busca semantica precisa de um
--- modelo de embedding separado e do mesmo modelo para indexar e consultar.
+-- openrouter/free e o roteador de chat. A busca semantica precisa de um modelo
+-- de embedding separado e do mesmo modelo para indexar e consultar.
 
 CREATE SCHEMA IF NOT EXISTS extensions;
 

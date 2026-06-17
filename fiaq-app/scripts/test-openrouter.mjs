@@ -16,8 +16,11 @@ loadEnv()
 
 const URL_BASE = 'https://openrouter.ai/api/v1'
 const KEY = process.env.OPENROUTER_API_KEY
-const CHAT_MODEL = process.env.OPENROUTER_CHAT_MODEL || 'openrouter/owl-alpha'
-const EMBED_MODEL = process.env.OPENROUTER_EMBED_MODEL || 'nvidia/llama-nemotron-embed-vl-1b-v2:free'
+const FREE_CHAT_MODEL = 'openrouter/free'
+const COMPATIBLE_EMBED_MODEL = 'nvidia/llama-nemotron-embed-vl-1b-v2:free'
+const CHAT_MODEL = process.env.OPENROUTER_CHAT_MODEL || FREE_CHAT_MODEL
+const RAW_EMBED_MODEL = process.env.OPENROUTER_EMBED_MODEL || COMPATIBLE_EMBED_MODEL
+const EMBED_MODEL = RAW_EMBED_MODEL === FREE_CHAT_MODEL ? COMPATIBLE_EMBED_MODEL : RAW_EMBED_MODEL
 
 const headers = {
   'Content-Type': 'application/json',
@@ -32,6 +35,9 @@ if (!KEY || KEY === 'COLE_SUA_KEY_AQUI') {
 }
 
 console.log('🔑 Key detectada:', KEY.slice(0, 12) + '…\n')
+if (RAW_EMBED_MODEL === FREE_CHAT_MODEL) {
+  console.log(`⚠️  ${FREE_CHAT_MODEL} é roteador de chat; embeddings serão testados com ${COMPATIBLE_EMBED_MODEL}.\n`)
+}
 
 // ── 1) Chat ──────────────────────────────────────────────────────────────────
 console.log(`💬 Testando CHAT (${CHAT_MODEL})…`)
