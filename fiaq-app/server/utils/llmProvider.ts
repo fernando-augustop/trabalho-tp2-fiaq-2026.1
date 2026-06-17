@@ -231,7 +231,16 @@ async function openRouterChatStream(messages: ChatMessage[]): Promise<ReadableSt
 
 async function openRouterRawChatStream(model: string, messages: ChatMessage[]): Promise<ReadableStream<string>> {
   const abort = new AbortController()
-  const timeout = setTimeout(() => abort.abort(), OPENROUTER_CHAT_TIMEOUT_MS)
+  let timeout: ReturnType<typeof setTimeout> | undefined
+  const clearStreamTimeout = () => {
+    if (timeout) clearTimeout(timeout)
+    timeout = undefined
+  }
+  const resetStreamTimeout = () => {
+    clearStreamTimeout()
+    timeout = setTimeout(() => abort.abort(), OPENROUTER_CHAT_TIMEOUT_MS)
+  }
+  resetStreamTimeout()
 
   let res: Response
   try {
@@ -242,17 +251,17 @@ async function openRouterRawChatStream(model: string, messages: ChatMessage[]): 
       body: JSON.stringify(openRouterChatBody(model, messages, true))
     })
   } catch (e) {
-    clearTimeout(timeout)
+    clearStreamTimeout()
     throw e
   }
 
   if (!res.ok) {
     const body = await res.text()
-    clearTimeout(timeout)
+    clearStreamTimeout()
     throw new Error(`OpenRouter stream error: ${res.status} ${body}`)
   }
   if (!res.body) {
-    clearTimeout(timeout)
+    clearStreamTimeout()
     throw new Error('No response body')
   }
 
@@ -267,10 +276,11 @@ async function openRouterRawChatStream(model: string, messages: ChatMessage[]): 
           const { done, value } = await reader.read()
 
           if (done) {
-            clearTimeout(timeout)
+            clearStreamTimeout()
             controller.close()
             return
           }
+          resetStreamTimeout()
           buffer += decoder.decode(value, { stream: true })
           const lines = buffer.split('\n')
 
@@ -283,7 +293,7 @@ async function openRouterRawChatStream(model: string, messages: ChatMessage[]): 
 
             const payload = trimmed.slice(5).trim()
             if (payload === '[DONE]') {
-              clearTimeout(timeout)
+              clearStreamTimeout()
               controller.close()
               return
             }
@@ -304,12 +314,12 @@ async function openRouterRawChatStream(model: string, messages: ChatMessage[]): 
           if (enqueued) return
         }
       } catch (e) {
-        clearTimeout(timeout)
+        clearStreamTimeout()
         controller.error(e)
       }
     },
     cancel() {
-      clearTimeout(timeout)
+      clearStreamTimeout()
       abort.abort()
     }
   })

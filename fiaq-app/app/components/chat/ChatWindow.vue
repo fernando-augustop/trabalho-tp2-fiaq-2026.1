@@ -46,7 +46,7 @@
       <ChatTypingIndicator v-if="showTyping" />
       <div
         ref="bottomEl"
-        class="h-1"
+        class="chat-bottom-anchor h-1"
         aria-hidden="true"
       />
     </div>
@@ -155,7 +155,7 @@ watch(
 </script>
 
 <style scoped>
-.fiaq-chat-stream {
+.chat-bottom-anchor {
   scroll-margin-bottom: 9rem;
 }
 </style>

@@ -38,6 +38,7 @@
     <button
       type="button"
       :disabled="disabled || busy || !canClear"
+      aria-label="Limpar conversa"
       title="Limpar conversa"
       class="inline-flex h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:opacity-50"
       @click="handleClear"

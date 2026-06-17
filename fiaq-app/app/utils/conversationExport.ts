@@ -288,7 +288,7 @@ function buildExcelHtml(messages: Message[]): string {
   const registry = createSourceRegistry(messages)
   const sourcesByIndex = new Map(registry.records.map(record => [record.index, record.source]))
   const rows = [
-    '<tr><th>Ordem</th><th>Tipo</th><th>Conteudo</th><th>Fontes</th></tr>'
+    '<tr><th>Ordem</th><th>Tipo</th><th>Conteúdo</th><th>Fontes</th></tr>'
   ]
 
   messages.forEach((message, index) => {
