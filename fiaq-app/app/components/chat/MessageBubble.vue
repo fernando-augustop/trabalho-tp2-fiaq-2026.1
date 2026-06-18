@@ -16,11 +16,12 @@
     v-else-if="showBody"
     class="flex justify-start gap-3"
   >
-    <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#1a2e5a] text-green-300 shadow-sm">
-      <UIcon
-        name="i-lucide-bot"
-        class="h-4 w-4"
-      />
+    <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl overflow-hidden shadow-sm">
+      <img
+        src="/content.png"
+        alt="Assistente"
+        class="h-8 w-8 object-cover"
+      >
     </div>
 
     <div class="flex w-full max-w-[min(56rem,92vw)] flex-col gap-2">

@@ -8,11 +8,12 @@
         v-if="messages.length === 0"
         class="flex h-full flex-col items-center justify-center gap-4 py-12 text-center"
       >
-        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1a2e5a] text-green-300 shadow-md">
-          <UIcon
-            name="i-lucide-bot"
-            class="h-8 w-8"
-          />
+        <div class="flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden shadow-md">
+          <img
+            src="/sarueBot1.png"
+            alt="Assistente"
+            class="h-16 w-16 object-cover"
+          >
         </div>
         <div>
           <p class="text-lg font-bold text-[#1a2e5a]">
