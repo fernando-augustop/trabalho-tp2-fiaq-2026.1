@@ -12,11 +12,16 @@
         class="hover:text-green-400 transition-colors"
       >Início</NuxtLink>
 
-         <button
-              type="button"
-            class="bg-transparent border-0 p-0 m-0 cursor-pointer font-medium hover:text-green-400 transition-colors"
-              @click="open"
-          >Contatos</button>
+      <button
+        type="button"
+        class="bg-transparent border-0 p-0 m-0 cursor-pointer font-medium hover:text-green-400 transition-colors"
+        @click="open"
+      >Contatos</button>
+
+      <NuxtLink
+        to="/sobre"
+        class="hover:text-green-400 transition-colors"
+      >Sobre</NuxtLink>
     </div>
   </nav>
 </template>
@@ -24,5 +29,5 @@
 <script setup lang="ts">
 import { useDepartmentsSidebar } from '~/composables/useDepartmentsSidebar'
 
-  const { open } = useDepartmentsSidebar()
+const { open } = useDepartmentsSidebar()
 </script>
