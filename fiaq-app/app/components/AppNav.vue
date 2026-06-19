@@ -11,10 +11,18 @@
         to="/"
         class="hover:text-green-400 transition-colors"
       >Início</NuxtLink>
-      <NuxtLink
-        to="/chatbot"
-        class="hover:text-green-400 transition-colors"
-      >Assistente</NuxtLink>
+
+         <button
+              type="button"
+            class="bg-transparent border-0 p-0 m-0 cursor-pointer font-medium hover:text-green-400 transition-colors"
+              @click="open"
+          >Contatos</button>
     </div>
   </nav>
 </template>
+
+<script setup lang="ts">
+import { useDepartmentsSidebar } from '~/composables/useDepartmentsSidebar'
+
+  const { open } = useDepartmentsSidebar()
+</script>
