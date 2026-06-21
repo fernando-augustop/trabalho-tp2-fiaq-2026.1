@@ -8,11 +8,11 @@
         v-if="messages.length === 0"
         class="flex h-full flex-col items-center justify-center gap-4 py-12 text-center"
       >
-        <div class="flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden shadow-md">
+        <div class="items-center justify-center">
           <img
-            src="/sarueBot1.png"
+            src="/sarueBot.png"
             alt="Assistente"
-            class="h-16 w-16 object-cover"
+            class="h-12 w-16"
           >
         </div>
         <div>
