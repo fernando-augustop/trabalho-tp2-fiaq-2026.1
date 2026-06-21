@@ -220,6 +220,19 @@ function sendEvent(res: NodeJS.WritableStream, data: object): void {
   res.write(`data: ${JSON.stringify(data)}\n\n`)
 }
 
+function runAfterResponse(event: Parameters<Parameters<typeof defineEventHandler>[0]>[0], promise: Promise<unknown>): void {
+  const runtimeEvent = event as typeof event & {
+    waitUntil?: (work: Promise<unknown>) => void
+  }
+
+  if (typeof runtimeEvent.waitUntil === 'function') {
+    runtimeEvent.waitUntil(promise)
+    return
+  }
+
+  void promise
+}
+
 export default defineEventHandler(async (event) => {
   const body = await readBody<RequestBody>(event)
 
@@ -321,7 +334,7 @@ export default defineEventHandler(async (event) => {
     sendEvent(res, { type: 'done' })
     closeResponse()
 
-    void embedQuery(question)
+    runAfterResponse(event, embedQuery(question)
       .then(queryVector => registrarPergunta(
         question,
         queryVector,
@@ -331,7 +344,7 @@ export default defineEventHandler(async (event) => {
       ))
       .catch((e) => {
         console.error('[chat.post] Falha ao registrar pergunta:', e)
-      })
+      }))
   } catch (e) {
     console.error('[chat.post] Error:', e)
     sendEvent(res, { type: 'error', message: 'LLM_UNAVAILABLE' })
