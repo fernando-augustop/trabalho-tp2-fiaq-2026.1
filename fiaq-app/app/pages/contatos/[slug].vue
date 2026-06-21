@@ -67,22 +67,13 @@
             </div>
           </div>
 
-          <!--
-            MAPA — cole aqui a URL de embed do Google Maps.
-            Como obter:
-              1. Abra o local no Google Maps.
-              2. Clique em "Compartilhar" → aba "Incorporar um mapa".
-              3. Copie só o valor do atributo src do iframe gerado (a URL longa
-                 que começa com "https://www.google.com/maps/embed?...").
-              4. Cole essa URL na constante MAPS_EMBED_URL abaixo.
-          -->
           <iframe
-            v-if="MAPS_EMBED_URL"
-            :src="MAPS_EMBED_URL"
+            v-if="departamento.mapsUrl"
+            :src="departamento.mapsUrl"
             class="h-64 w-full border-0 sm:h-72"
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
-            title="Mapa do departamento"
+            :title="`Mapa de ${departamento.nome}`"
           />
         </div>
 
@@ -154,12 +145,13 @@ import { computed } from 'vue'
 import { findDepartamento } from '~/utils/departamentos'
 
 const route = useRoute()
-const slug = computed(() => String(route.params.slug))
-const departamento = computed(() => findDepartamento(slug.value))
+const slug = computed(() => {
+  const param = route.params.slug
+  const value = Array.isArray(param) ? param[0] : param
 
-// (seu link) — cole aqui a URL de embed do Google Maps (veja instruções no
-// comentário acima do <iframe>, no template). Deixe '' para esconder o mapa.
-const MAPS_EMBED_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4814.823601540712!2d-47.87162942391438!3d-15.75857962207623!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x935a3bb88f71361f%3A0x3933d293e644ad55!2zUHLDqWRpbyBkZSBDacOqbmNpYSBkYSBDb21wdXRhw6fDo28gZSBFc3RhdMOtc3RpY2EgLSBDSUMvRVNU!5e1!3m2!1spt-BR!2sbr!4v1782043857591!5m2!1spt-BR!2sbr'
+  return value ?? ''
+})
+const departamento = computed(() => findDepartamento(slug.value))
 
 useSeoMeta({
   title: () => `Contatos — ${departamento.value?.nome ?? 'Departamento não encontrado'} — fIAq`,

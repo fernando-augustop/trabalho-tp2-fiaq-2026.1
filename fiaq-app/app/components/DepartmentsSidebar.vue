@@ -78,21 +78,46 @@ import { departamentos } from '~/utils/departamentos'
 import { useDepartmentsSidebar } from '~/composables/useDepartmentsSidebar'
 
 const { isOpen, close } = useDepartmentsSidebar()
+let bodyScrollLocks = 0
+let previousBodyOverflow = ''
 
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') close()
 }
 
+function lockBodyScroll() {
+  if (bodyScrollLocks === 0) {
+    previousBodyOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+  }
+  bodyScrollLocks++
+}
+
+function unlockBodyScroll() {
+  if (bodyScrollLocks === 0) return
+  bodyScrollLocks--
+
+  if (bodyScrollLocks === 0) {
+    document.body.style.overflow = previousBodyOverflow
+    previousBodyOverflow = ''
+  }
+}
+
 watch(isOpen, (open) => {
   if (!import.meta.client) return
-  document.body.style.overflow = open ? 'hidden' : ''
-  if (open) window.addEventListener('keydown', handleKeydown)
-  else window.removeEventListener('keydown', handleKeydown)
-})
+
+  if (open) {
+    lockBodyScroll()
+    window.addEventListener('keydown', handleKeydown)
+  } else {
+    unlockBodyScroll()
+    window.removeEventListener('keydown', handleKeydown)
+  }
+}, { immediate: true })
 
 onBeforeUnmount(() => {
   if (!import.meta.client) return
-  document.body.style.overflow = ''
+  if (isOpen.value) unlockBodyScroll()
   window.removeEventListener('keydown', handleKeydown)
 })
 </script>
