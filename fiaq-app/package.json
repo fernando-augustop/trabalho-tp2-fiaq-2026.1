@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev":  "nuxt dev",
+    "dev": "cross-env TMPDIR=/tmp nuxt dev",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "build:faq": "node scripts/build-faq.mjs",
@@ -36,6 +36,7 @@
     "@nuxt/eslint": "^1.15.2",
     "@types/pdf-parse": "^1.1.5",
     "@types/sanitize-html": "^2.16.1",
+    "cross-env": "^7.0.3",
     "eslint": "^10.2.0",
     "typescript": "^6.0.2",
     "vue-tsc": "^3.2.6"

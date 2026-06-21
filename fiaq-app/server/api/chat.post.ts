@@ -12,6 +12,11 @@ interface RequestBody {
   messages: ChatMessage[]
 }
 
+const RAG_RESULT_LIMIT = 4
+const RAG_MIN_SCORE = 0.48
+const MAX_CONTEXT_CHARS_PER_RESULT = 900
+const MAX_CONTEXT_CHARS_TOTAL = 3600
+
 const SYSTEM_PROMPT = `Você é o assistente virtual do fIAq, portal de informações acadêmicas da Universidade de Brasília (UnB), voltado para alunos do curso de Ciência da Computação.
 
 COMPORTAMENTO GERAL:
@@ -87,6 +92,35 @@ function stripLinks(text: string): string {
     .replace(/[ \t]+([.,;:!?])/g, '$1')
 }
 
+function compactText(text: string, maxChars: number): string {
+  const normalized = stripLinks(text).replace(/\s+/g, ' ').trim()
+  if (normalized.length <= maxChars) return normalized
+
+  const sliced = normalized.slice(0, maxChars).replace(/\s+\S*$/, '').trim()
+  return `${sliced}...`
+}
+
+function buildCompactContext(results: SearchResult[]): string {
+  const parts: string[] = []
+  let usedChars = 0
+
+  for (const result of results) {
+    const heading = `[${result.titulo}]\n`
+    const remaining = MAX_CONTEXT_CHARS_TOTAL - usedChars - heading.length
+    const budget = Math.min(MAX_CONTEXT_CHARS_PER_RESULT, remaining)
+
+    if (budget < 160) break
+
+    const content = compactText(result.conteudo, budget)
+    parts.push(`${heading}${content}`)
+    usedChars += heading.length + content.length + 2
+  }
+
+  return parts.length
+    ? parts.join('\n\n')
+    : 'Nenhuma informação relevante encontrada na base de dados.'
+}
+
 const STOPWORDS = new Set([
   'a', 'ao', 'aos', 'as', 'como', 'com', 'da', 'das', 'de', 'do', 'dos', 'e',
   'em', 'eu', 'fazer', 'isso', 'me', 'na', 'no', 'o', 'os', 'ou', 'para',
@@ -159,24 +193,36 @@ export default defineEventHandler(async (event) => {
   })
 
   const res = event.node.res
+  let responseClosed = false
+
+  function closeResponse() {
+    if (responseClosed) return
+    responseClosed = true
+    res.end()
+  }
 
   try { // EMBEDDING
+    sendEvent(res, { type: 'status', stage: 'searching' })
+
     let queryVector: number[]
     try {
       queryVector = await embedQuery(question)
     } catch {
       sendEvent(res, { type: 'error', message: 'LLM_UNAVAILABLE' })
-      res.end()
+      closeResponse()
       return
     }
 
-    const { results: rawResults, source: ragSource } = await buscarRag(queryVector, embedInfo.model, 5, 0.45)
+    const { results: rawResults, source: ragSource } = await buscarRag(
+      queryVector,
+      embedInfo.model,
+      RAG_RESULT_LIMIT,
+      RAG_MIN_SCORE
+    )
     const results = rankContextResults(question, rawResults)
     console.log(`[chat.post] Contexto RAG carregado de ${ragSource}.`)
 
-    const context = results.length > 0
-      ? results.map(r => `[${r.titulo}]\n${stripLinks(r.conteudo)}`).join('\n\n')
-      : 'Nenhuma informação relevante encontrada na base de dados.'
+    const context = buildCompactContext(results)
 
     const history = body.messages
       .slice(0, -1)
@@ -207,16 +253,21 @@ export default defineEventHandler(async (event) => {
     }
 
     sendEvent(res, { type: 'done' })
+    closeResponse()
 
-    try {
-      await registrarPergunta(question, queryVector, embedInfo.model, respostaCompleta, results.map(r => ({ id: r.id, titulo: r.titulo, url: r.url })))
-    } catch (e) {
+    void registrarPergunta(
+      question,
+      queryVector,
+      embedInfo.model,
+      respostaCompleta,
+      results.map(r => ({ id: r.id, titulo: r.titulo, url: r.url }))
+    ).catch((e) => {
       console.error('[chat.post] Falha ao registrar pergunta:', e)
-    }
+    })
   } catch (e) {
     console.error('[chat.post] Error:', e)
     sendEvent(res, { type: 'error', message: 'LLM_UNAVAILABLE' })
   } finally {
-    res.end()
+    closeResponse()
   }
 })

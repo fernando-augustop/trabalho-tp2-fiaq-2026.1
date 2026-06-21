@@ -16,7 +16,9 @@
         type="button"
         class="bg-transparent border-0 p-0 m-0 cursor-pointer font-medium hover:text-green-400 transition-colors"
         @click="open"
-      >Contatos</button>
+      >
+        Contatos
+      </button>
 
       <NuxtLink
         to="/sobre"

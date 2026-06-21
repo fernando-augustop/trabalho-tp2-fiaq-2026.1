@@ -456,6 +456,16 @@ function drawPdfRefLinks(
   return cursorY + 22
 }
 
+function drawPdfLogo(doc: InstanceType<typeof import('jspdf').jsPDF>, x: number, y: number) {
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(20)
+  doc.setTextColor(BRAND_NAVY)
+  doc.text('fIAq', x, y)
+
+  doc.setTextColor(BRAND_GREEN)
+  doc.text('IA', x + doc.getTextWidth('f') - 0.5, y)
+}
+
 function drawPdfShell(doc: InstanceType<typeof import('jspdf').jsPDF>, title: string) {
   const pages = doc.getNumberOfPages()
   const width = doc.internal.pageSize.getWidth()
@@ -466,14 +476,7 @@ function drawPdfShell(doc: InstanceType<typeof import('jspdf').jsPDF>, title: st
     doc.setFillColor('#ffffff')
     doc.rect(0, 0, width, 78, 'F')
 
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(20)
-    doc.setTextColor(BRAND_NAVY)
-    doc.text('f', 42, 49)
-    doc.setTextColor(BRAND_GREEN)
-    doc.text('IA', 52, 49)
-    doc.setTextColor(BRAND_NAVY)
-    doc.text('q', 77, 49)
+    drawPdfLogo(doc, 42, 49)
 
     doc.setTextColor(BRAND_NAVY)
     doc.setFontSize(9)

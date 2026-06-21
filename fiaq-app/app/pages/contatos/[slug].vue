@@ -5,7 +5,10 @@
         v-if="departamento"
         class="mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#22c55e]/35 bg-[#22c55e]/15 px-3.5 py-1.5 text-[13px] text-[#22c55e]"
       >
-        <UIcon :name="departamento.icon" class="h-3.5 w-3.5" />
+        <UIcon
+          :name="departamento.icon"
+          class="h-3.5 w-3.5"
+        />
         {{ departamento.badge }}
       </div>
 
@@ -21,7 +24,10 @@
         to="/"
         class="absolute bottom-4 left-6 inline-flex items-center gap-1.5 text-sm font-medium text-blue-200 transition-colors hover:text-green-400 sm:left-10"
       >
-        <UIcon name="i-lucide-arrow-left" class="h-4 w-4" />
+        <UIcon
+          name="i-lucide-arrow-left"
+          class="h-4 w-4"
+        />
         Voltar para o início
       </NuxtLink>
     </div>
@@ -46,7 +52,10 @@
         <div class="mb-6 overflow-hidden rounded-2xl bg-[#1a2744]">
           <div class="flex items-start gap-3.5 px-6 py-5">
             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[#22c55e]/15 text-[#22c55e]">
-              <UIcon name="i-lucide-map-pin" class="h-5 w-5" />
+              <UIcon
+                name="i-lucide-map-pin"
+                class="h-5 w-5"
+              />
             </span>
             <div>
               <p class="mb-1 text-sm font-medium text-white">
@@ -89,7 +98,10 @@
           >
             <div class="flex items-center gap-3 bg-[#1a2744] px-5 py-4">
               <span class="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border-[1.5px] border-[#22c55e]/40 bg-[#22c55e]/20 text-[#22c55e]">
-                <UIcon :name="card.icon" class="h-[18px] w-[18px]" />
+                <UIcon
+                  :name="card.icon"
+                  class="h-[18px] w-[18px]"
+                />
               </span>
               <div>
                 <p class="text-[15px] font-medium text-white">
@@ -109,7 +121,10 @@
                 :class="idx < card.itens.length - 1 ? 'border-b-[0.5px] border-[#eef0f5]' : ''"
               >
                 <span class="mt-px flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-[#eef6ff] text-[#1a2744]">
-                  <UIcon :name="item.icon" class="h-[15px] w-[15px]" />
+                  <UIcon
+                    :name="item.icon"
+                    class="h-[15px] w-[15px]"
+                  />
                 </span>
                 <div>
                   <p class="text-[11px] leading-none text-slate-400">

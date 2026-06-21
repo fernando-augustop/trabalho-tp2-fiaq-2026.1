@@ -1,26 +1,43 @@
-
 <template>
-  <div class="flex justify-start gap-3">
-    <div class="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+  <div
+    class="flex justify-start gap-3"
+    role="status"
+    aria-live="polite"
+  >
+    <div class="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <img
         src="/content.png"
-        alt="Assistente"
-        class="h-8 w-8 object-cover"
+        alt=""
+        class="h-12 w-12 object-cover"
       >
     </div>
-    <div class="bg-white border border-gray-200 rounded-2xl rounded-bl-sm px-5 py-4 shadow-sm flex items-center gap-1.5">
+    <div class="flex min-h-12 items-center gap-3 rounded-2xl rounded-bl-sm border border-gray-200 bg-white px-5 py-3 shadow-sm">
+      <span class="sr-only">
+        Saruê preparando resposta.
+      </span>
       <span
-        class="dot"
-        style="animation-delay: 0ms"
-      />
+        aria-hidden="true"
+        class="text-xs font-semibold text-slate-500"
+      >
+        Saruê pensando
+      </span>
       <span
-        class="dot"
-        style="animation-delay: 150ms"
-      />
-      <span
-        class="dot"
-        style="animation-delay: 300ms"
-      />
+        aria-hidden="true"
+        class="flex items-center gap-1.5"
+      >
+        <span
+          class="dot"
+          style="animation-delay: 0ms"
+        />
+        <span
+          class="dot"
+          style="animation-delay: 150ms"
+        />
+        <span
+          class="dot"
+          style="animation-delay: 300ms"
+        />
+      </span>
     </div>
   </div>
 </template>

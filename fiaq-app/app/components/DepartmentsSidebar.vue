@@ -18,8 +18,13 @@
       >
         <div class="flex items-center justify-between gap-3 bg-[#1a2e5a] px-5 py-4">
           <div class="flex items-center gap-2.5 text-white">
-            <UIcon name="i-lucide-building-2" class="h-5 w-5 text-green-300" />
-            <h2 class="text-base font-bold">Departamentos</h2>
+            <UIcon
+              name="i-lucide-building-2"
+              class="h-5 w-5 text-green-300"
+            />
+            <h2 class="text-base font-bold">
+              Departamentos
+            </h2>
           </div>
           <button
             type="button"
@@ -27,7 +32,10 @@
             class="flex h-8 w-8 items-center justify-center rounded-lg text-blue-200 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
             @click="close"
           >
-            <UIcon name="i-lucide-x" class="h-5 w-5" />
+            <UIcon
+              name="i-lucide-x"
+              class="h-5 w-5"
+            />
           </button>
         </div>
 
@@ -44,7 +52,10 @@
             @click="close"
           >
             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#1a2e5a] text-green-300">
-              <UIcon :name="dep.icon" class="h-5 w-5" />
+              <UIcon
+                :name="dep.icon"
+                class="h-5 w-5"
+              />
             </span>
             <span class="min-w-0">
               <span class="block truncate text-sm font-bold text-[#1a2e5a]">{{ dep.nome }}</span>

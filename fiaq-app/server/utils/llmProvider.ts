@@ -29,7 +29,9 @@ const OPENROUTER_CHAT_ATTEMPTS = readPositiveInt(
 )
 const OPENROUTER_CHAT_MAX_TOKENS = readPositiveInt(process.env.OPENROUTER_CHAT_MAX_TOKENS, 650)
 const OPENROUTER_CHAT_TEMPERATURE = readTemperature(process.env.OPENROUTER_CHAT_TEMPERATURE, 0.2)
-const OPENROUTER_STREAM_PREFLIGHT_CHARS = 32
+// 16 chars is enough to catch unusable CJK/safety-classifier starts while
+// releasing the first visible token faster than the older 32-char buffer.
+const OPENROUTER_STREAM_PREFLIGHT_CHARS = readPositiveInt(process.env.OPENROUTER_STREAM_PREFLIGHT_CHARS, 16)
 
 const CHAT_PROVIDER = (process.env.CHAT_PROVIDER || 'ollama').toLowerCase()
 const EMBED_PROVIDER = (process.env.EMBED_PROVIDER || 'ollama').toLowerCase()
