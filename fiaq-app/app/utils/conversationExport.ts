@@ -12,6 +12,8 @@ interface PortableConversation {
     role: Message['role']
     content: string
     sources?: Source[]
+    feedback?: Message['feedback']
+    webEnhanced?: boolean
   }>
 }
 
@@ -41,11 +43,11 @@ interface PdfSourceTarget {
 type SourceInput = Partial<Source>
 
 const BRAND_NAVY = '#1a2e5a'
-const BRAND_GREEN = '#00DC82'
-const TEXT_SLATE = '#24324a'
+const BRAND_GREEN = '#16a34a'
+const TEXT_SLATE = '#0f172a'
 const MUTED_SLATE = '#64748b'
 const BORDER_SLATE = '#e2e8f0'
-const SURFACE_SLATE = '#f8fafc'
+const SURFACE_SLATE = '#f9fafb'
 
 function exportableMessages(messages: Message[]): Message[] {
   return messages
@@ -124,7 +126,9 @@ function cleanSource(source: SourceInput): Source {
   return {
     id: String(source.id || source.url || source.titulo || 'fonte'),
     titulo: decodeEntities(String(source.titulo || 'Fonte oficial')).replace(/\s+/g, ' ').trim() || 'Fonte oficial',
-    url: String(source.url || '').trim()
+    url: String(source.url || '').trim(),
+    kind: source.kind === 'web' || source.kind === 'official' ? source.kind : 'rag',
+    description: String(source.description || '').trim() || undefined
   }
 }
 
@@ -205,7 +209,9 @@ function toPortableConversation(messages: Message[]): PortableConversation {
     messages: cleanMessages.map(message => ({
       role: message.role,
       content: message.content,
-      sources: message.sources?.map(cleanSource)
+      sources: message.sources?.map(cleanSource),
+      feedback: message.feedback,
+      webEnhanced: message.webEnhanced
     }))
   }
 }
@@ -231,7 +237,7 @@ function buildTxt(messages: Message[]): string {
     answer++
     const refs = registry.byMessageId.get(message.id) ?? []
     const suffix = refs.length ? `\n\nFontes: ${refs.map(ref => `[${ref}]`).join(' ')}` : ''
-    lines.push(`Resposta ${answer}`, `${plainText(message.content)}${suffix}`, '')
+    lines.push(`${message.webEnhanced ? 'Resposta com pesquisa web' : 'Resposta'} ${answer}`, `${plainText(message.content)}${suffix}`, '')
   }
 
   if (registry.records.length) {
@@ -266,7 +272,7 @@ function buildMarkdown(messages: Message[]): string {
     answer++
     const refs = registry.byMessageId.get(message.id) ?? []
     const suffix = refs.length ? `\n\nFontes: ${refs.map(ref => `[${ref}][fonte-${ref}]`).join(' ')}` : ''
-    lines.push(`## Resposta ${answer}`, '', `${message.content.trim()}${suffix}`, '')
+    lines.push(`## ${message.webEnhanced ? 'Resposta com pesquisa web' : 'Resposta'} ${answer}`, '', `${message.content.trim()}${suffix}`, '')
   }
 
   if (registry.records.length) {
@@ -305,7 +311,7 @@ function buildExcelHtml(messages: Message[]): string {
     rows.push(
       '<tr>'
       + `<td>${index + 1}</td>`
-      + `<td>${message.role === 'user' ? 'Pergunta' : 'Resposta'}</td>`
+      + `<td>${message.role === 'user' ? 'Pergunta' : message.webEnhanced ? 'Resposta web' : 'Resposta'}</td>`
       + `<td>${htmlCell(plainText(message.content))}</td>`
       + `<td>${htmlCell(sources)}</td>`
       + '</tr>'
@@ -400,8 +406,8 @@ function drawPdfPill(
   tone: 'navy' | 'green' | 'slate' = 'slate'
 ) {
   const width = doc.getTextWidth(label) + 15
-  const fill = tone === 'navy' ? BRAND_NAVY : tone === 'green' ? '#dcfce7' : '#f1f5f9'
-  const text = tone === 'navy' ? '#ffffff' : tone === 'green' ? '#047857' : MUTED_SLATE
+  const fill = tone === 'navy' ? '#111827' : tone === 'green' ? '#ecfdf5' : '#f8fafc'
+  const text = tone === 'navy' ? '#ffffff' : tone === 'green' ? '#047857' : '#475569'
 
   doc.setFillColor(fill)
   doc.roundedRect(x, y - 11, width, 18, 9, 9, 'F')
@@ -474,25 +480,27 @@ function drawPdfShell(doc: InstanceType<typeof import('jspdf').jsPDF>, title: st
   for (let page = 1; page <= pages; page++) {
     doc.setPage(page)
     doc.setFillColor('#ffffff')
-    doc.rect(0, 0, width, 78, 'F')
+    doc.rect(0, 0, width, 72, 'F')
 
-    drawPdfLogo(doc, 42, 49)
+    drawPdfLogo(doc, 42, 46)
 
     doc.setTextColor(BRAND_NAVY)
     doc.setFontSize(9)
-    doc.text('Assistente Virtual UnB', width - 144, 42)
+    doc.text('Assistente Virtual UnB', width - 144, 39)
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
     doc.setTextColor(MUTED_SLATE)
-    doc.text('Conversa exportada', width - 144, 55)
+    doc.text('Conversa exportada', width - 144, 52)
 
     doc.setDrawColor(BORDER_SLATE)
-    doc.line(42, 72, width - 42, 72)
+    doc.line(42, 68, width - 42, 68)
 
     doc.setFontSize(8)
     doc.setTextColor(MUTED_SLATE)
-    doc.text(pdfSafeText(title), 42, height - 34, { maxWidth: width - 140 })
-    doc.text(`${page}/${pages}`, width - 64, height - 34)
+    doc.setDrawColor('#f1f5f9')
+    doc.line(42, height - 50, width - 42, height - 50)
+    doc.text(pdfSafeText(title), 42, height - 30, { maxWidth: width - 140 })
+    doc.text(`${page}/${pages}`, width - 64, height - 30)
   }
 }
 
@@ -516,9 +524,10 @@ async function exportPdf(messages: Message[], filename: string) {
     author: 'fIAq'
   })
 
-  doc.setFillColor(SURFACE_SLATE)
-  doc.roundedRect(marginX, y - 18, contentWidth, 92, 16, 16, 'F')
-  drawPdfPill(doc, 'Conversa fIAq', marginX + 18, y + 2, 'green')
+  doc.setFillColor('#ffffff')
+  doc.setDrawColor(BORDER_SLATE)
+  doc.roundedRect(marginX, y - 18, contentWidth, 86, 10, 10, 'S')
+  drawPdfPill(doc, 'Conversa fIAq', marginX + 18, y + 2, 'slate')
   doc.setTextColor(BRAND_NAVY)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(18)
@@ -528,18 +537,18 @@ async function exportPdf(messages: Message[], filename: string) {
   doc.setFontSize(10)
   doc.setTextColor(MUTED_SLATE)
   doc.text(`Exportado em ${new Date().toLocaleString('pt-BR')}`, marginX + 18, y)
-  y += 42
+  y += 38
 
   for (const message of messages) {
     y = ensurePdfSpace(doc, y, 72)
 
     if (message.role === 'user') {
       question++
-      doc.setDrawColor(BRAND_GREEN)
-      doc.setLineWidth(2)
+      doc.setDrawColor(BORDER_SLATE)
+      doc.setLineWidth(1)
       doc.line(marginX, y - 2, marginX, y + 42)
       doc.setFont('helvetica', 'bold')
-      drawPdfPill(doc, `Pergunta ${question}`, marginX + 12, y, 'navy')
+      drawPdfPill(doc, `Pergunta ${question}`, marginX + 12, y, 'slate')
       y += 22
 
       doc.setFont('helvetica', 'normal')
@@ -554,7 +563,7 @@ async function exportPdf(messages: Message[], filename: string) {
     doc.setLineWidth(1)
     doc.line(marginX, y - 2, marginX, y + 42)
     doc.setFont('helvetica', 'bold')
-    drawPdfPill(doc, `Resposta ${answer}`, marginX + 12, y, 'slate')
+    drawPdfPill(doc, `${message.webEnhanced ? 'Resposta web' : 'Resposta'} ${answer}`, marginX + 12, y, message.webEnhanced ? 'green' : 'slate')
     y += 22
 
     doc.setFont('helvetica', 'normal')
@@ -574,9 +583,10 @@ async function exportPdf(messages: Message[], filename: string) {
   if (registry.records.length) {
     doc.addPage()
     y = 104
-    doc.setFillColor(SURFACE_SLATE)
-    doc.roundedRect(marginX, y - 18, contentWidth, 70, 16, 16, 'F')
-    drawPdfPill(doc, 'Referências', marginX + 18, y + 2, 'green')
+    doc.setFillColor('#ffffff')
+    doc.setDrawColor(BORDER_SLATE)
+    doc.roundedRect(marginX, y - 18, contentWidth, 66, 10, 10, 'S')
+    drawPdfPill(doc, 'Referências', marginX + 18, y + 2, 'slate')
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(18)
     doc.setTextColor(BRAND_NAVY)
@@ -597,16 +607,16 @@ async function exportPdf(messages: Message[], filename: string) {
       doc.setDrawColor(BORDER_SLATE)
       doc.roundedRect(marginX, y, contentWidth, cardHeight, 14, 14, 'FD')
 
-      doc.setFillColor(BRAND_NAVY)
+      doc.setFillColor(SURFACE_SLATE)
       doc.roundedRect(marginX + 16, y + 18, 36, 30, 8, 8, 'F')
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(10)
-      doc.setTextColor('#ffffff')
+      doc.setTextColor(TEXT_SLATE)
       doc.text(`[${record.index}]`, marginX + 25, y + 37)
 
       doc.setFontSize(8)
       doc.setTextColor(MUTED_SLATE)
-      doc.text('fonte oficial', marginX + 66, y + 22)
+      doc.text(record.source.kind === 'web' ? 'fonte web' : 'fonte da base', marginX + 66, y + 22)
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(10.5)
       doc.setTextColor(BRAND_NAVY)
@@ -696,7 +706,9 @@ export async function readConversationFile(file: File): Promise<MessageDraft[]> 
         role,
         content,
         streaming: false,
-        sources: sources?.length ? sources : undefined
+        sources: sources?.length ? sources : undefined,
+        feedback: message.feedback === 'helpful' || message.feedback === 'unhelpful' ? message.feedback : undefined,
+        webEnhanced: Boolean(message.webEnhanced)
       }
     })
     .filter((message): message is MessageDraft => Boolean(message))

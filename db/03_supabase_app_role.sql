@@ -29,6 +29,7 @@ GRANT SELECT ON faq_categoria, faq_entrada TO fiaq_app;
 GRANT SELECT ON rag_documento, rag_chunk TO fiaq_app;
 GRANT SELECT, INSERT, UPDATE ON pergunta_registrada TO fiaq_app;
 GRANT SELECT, INSERT ON ocorrencia_pergunta TO fiaq_app;
+GRANT SELECT, INSERT ON avaliacao_resposta TO fiaq_app;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO fiaq_app;
 GRANT EXECUTE ON FUNCTION buscar_rag_chunks(extensions.vector(2048), TEXT, DOUBLE PRECISION, INT) TO fiaq_app;
 
@@ -38,6 +39,7 @@ ALTER TABLE rag_documento ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rag_chunk ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pergunta_registrada ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ocorrencia_pergunta ENABLE ROW LEVEL SECURITY;
+ALTER TABLE avaliacao_resposta ENABLE ROW LEVEL SECURITY;
 
 DO $$
 BEGIN
@@ -162,6 +164,32 @@ BEGIN
   ) THEN
     CREATE POLICY fiaq_app_insert_ocorrencia
       ON ocorrencia_pergunta
+      FOR INSERT
+      TO fiaq_app
+      WITH CHECK (true);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'avaliacao_resposta'
+      AND policyname = 'fiaq_app_select_avaliacao'
+  ) THEN
+    CREATE POLICY fiaq_app_select_avaliacao
+      ON avaliacao_resposta
+      FOR SELECT
+      TO fiaq_app
+      USING (true);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'avaliacao_resposta'
+      AND policyname = 'fiaq_app_insert_avaliacao'
+  ) THEN
+    CREATE POLICY fiaq_app_insert_avaliacao
+      ON avaliacao_resposta
       FOR INSERT
       TO fiaq_app
       WITH CHECK (true);

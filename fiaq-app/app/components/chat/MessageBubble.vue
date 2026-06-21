@@ -28,6 +28,16 @@
       <!-- Message content -->
       <div class="rounded-2xl rounded-bl-sm border border-gray-200 bg-white px-5 py-3 text-sm leading-relaxed text-[#1a2e5a] shadow-sm">
         <div
+          v-if="message.webEnhanced"
+          class="mb-2 inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-100"
+        >
+          <UIcon
+            name="i-lucide-search-check"
+            class="h-3.5 w-3.5"
+          />
+          Pesquisa web
+        </div>
+        <div
           class="fiaq-prose"
           v-html="renderedContent"
         />
@@ -44,10 +54,10 @@
       >
         <p class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
           <UIcon
-            name="i-lucide-book-open"
+            :name="hasWebSources ? 'i-lucide-globe-2' : 'i-lucide-book-open'"
             class="h-3.5 w-3.5 text-green-600"
           />
-          Fontes consultadas
+          {{ hasWebSources ? 'Fontes web consultadas' : 'Fontes consultadas' }}
         </p>
         <ChatSourceChip
           v-for="source in message.sources"
@@ -123,12 +133,70 @@
           </div>
         </div>
 
+        <div
+          class="relative"
+          @keydown.escape="showFeedbackMenu = false"
+        >
+          <button
+            type="button"
+            :disabled="feedbackDisabled"
+            :aria-expanded="showFeedbackMenu"
+            aria-haspopup="menu"
+            title="Avaliar resposta"
+            class="inline-flex h-8 items-center gap-1.5 rounded-lg border bg-white px-2.5 text-[11px] font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+            :class="feedbackButtonClass"
+            @click.stop="showFeedbackMenu = !showFeedbackMenu"
+          >
+            <UIcon
+              :name="feedbackIcon"
+              class="h-3.5 w-3.5"
+            />
+            {{ feedbackLabel }}
+            <UIcon
+              name="i-lucide-chevron-down"
+              class="h-3 w-3"
+            />
+          </button>
+
+          <div
+            v-if="showFeedbackMenu"
+            role="menu"
+            class="absolute bottom-full left-0 z-30 mb-2 w-52 overflow-hidden rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl ring-1 ring-slate-900/5"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-semibold text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:outline-none"
+              @click="handleFeedback('helpful')"
+            >
+              <UIcon
+                name="i-lucide-thumbs-up"
+                class="h-4 w-4"
+              />
+              Essa resposta me ajudou
+            </button>
+
+            <button
+              type="button"
+              role="menuitem"
+              class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-semibold text-slate-700 transition-colors hover:bg-amber-50 hover:text-amber-700 focus:bg-amber-50 focus:outline-none"
+              @click="handleFeedback('unhelpful')"
+            >
+              <UIcon
+                name="i-lucide-thumbs-down"
+                class="h-4 w-4"
+              />
+              Não me ajudou
+            </button>
+          </div>
+        </div>
+
         <span
-          v-if="actionStatus"
+          v-if="actionStatus || feedbackStatus"
           class="text-[11px] font-medium"
           :class="actionStatusKind === 'error' ? 'text-red-600' : 'text-slate-500'"
         >
-          {{ actionStatus }}
+          {{ actionStatus || feedbackStatus }}
         </span>
       </div>
     </div>
@@ -147,12 +215,17 @@ import {
 const props = defineProps<{
   message: Message
   allMessages: Message[]
+  feedbackDisabled?: boolean
+}>()
+const emit = defineEmits<{
+  feedback: [messageId: number, rating: 'helpful' | 'unhelpful']
 }>()
 const copyStatus = ref<'idle' | 'copied' | 'error'>('idle')
 const actionStatus = ref('')
 const actionStatusKind = ref<'info' | 'error'>('info')
 const exportBusy = ref(false)
 const showExportMenu = ref(false)
+const showFeedbackMenu = ref(false)
 const actionsEl = ref<HTMLElement | null>(null)
 let copyResetTimeout: number | null = null
 
@@ -174,6 +247,33 @@ function stripLinks(text: string): string {
 const renderedContent = computed(() => {
   const clean = stripLinks(props.message.content ?? '')
   return renderMarkdown(clean)
+})
+
+const hasWebSources = computed(() => props.message.sources?.some(source => source.kind === 'web') ?? false)
+
+const feedbackLabel = computed(() => {
+  if (props.message.feedback === 'helpful') return 'Ajudou'
+  if (props.message.feedback === 'unhelpful') return props.message.webEnhanced ? 'Avaliado' : 'Não ajudou'
+  return 'Avaliar'
+})
+
+const feedbackIcon = computed(() => {
+  if (props.message.feedback === 'helpful') return 'i-lucide-thumbs-up'
+  if (props.message.feedback === 'unhelpful') return 'i-lucide-thumbs-down'
+  return 'i-lucide-star'
+})
+
+const feedbackButtonClass = computed(() => {
+  if (props.message.feedback === 'helpful') return 'border-emerald-200 text-emerald-700'
+  if (props.message.feedback === 'unhelpful') return 'border-amber-200 text-amber-700'
+  return 'border-slate-200 text-slate-600 hover:border-[#1a2e5a] hover:text-[#1a2e5a]'
+})
+
+const feedbackStatus = computed(() => {
+  if (props.message.feedback === 'helpful') return 'Obrigado pelo feedback.'
+  if (props.message.feedback === 'unhelpful' && props.message.webEnhanced) return 'Feedback registrado.'
+  if (props.message.feedback === 'unhelpful') return 'Resposta complementar solicitada.'
+  return ''
 })
 
 const copyTitle = computed(() => {
@@ -282,15 +382,32 @@ async function handleExport(format: ConversationExportFormat) {
   }
 }
 
+function handleFeedback(rating: 'helpful' | 'unhelpful') {
+  if (props.feedbackDisabled || props.message.feedback === rating) {
+    showFeedbackMenu.value = false
+    return
+  }
+
+  actionStatus.value = ''
+  showFeedbackMenu.value = false
+  emit('feedback', props.message.id, rating)
+}
+
 function handleDocumentClick(event: MouseEvent) {
   const target = event.target
   if (!(target instanceof Node) || actionsEl.value?.contains(target)) return
   showExportMenu.value = false
+  showFeedbackMenu.value = false
 }
 
 const plainCopy = computed(() => stripLinks(props.message.content ?? '').trim())
 
 watch(showExportMenu, (isOpen) => {
+  if (isOpen) document.addEventListener('click', handleDocumentClick)
+  else document.removeEventListener('click', handleDocumentClick)
+})
+
+watch(showFeedbackMenu, (isOpen) => {
   if (isOpen) document.addEventListener('click', handleDocumentClick)
   else document.removeEventListener('click', handleDocumentClick)
 })

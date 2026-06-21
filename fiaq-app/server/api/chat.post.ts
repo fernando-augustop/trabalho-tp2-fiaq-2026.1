@@ -55,6 +55,7 @@ LINKS E FATOS:
 
 * NUNCA invente URLs, e-mails, prazos, documentos ou nomes que não estejam no contexto.
 * Não escreva URLs na resposta — os links das fontes aparecem automaticamente abaixo.
+* Cite as fontes usadas no corpo da resposta com marcadores como [1], [2] ou [3].
 * Em vez de citar links, mencione onde a informação pode ser encontrada, como SIGAA, SAA, calendário acadêmico ou coordenação do curso.
 * Use Markdown simples (parágrafos e listas).
 * NUNCA use blocos de código com crases.
@@ -104,8 +105,8 @@ function buildCompactContext(results: SearchResult[]): string {
   const parts: string[] = []
   let usedChars = 0
 
-  for (const result of results) {
-    const heading = `[${result.titulo}]\n`
+  for (const [index, result] of results.entries()) {
+    const heading = `[${index + 1}] ${result.titulo}\n${result.url ? `URL: ${result.url}\n` : ''}`
     const remaining = MAX_CONTEXT_CHARS_TOTAL - usedChars - heading.length
     const budget = Math.min(MAX_CONTEXT_CHARS_PER_RESULT, remaining)
 
@@ -248,7 +249,7 @@ export default defineEventHandler(async (event) => {
     if (results.length > 0) {
       sendEvent(res, {
         type: 'sources',
-        items: results.map(r => ({ id: r.id, titulo: r.titulo, url: r.url }))
+        items: results.map(r => ({ id: r.id, titulo: r.titulo, url: r.url, kind: 'rag' }))
       })
     }
 

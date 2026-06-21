@@ -9,7 +9,7 @@
   >
     <span class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white text-[#1a2e5a] ring-1 ring-blue-100 transition-colors group-hover:bg-[#1a2e5a] group-hover:text-green-400">
       <UIcon
-        name="i-lucide-link"
+        :name="source.kind === 'web' ? 'i-lucide-globe-2' : 'i-lucide-link'"
         class="h-4 w-4"
       />
     </span>
@@ -19,6 +19,12 @@
         {{ cleanTitle }}
       </span>
       <span class="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs font-medium text-slate-500">
+        <span
+          v-if="source.kind === 'web'"
+          class="shrink-0 rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-700"
+        >
+          web
+        </span>
         <span class="truncate">{{ sourceHost }}</span>
         <UIcon
           name="i-lucide-external-link"

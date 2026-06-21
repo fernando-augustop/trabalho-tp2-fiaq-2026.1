@@ -46,6 +46,9 @@ OPENROUTER_CHAT_MODEL=google/gemma-4-31b-it:free
 OPENROUTER_CHAT_FALLBACK_MODELS=nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3-super-120b-a12b:free
 OPENROUTER_EMBED_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
 DATABASE_URL=postgresql://fiaq_app.PROJECT_REF:SENHA@REGIAO.pooler.supabase.com:6543/postgres?sslmode=require
+FIRECRAWL_API_URL=https://seu-firecrawl.example
+FIRECRAWL_API_KEY=
+FIRECRAWL_INCLUDE_DOMAINS=cic.unb.br,www.cic.unb.br,unb.br,www.unb.br,saa.unb.br,sigaa.unb.br
 ```
 
 Notas importantes:
@@ -58,6 +61,8 @@ Notas importantes:
   roteia aleatoriamente e pode escolher um modelo menos adequado para português.
 - Embeddings precisam continuar no mesmo modelo usado no seed do RAG.
 - Nunca commite `OPENROUTER_API_KEY`, senha do banco ou connection string real.
+- A busca Firecrawl só é acionada depois do feedback "Não me ajudou"; a
+  primeira resposta do modelo não faz pesquisa web.
 
 ## Validar a suite completa
 
@@ -123,6 +128,14 @@ curl "http://localhost:${PORT}/api/perguntas/em-alta?dias=7&limite=5"
 
 Esse endpoint confirma que a pergunta passou pelo fluxo de gravação no
 Supabase.
+
+Valide o reforço web sob demanda:
+
+1. Envie uma pergunta no chatbot.
+2. Espere a primeira resposta terminar.
+3. Abra **Avaliar** na resposta e clique em **Não me ajudou**.
+4. A resposta seguinte deve exibir o selo "Pesquisa web" e fontes clicáveis
+   vindas do Firecrawl.
 
 ## Simular o deploy localmente
 

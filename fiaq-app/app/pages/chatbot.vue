@@ -42,6 +42,7 @@
           :messages="messages"
           :loading="loading"
           @suggest="sendMessage"
+          @feedback="rateMessage"
         />
 
         <div class="sticky bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
@@ -61,7 +62,7 @@
 import { onMounted } from 'vue'
 import { useFiaqChat } from '~/composables/useFiaqChat'
 
-const { messages, loading, sendMessage, replaceMessages, clearMessages } = useFiaqChat()
+const { messages, loading, sendMessage, rateMessage, replaceMessages, clearMessages } = useFiaqChat()
 
 const route = useRoute()
 onMounted(() => {

@@ -42,6 +42,8 @@
         <ChatMessageBubble
           :message="msg"
           :all-messages="messages"
+          :feedback-disabled="loading"
+          @feedback="(messageId, rating) => $emit('feedback', messageId, rating)"
         />
       </template>
       <ChatTypingIndicator v-if="showTyping" />
@@ -84,6 +86,7 @@ const showTyping = computed(() => {
 
 defineEmits<{
   suggest: [text: string]
+  feedback: [messageId: number, rating: 'helpful' | 'unhelpful']
 }>()
 
 const suggestions = [
