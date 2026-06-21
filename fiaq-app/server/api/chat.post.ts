@@ -253,9 +253,7 @@ export default defineEventHandler(async (event) => {
     }
 
     sendEvent(res, { type: 'done' })
-    closeResponse()
-
-    void registrarPergunta(
+    const registroPergunta = registrarPergunta(
       question,
       queryVector,
       embedInfo.model,
@@ -264,6 +262,9 @@ export default defineEventHandler(async (event) => {
     ).catch((e) => {
       console.error('[chat.post] Falha ao registrar pergunta:', e)
     })
+
+    closeResponse()
+    await registroPergunta
   } catch (e) {
     console.error('[chat.post] Error:', e)
     sendEvent(res, { type: 'error', message: 'LLM_UNAVAILABLE' })

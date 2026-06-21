@@ -3,7 +3,7 @@
     <Transition name="fiaq-backdrop">
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-40 bg-slate-900/50"
+        class="fixed inset-0 z-[60] bg-slate-900/50"
         @click="close"
       />
     </Transition>
@@ -11,7 +11,7 @@
     <Transition name="fiaq-panel">
       <aside
         v-if="isOpen"
-        class="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-white shadow-2xl"
+        class="fixed inset-y-0 right-0 z-[70] flex w-full max-w-sm flex-col bg-white shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-label="Departamentos da UnB"

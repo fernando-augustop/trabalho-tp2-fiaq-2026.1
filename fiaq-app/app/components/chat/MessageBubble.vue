@@ -18,7 +18,7 @@
   >
     <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl overflow-hidden shadow-sm">
       <img
-        src="/sarueBot.png"
+        src="/sarue-avatar.png"
         alt="Assistente"
         class="h-8 w-8 object-contain"
       >

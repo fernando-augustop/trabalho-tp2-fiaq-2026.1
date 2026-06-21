@@ -6,7 +6,7 @@
   >
     <div class="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <img
-        src="/sarueBot.png"
+        src="/sarue-avatar.png"
         alt=""
         class="h-12 w-12 object-contain"
       >

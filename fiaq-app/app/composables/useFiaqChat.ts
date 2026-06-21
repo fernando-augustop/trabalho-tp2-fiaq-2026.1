@@ -95,9 +95,9 @@ export function useFiaqChat() {
     )
   }
 
-  function updateLastAssistantMessage(patch: Partial<Message>) {
-    const idx = messages.value.length - 1
-    if (idx >= 0 && messages.value[idx]?.role === 'assistant') {
+  function updateAssistantMessage(messageId: number, patch: Partial<Message>) {
+    const idx = messages.value.findIndex(message => message.id === messageId && message.role === 'assistant')
+    if (idx >= 0) {
       messages.value[idx] = { ...messages.value[idx], ...patch } as Message
     }
   }
@@ -109,7 +109,8 @@ export function useFiaqChat() {
     messages.value.push({ id: ++msgId, role: 'user', content: trimmed })
     loading.value = true
 
-    messages.value.push({ id: ++msgId, role: 'assistant', content: '', streaming: true })
+    const assistantId = ++msgId
+    messages.value.push({ id: assistantId, role: 'assistant', content: '', streaming: true })
 
     // Snapshot the history to send (exclude the empty assistant message)
     const history = messages.value
@@ -124,8 +125,6 @@ export function useFiaqChat() {
       })
 
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)
-
-      loading.value = false
 
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
@@ -148,22 +147,24 @@ export function useFiaqChat() {
 
             if (event.type === 'token') {
               accumulatedContent += event.content
-              updateLastAssistantMessage({ content: accumulatedContent })
+              updateAssistantMessage(assistantId, { content: accumulatedContent })
             }
 
             if (event.type === 'sources') {
-              updateLastAssistantMessage({ sources: event.items })
+              updateAssistantMessage(assistantId, { sources: event.items })
             }
 
             if (event.type === 'done') {
-              updateLastAssistantMessage({ streaming: false })
+              updateAssistantMessage(assistantId, { streaming: false })
+              loading.value = false
             }
 
             if (event.type === 'error') {
-              updateLastAssistantMessage({
+              updateAssistantMessage(assistantId, {
                 content: 'Ocorreu um erro ao processar sua mensagem. Tente novamente.',
                 streaming: false
               })
+              loading.value = false
             }
           } catch {
             // evento SSE parcial/malformado — ignora esta linha
@@ -171,12 +172,12 @@ export function useFiaqChat() {
         }
       }
     } catch {
-      updateLastAssistantMessage({
+      updateAssistantMessage(assistantId, {
         content: 'Ocorreu um erro ao enviar sua mensagem. Tente novamente.',
         streaming: false
       })
     } finally {
-      updateLastAssistantMessage({ streaming: false })
+      updateAssistantMessage(assistantId, { streaming: false })
       loading.value = false
     }
   }
