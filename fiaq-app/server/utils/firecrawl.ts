@@ -29,6 +29,10 @@ interface FirecrawlSearchResponse {
   error?: string
 }
 
+interface SearchFirecrawlOptions {
+  signal?: AbortSignal
+}
+
 const FIRECRAWL_DEFAULT_API_URL = 'https://api.firecrawl.dev'
 const FIRECRAWL_SEARCH_LIMIT = readPositiveInt(process.env.FIRECRAWL_SEARCH_LIMIT, 4)
 const FIRECRAWL_TIMEOUT_MS = readPositiveInt(process.env.FIRECRAWL_TIMEOUT_MS, 25000)
@@ -93,12 +97,19 @@ function sourceId(url: string, index: number): string {
   }
 }
 
-export async function searchFirecrawl(question: string): Promise<FirecrawlSource[]> {
+export async function searchFirecrawl(question: string, options: SearchFirecrawlOptions = {}): Promise<FirecrawlSource[]> {
   const trimmed = question.trim().slice(0, 500)
   if (!trimmed) return []
 
   const abort = new AbortController()
+  const abortFromCaller = () => abort.abort(options.signal?.reason)
   const timeout = setTimeout(() => abort.abort(), FIRECRAWL_TIMEOUT_MS)
+
+  if (options.signal?.aborted) {
+    abortFromCaller()
+  } else {
+    options.signal?.addEventListener('abort', abortFromCaller, { once: true })
+  }
 
   try {
     const res = await fetch(`${firecrawlBaseUrl()}/v2/search`, {
@@ -119,7 +130,15 @@ export async function searchFirecrawl(question: string): Promise<FirecrawlSource
       })
     })
 
-    const payload = await res.json().catch(async () => ({ error: await res.text() })) as FirecrawlSearchResponse
+    const responseText = await res.text()
+    let payload: FirecrawlSearchResponse
+
+    try {
+      payload = responseText ? JSON.parse(responseText) as FirecrawlSearchResponse : {}
+    } catch {
+      payload = { error: responseText }
+    }
+
     if (!res.ok || payload.success === false) {
       throw new Error(`Firecrawl search error: ${res.status} ${payload.error || ''}`.trim())
     }
@@ -146,6 +165,7 @@ export async function searchFirecrawl(question: string): Promise<FirecrawlSource
       .filter((source): source is FirecrawlSource => Boolean(source))
   } finally {
     clearTimeout(timeout)
+    options.signal?.removeEventListener('abort', abortFromCaller)
   }
 }
 

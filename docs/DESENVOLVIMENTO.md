@@ -44,11 +44,13 @@ EMBED_PROVIDER=openrouter
 OPENROUTER_API_KEY=...
 OPENROUTER_CHAT_MODEL=google/gemma-4-31b-it:free
 OPENROUTER_CHAT_FALLBACK_MODELS=nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3-super-120b-a12b:free
+OPENROUTER_STREAM_PREFLIGHT_CHARS=32
 OPENROUTER_EMBED_MODEL=nvidia/llama-nemotron-embed-vl-1b-v2:free
 DATABASE_URL=postgresql://fiaq_app.PROJECT_REF:SENHA@REGIAO.pooler.supabase.com:6543/postgres?sslmode=require
 FIRECRAWL_API_URL=https://seu-firecrawl.example
 FIRECRAWL_API_KEY=
 FIRECRAWL_INCLUDE_DOMAINS=cic.unb.br,www.cic.unb.br,unb.br,www.unb.br,saa.unb.br,sigaa.unb.br
+FIRECRAWL_SEARCH_LIMIT=4
 ```
 
 Notas importantes:
@@ -59,10 +61,15 @@ Notas importantes:
   Supabase em ambiente serverless.
 - Prefira modelo gratuito fixo em `OPENROUTER_CHAT_MODEL`; `openrouter/free`
   roteia aleatoriamente e pode escolher um modelo menos adequado para português.
+- `OPENROUTER_STREAM_PREFLIGHT_CHARS` controla quantos caracteres o backend
+  acumula antes de liberar o streaming da resposta; o padrão é `32`.
 - Embeddings precisam continuar no mesmo modelo usado no seed do RAG.
 - Nunca commite `OPENROUTER_API_KEY`, senha do banco ou connection string real.
-- A busca Firecrawl só é acionada depois do feedback "Não me ajudou"; a
-  primeira resposta do modelo não faz pesquisa web.
+- A busca Firecrawl é acionada quando o usuário marca "Não me ajudou" e também
+  automaticamente quando uma pergunta de escopo UnB não tem contexto local forte
+  no RAG.
+- `FIRECRAWL_SEARCH_LIMIT` limita quantos resultados web entram no contexto; o
+  padrão é `4`.
 
 ## Validar a suite completa
 

@@ -60,7 +60,9 @@ export default defineEventHandler(async (event) => {
   })
 
   const res = event.node.res
+  const abort = new AbortController()
   let responseClosed = false
+  let reader: ReadableStreamDefaultReader<string> | null = null
 
   function closeResponse() {
     if (responseClosed) return
@@ -68,10 +70,20 @@ export default defineEventHandler(async (event) => {
     res.end()
   }
 
+  function handleClientClose() {
+    if (responseClosed) return
+    abort.abort()
+    void reader?.cancel().catch(() => {})
+  }
+
+  res.on('close', handleClientClose)
+
   try {
     sendEvent(res, { type: 'status', stage: 'web_search' })
 
-    const webSources = await searchFirecrawl(question)
+    const webSources = await searchFirecrawl(question, { signal: abort.signal })
+    if (abort.signal.aborted) return
+
     const context = buildFirecrawlContext(webSources)
 
     if (webSources.length) {
@@ -93,19 +105,22 @@ export default defineEventHandler(async (event) => {
     ]
 
     const stream = await chatStream(messages)
-    const reader = stream.getReader()
+    reader = stream.getReader()
 
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
+      if (abort.signal.aborted) return
       sendEvent(res, { type: 'token', content: value })
     }
 
     sendEvent(res, { type: 'done' })
   } catch (e) {
+    if (abort.signal.aborted) return
     console.error('[chat.web.post] Error:', e)
     sendEvent(res, { type: 'error', message: 'WEB_SEARCH_UNAVAILABLE' })
   } finally {
+    res.off('close', handleClientClose)
     closeResponse()
   }
 })

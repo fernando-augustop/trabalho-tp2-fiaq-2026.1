@@ -11,10 +11,13 @@
     <Transition name="fiaq-panel">
       <aside
         v-if="isOpen"
+        ref="panelEl"
         class="fixed inset-y-0 right-0 z-[70] flex w-full max-w-sm flex-col bg-white shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-label="Departamentos da UnB"
+        tabindex="-1"
+        @keydown="handleKeydown"
       >
         <div class="flex items-center justify-between gap-3 bg-[#1a2e5a] px-5 py-4">
           <div class="flex items-center gap-2.5 text-white">
@@ -27,6 +30,7 @@
             </h2>
           </div>
           <button
+            ref="closeButtonEl"
             type="button"
             title="Fechar"
             class="flex h-8 w-8 items-center justify-center rounded-lg text-blue-200 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
@@ -73,16 +77,29 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, watch } from 'vue'
+import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { departamentos } from '~/utils/departamentos'
 import { useDepartmentsSidebar } from '~/composables/useDepartmentsSidebar'
 
 const { isOpen, close } = useDepartmentsSidebar()
+const panelEl = ref<HTMLElement | null>(null)
+const closeButtonEl = ref<HTMLButtonElement | null>(null)
 let bodyScrollLocks = 0
 let previousBodyOverflow = ''
+let previousActiveElement: HTMLElement | null = null
+
+const focusableSelector = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])'
+].join(',')
 
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') close()
+  if (event.key === 'Tab') trapFocus(event)
 }
 
 function lockBodyScroll() {
@@ -103,22 +120,79 @@ function unlockBodyScroll() {
   }
 }
 
+function focusableElements(): HTMLElement[] {
+  return Array.from(panelEl.value?.querySelectorAll<HTMLElement>(focusableSelector) ?? [])
+    .filter((element) => {
+      const style = window.getComputedStyle(element)
+      return style.display !== 'none' && style.visibility !== 'hidden'
+    })
+}
+
+function trapFocus(event: KeyboardEvent) {
+  if (!isOpen.value || !panelEl.value) return
+
+  const elements = focusableElements()
+  if (!elements.length) {
+    event.preventDefault()
+    panelEl.value.focus()
+    return
+  }
+
+  const first = elements[0]
+  const last = elements[elements.length - 1]
+  const activeElement = document.activeElement
+
+  if (!(activeElement instanceof HTMLElement) || !panelEl.value.contains(activeElement)) {
+    event.preventDefault()
+    first?.focus()
+    return
+  }
+
+  if (event.shiftKey && activeElement === first) {
+    event.preventDefault()
+    last?.focus()
+    return
+  }
+
+  if (!event.shiftKey && activeElement === last) {
+    event.preventDefault()
+    first?.focus()
+  }
+}
+
+async function focusPanel() {
+  await nextTick()
+  const target = closeButtonEl.value ?? focusableElements()[0] ?? panelEl.value
+  target?.focus()
+}
+
+function restoreFocus() {
+  if (!previousActiveElement?.isConnected) {
+    previousActiveElement = null
+    return
+  }
+
+  previousActiveElement.focus()
+  previousActiveElement = null
+}
+
 watch(isOpen, (open) => {
   if (!import.meta.client) return
 
   if (open) {
+    previousActiveElement = document.activeElement instanceof HTMLElement ? document.activeElement : null
     lockBodyScroll()
-    window.addEventListener('keydown', handleKeydown)
+    void focusPanel()
   } else {
     unlockBodyScroll()
-    window.removeEventListener('keydown', handleKeydown)
+    restoreFocus()
   }
 }, { immediate: true })
 
 onBeforeUnmount(() => {
   if (!import.meta.client) return
   if (isOpen.value) unlockBodyScroll()
-  window.removeEventListener('keydown', handleKeydown)
+  restoreFocus()
 })
 </script>
 

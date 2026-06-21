@@ -20,8 +20,9 @@ export async function registrarAvaliacaoResposta(input: RegistrarAvaliacaoInput)
   const sql = getSql()
 
   try {
+    const fontesUsadas = Array.isArray(input.fontesUsadas) ? input.fontesUsadas : []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fontesJson = sql.json(input.fontesUsadas as any)
+    const fontesJson = sql.json(fontesUsadas as any)
 
     await sql`
       INSERT INTO avaliacao_resposta
