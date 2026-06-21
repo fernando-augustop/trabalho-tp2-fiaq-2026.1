@@ -2,7 +2,7 @@
   <nav class="fiaq-nav sticky top-0 z-50 bg-[#1a2e5a] px-6 sm:px-10 py-4 flex items-center justify-between shrink-0">
     <NuxtLink
       to="/"
-      class="fiaq-logo text-white text-4xl sm:text-5xl font-black tracking-tight"
+      class="fiaq-logo text-white text-4xl sm:text-5xl font-black"
     >
       <span class="text-white">f</span><span class="fiaq-logo-accent text-green-700">IA</span><span class="text-white">q</span>
     </NuxtLink>

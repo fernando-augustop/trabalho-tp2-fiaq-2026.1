@@ -1,7 +1,8 @@
 import { embedQuery } from '../utils/embeddings'
 import { chatStream, embedInfo } from '../utils/llmProvider'
 import { registrarPergunta } from '../repositorios/pergunta'
-import { buscarRag, type SearchResult } from '../repositorios/rag'
+import { buscarRagPorTexto, type SearchResult } from '../repositorios/rag'
+import { buildFirecrawlContext, searchFirecrawl } from '../utils/firecrawl'
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
@@ -12,67 +13,33 @@ interface RequestBody {
   messages: ChatMessage[]
 }
 
-const RAG_RESULT_LIMIT = 4
-const RAG_MIN_SCORE = 0.48
-const MAX_CONTEXT_CHARS_PER_RESULT = 900
-const MAX_CONTEXT_CHARS_TOTAL = 3600
+interface ResponseSource {
+  id: string
+  titulo: string
+  url: string
+  kind: 'rag' | 'web'
+  description?: string
+}
 
-const SYSTEM_PROMPT = `Você é o assistente virtual do fIAq, portal de informações acadêmicas da Universidade de Brasília (UnB), voltado para alunos do curso de Ciência da Computação.
+const RAG_RESULT_LIMIT = 3
+const MAX_CONTEXT_CHARS_PER_RESULT = 700
+const MAX_CONTEXT_CHARS_TOTAL = 2200
+const LOCAL_CONTEXT_MIN_SCORE = 0.52
 
-COMPORTAMENTO GERAL:
+const SYSTEM_PROMPT = `Você é o assistente virtual do fIAq, portal acadêmico do CIC/UnB.
 
-* Cumprimentos e saudações devem ser respondidos de forma amigável e natural.
-* Responda SEMPRE em português brasileiro, de forma clara, direta e acolhedora.
-* É proibido responder em chinês, inglês ou qualquer outro idioma. Se algum trecho do contexto estiver em outro idioma, ignore esse idioma e responda em português brasileiro.
-* Responda DIRETAMENTE ao aluno. NUNCA simule diálogos nem use prefixos como "Aluno:" ou "Assistente:".
-* Priorize ajudar o aluno a resolver a dúvida.
-* Seja conciso, mas complete. Quando a pergunta envolver procedimentos, explique todas as etapas necessárias.
-
-AO USAR O CONTEXTO:
-
-* Um <contexto> com informações relevantes será fornecido. Use-o como sua principal fonte.
-* Se o contexto contiver a resposta completa, responda com base nele.
-* Se o contexto contiver apenas parte da resposta, utilize as informações disponíveis e complemente a explicação de forma coerente.
-* Considere que informações relevantes podem estar distribuídas em vários trechos do contexto. Combine os trechos antes de responder.
-* Escolha os trechos que correspondem à pergunta feita. Se a pergunta for genérica e o contexto trouxer um subtópico específico, como estágio obrigatório, migração ou classificação, não trate esse subtópico como resposta principal a menos que o aluno tenha perguntado por ele.
-* Extraia e utilize detalhes específicos presentes no contexto: prazos, documentos, requisitos, sistemas (SIGAA, SAA etc.), formulários, setores responsáveis e procedimentos.
-* Quando o contexto mencionar um processo acadêmico, explique o procedimento passo a passo em vez de apenas resumir as regras.
-* Sempre prefira fornecer uma orientação útil a responder que não possui informação suficiente.
-
-PERGUNTAS SOBRE A UNB:
-
-* Se a pergunta estiver relacionada à UnB, ao CIC, à graduação, matrícula, disciplinas, estágio, TCC, monitoria, bolsas, desligamento, histórico, trancamento, aproveitamento de estudos ou processos acadêmicos, considere a pergunta DENTRO DO ESCOPO.
-* Mesmo quando o contexto estiver incompleto, tente orientar o aluno utilizando as informações disponíveis.
-* Não responda que a pergunta está fora do escopo apenas porque o contexto é parcial.
-
-FALLBACK:
-
-* Só use o fallback quando a pergunta for claramente externa à UnB ou quando não houver qualquer informação relevante no contexto.
-* Antes de dizer que não possui a informação, tente indicar o setor, sistema ou documento que provavelmente poderá ajudar o aluno.
-* Evite respostas genéricas como "não tenho essa informação" quando existir qualquer informação útil no contexto.
-
-LINKS E FATOS:
-
-* NUNCA invente URLs, e-mails, prazos, documentos ou nomes que não estejam no contexto.
-* Não escreva URLs na resposta — os links das fontes aparecem automaticamente abaixo.
-* Cite as fontes usadas no corpo da resposta com marcadores como [1], [2] ou [3].
-* Em vez de citar links, mencione onde a informação pode ser encontrada, como SIGAA, SAA, calendário acadêmico ou coordenação do curso.
-* Use Markdown simples (parágrafos e listas).
-* NUNCA use blocos de código com crases.
-
-QUALIDADE DA RESPOSTA:
-
-* Responda à pergunta feita pelo aluno.
-* Não apenas copie trechos do contexto.
-* Organize as informações de forma lógica.
-* Quando houver um procedimento, apresente as etapas em ordem.
-* Quando houver requisitos ou documentos necessários, liste-os claramente.
-* Quando houver prazos, destaque-os.
-
-TEMAS SENSÍVEIS:
-
-* Assédio, discriminação, violência ou saúde mental: oriente SEMPRE a procurar a Ouvidoria e o CAEP.
-* Nunca tente resolver esses casos você mesmo.`
+Regras:
+* Responda sempre em português brasileiro, de forma direta, clara e acolhedora.
+* Use o <contexto> como fonte principal. Combine trechos relacionados antes de responder.
+* Não invente URLs, e-mails, prazos, documentos, regras ou procedimentos.
+* Não escreva URLs no corpo; os links clicáveis aparecem abaixo da resposta.
+* Não crie seções "Links úteis", "Fontes", "Referências" ou listas de links no corpo da resposta.
+* Cite fontes no corpo com [1], [2] ou [3]. Toda resposta factual deve ter pelo menos uma citação.
+* Use Markdown simples, sem blocos de código e sem emojis.
+* Em perguntas de escopo UnB, nunca use frases como "não sei", "não tenho informação" ou "não encontrei informação". Se a informação não estiver confirmada, dê a melhor orientação possível, indique o setor, sistema ou documento provável e deixe claro o próximo passo sem inventar fatos.
+* Para dúvidas amplas de matrícula, explique o processo geral primeiro. Você pode dizer que calouros e veteranos podem ter orientações específicas, mas não peça esclarecimento como resposta principal.
+* Não afirme que matrícula de calouros é automática, nem descreva regra de calouros, se isso não estiver explicitamente confirmado no contexto.
+* Em assédio, discriminação, violência ou saúde mental, oriente a procurar a Ouvidoria e o CAEP.`
 
 function buildPrompt(context: string, question: string): string {
   return `<contexto>
@@ -128,14 +95,97 @@ const STOPWORDS = new Set([
   'posso', 'que', 'quero', 'sao', 'se', 'um', 'uma', 'unb'
 ])
 
-function terms(text: string): string[] {
+const GENERIC_CONTEXT_TERMS = new Set([
+  'aluno',
+  'atendimento',
+  'documento',
+  'funciona',
+  'horario',
+  'informacao',
+  'instituto',
+  'orientacao',
+  'secretaria',
+  'setor',
+  'sofri'
+])
+
+const UNB_SCOPE_TERMS = [
+  'unb',
+  'universidade de brasilia',
+  'cic',
+  'ciencia da computacao',
+  'computacao',
+  'matricula',
+  'disciplina',
+  'estagio',
+  'tcc',
+  'projeto final',
+  'extensao',
+  'monitoria',
+  'bolsa',
+  'sigaa',
+  'saa',
+  'sei',
+  'secretaria',
+  'coordenacao',
+  'graduacao',
+  'curriculo',
+  'grade',
+  'trancamento',
+  'aproveitamento',
+  'equivalencia',
+  'formatura',
+  'calendario academico',
+  'ouvidoria',
+  'assedio',
+  'discriminacao',
+  'caep'
+]
+
+function normalizeText(text: string): string {
   return text
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function terms(text: string): string[] {
+  return normalizeText(text)
     .split(/\s+/)
     .filter(term => term.length >= 3 && !STOPWORDS.has(term))
+}
+
+function isUnbScopedQuestion(question: string): boolean {
+  const normalized = normalizeText(question)
+  return UNB_SCOPE_TERMS.some(term => normalized.includes(term))
+}
+
+function hasEnoughLocalContext(question: string, results: SearchResult[]): boolean {
+  const top = results[0]
+  if (!top) return false
+
+  const distinctiveTerms = terms(question).filter(term => !GENERIC_CONTEXT_TERMS.has(term))
+  const queryTerms = new Set(distinctiveTerms.length ? distinctiveTerms : terms(question))
+  if (!queryTerms.size) return true
+
+  const titleTerms = new Set(terms(top.titulo))
+  const topTextTerms = new Set(terms(`${top.titulo} ${top.conteudo}`).slice(0, 180))
+  const overlap = [...queryTerms].filter(term => topTextTerms.has(term)).length
+  const titleOverlap = [...queryTerms].filter(term => titleTerms.has(term)).length
+  const coverage = overlap / queryTerms.size
+
+  if (top.score >= 0.9 && overlap > 0) return true
+  if (top.score >= LOCAL_CONTEXT_MIN_SCORE && coverage >= 0.5) return true
+  if (top.score >= 0.45 && titleOverlap > 0 && overlap >= 1) return true
+
+  return top.score >= 0.38 && overlap >= Math.min(2, queryTerms.size)
+}
+
+function shouldUseWebFallback(question: string, results: SearchResult[]): boolean {
+  return isUnbScopedQuestion(question) && !hasEnoughLocalContext(question, results)
 }
 
 function rankContextResults(question: string, results: SearchResult[]): SearchResult[] {
@@ -202,28 +252,43 @@ export default defineEventHandler(async (event) => {
     res.end()
   }
 
-  try { // EMBEDDING
+  try {
     sendEvent(res, { type: 'status', stage: 'searching' })
 
-    let queryVector: number[]
-    try {
-      queryVector = await embedQuery(question)
-    } catch {
-      sendEvent(res, { type: 'error', message: 'LLM_UNAVAILABLE' })
-      closeResponse()
-      return
-    }
-
-    const { results: rawResults, source: ragSource } = await buscarRag(
-      queryVector,
-      embedInfo.model,
-      RAG_RESULT_LIMIT,
-      RAG_MIN_SCORE
-    )
+    const rawResults = buscarRagPorTexto(question, RAG_RESULT_LIMIT)
     const results = rankContextResults(question, rawResults)
-    console.log(`[chat.post] Contexto RAG carregado de ${ragSource}.`)
+    console.log('[chat.post] Contexto RAG carregado do índice local por texto.')
 
-    const context = buildCompactContext(results)
+    let context = buildCompactContext(results)
+    let answerSources: ResponseSource[] = results.map(r => ({
+      id: r.id,
+      titulo: r.titulo,
+      url: r.url,
+      kind: 'rag'
+    }))
+
+    if (shouldUseWebFallback(question, results)) {
+      sendEvent(res, { type: 'status', stage: 'web_search' })
+      console.log('[chat.post] Contexto local insuficiente para pergunta UnB; pesquisando fontes oficiais com Firecrawl.')
+
+      try {
+        const webSources = await searchFirecrawl(question)
+
+        if (webSources.length) {
+          context = buildFirecrawlContext(webSources)
+          answerSources = webSources.map(source => ({
+            id: source.id,
+            titulo: source.titulo,
+            url: source.url,
+            kind: source.kind,
+            description: source.description
+          }))
+          sendEvent(res, { type: 'mode', webEnhanced: true })
+        }
+      } catch (error) {
+        console.warn('[chat.post] Falha na pesquisa Firecrawl; usando contexto local disponível:', error)
+      }
+    }
 
     const history = body.messages
       .slice(0, -1)
@@ -234,6 +299,13 @@ export default defineEventHandler(async (event) => {
       ...history,
       { role: 'user', content: buildPrompt(context, question) }
     ]
+
+    if (answerSources.length > 0) {
+      sendEvent(res, {
+        type: 'sources',
+        items: answerSources
+      })
+    }
 
     const stream = await chatStream(messages)
     const reader = stream.getReader()
@@ -246,26 +318,20 @@ export default defineEventHandler(async (event) => {
       sendEvent(res, { type: 'token', content: value })
     }
 
-    if (results.length > 0) {
-      sendEvent(res, {
-        type: 'sources',
-        items: results.map(r => ({ id: r.id, titulo: r.titulo, url: r.url, kind: 'rag' }))
-      })
-    }
-
     sendEvent(res, { type: 'done' })
-    const registroPergunta = registrarPergunta(
-      question,
-      queryVector,
-      embedInfo.model,
-      respostaCompleta,
-      results.map(r => ({ id: r.id, titulo: r.titulo, url: r.url }))
-    ).catch((e) => {
-      console.error('[chat.post] Falha ao registrar pergunta:', e)
-    })
-
     closeResponse()
-    await registroPergunta
+
+    void embedQuery(question)
+      .then(queryVector => registrarPergunta(
+        question,
+        queryVector,
+        embedInfo.model,
+        respostaCompleta,
+        answerSources.map(source => ({ id: source.id, titulo: source.titulo, url: source.url }))
+      ))
+      .catch((e) => {
+        console.error('[chat.post] Falha ao registrar pergunta:', e)
+      })
   } catch (e) {
     console.error('[chat.post] Error:', e)
     sendEvent(res, { type: 'error', message: 'LLM_UNAVAILABLE' })

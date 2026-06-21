@@ -1,31 +1,34 @@
 <template>
   <div class="shrink-0">
-    <div class="flex w-full items-end gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-md ring-1 ring-white/70">
+    <div class="group flex w-full items-end gap-2 rounded-[1.35rem] border border-slate-200 bg-white/95 p-2.5 shadow-[0_16px_44px_rgba(15,23,42,0.12)] ring-1 ring-white/70 transition-all focus-within:border-[#00a155] focus-within:ring-4 focus-within:ring-[#00a155]/15">
+      <span class="mb-2.5 hidden h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-[#1a2e5a] transition-colors group-focus-within:bg-emerald-50 group-focus-within:text-[#00a155] sm:flex">
+        <UIcon
+          name="i-lucide-message-circle"
+          class="h-5 w-5"
+        />
+      </span>
       <textarea
         ref="textareaEl"
         v-model="text"
         rows="1"
         placeholder="Digite sua pergunta..."
         :disabled="disabled"
-        class="max-h-36 min-h-11 flex-1 resize-none bg-transparent px-3 py-3 text-sm leading-5 text-[#1a2e5a] outline-none placeholder:text-slate-400 disabled:opacity-50"
+        class="max-h-44 min-h-14 flex-1 resize-none bg-transparent px-2 py-3.5 text-base leading-7 text-[#142854] outline-none placeholder:text-slate-400 disabled:opacity-50 sm:text-lg"
         @input="resize"
         @keydown="handleKeydown"
       />
       <button
         :disabled="disabled || !text.trim()"
         title="Enviar pergunta"
-        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#1a2e5a] text-white transition-colors hover:bg-[#243d75] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-40"
+        class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#00a155] text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#079052] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
         @click="handleSend"
       >
         <UIcon
           name="i-lucide-send"
-          class="h-4 w-4"
+          class="h-5 w-5"
         />
       </button>
     </div>
-    <p class="mt-2 text-center text-[10px] text-gray-400">
-      Assistente em fase experimental. Confira informações importantes nas fontes.
-    </p>
   </div>
 </template>
 
@@ -45,7 +48,7 @@ function resize() {
   const el = textareaEl.value
   if (!el) return
   el.style.height = 'auto'
-  el.style.height = `${Math.min(el.scrollHeight, 144)}px`
+  el.style.height = `${Math.min(el.scrollHeight, 176)}px`
 }
 
 function handleSend() {

@@ -29,9 +29,13 @@ const OPENROUTER_CHAT_ATTEMPTS = readPositiveInt(
 )
 const OPENROUTER_CHAT_MAX_TOKENS = readPositiveInt(process.env.OPENROUTER_CHAT_MAX_TOKENS, 650)
 const OPENROUTER_CHAT_TEMPERATURE = readTemperature(process.env.OPENROUTER_CHAT_TEMPERATURE, 0.2)
-// Keep the default longer than known safety-classifier strings so invalid
-// OpenRouter responses can be discarded before any token is shown to users.
-const OPENROUTER_STREAM_PREFLIGHT_CHARS = readPositiveInt(process.env.OPENROUTER_STREAM_PREFLIGHT_CHARS, 32)
+// Keep this longer than known safety-classifier strings so invalid OpenRouter
+// responses can be discarded before any token is shown to users.
+const OPENROUTER_STREAM_PREFLIGHT_MIN_CHARS = 32
+const OPENROUTER_STREAM_PREFLIGHT_CHARS = Math.max(
+  readPositiveInt(process.env.OPENROUTER_STREAM_PREFLIGHT_CHARS, OPENROUTER_STREAM_PREFLIGHT_MIN_CHARS),
+  OPENROUTER_STREAM_PREFLIGHT_MIN_CHARS
+)
 
 const CHAT_PROVIDER = (process.env.CHAT_PROVIDER || 'ollama').toLowerCase()
 const EMBED_PROVIDER = (process.env.EMBED_PROVIDER || 'ollama').toLowerCase()

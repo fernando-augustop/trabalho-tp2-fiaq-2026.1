@@ -1,5 +1,5 @@
 import { getSql, isDatabaseConfigured } from '../db/index'
-import { topKFiltered } from '../utils/vectorStore'
+import { keywordTopK, topKFiltered } from '../utils/vectorStore'
 
 const VECTOR_DIM = 2048
 
@@ -98,4 +98,8 @@ export async function buscarRag(
     results: topKFiltered(queryVector, safeK, safeMinScore),
     source: 'json'
   }
+}
+
+export function buscarRagPorTexto(query: string, k = 5): SearchResult[] {
+  return keywordTopK(query, normalizeK(k))
 }

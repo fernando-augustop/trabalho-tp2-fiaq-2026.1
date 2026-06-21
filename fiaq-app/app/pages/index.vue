@@ -21,16 +21,17 @@
         class="fiaq-search-form flex justify-center"
         @submit.prevent="ask"
       >
-        <div class="fiaq-search-box flex w-full max-w-xl rounded-lg overflow-hidden shadow-lg border border-white/10">
+        <div class="fiaq-search-box flex w-full max-w-2xl overflow-hidden rounded-xl border border-white/30 bg-white shadow-[0_18px_42px_rgba(4,12,30,0.22)] ring-1 ring-slate-900/10">
           <input
             v-model="query"
             type="text"
             placeholder="Ex: Quais são as etapas da matrícula?"
-            class="fiaq-search-input flex-1 bg-[#2b3f6e] text-white placeholder-gray-400 px-5 py-3.5 text-sm outline-none"
+            aria-label="Campo de pergunta para o assistente"
+            class="fiaq-search-input min-w-0 flex-1 bg-white px-5 py-4 text-base text-[#1a2e5a] outline-none placeholder:text-slate-500"
           >
           <button
             type="submit"
-            class="fiaq-search-button bg-green-500 text-[#0a2e1a] font-bold px-6 py-3.5 text-sm hover:bg-green-400 transition-colors flex items-center gap-2"
+            class="fiaq-search-button flex shrink-0 items-center gap-2 border-l border-emerald-800/25 bg-[#00a155] px-6 py-4 text-base font-bold text-[#0a2e1a] transition-colors hover:bg-[#17b86a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a2e5a]"
           >
             <UIcon
               name="i-lucide-send"

@@ -116,7 +116,7 @@ OPENROUTER_CHAT_MODEL   = google/gemma-4-31b-it:free
 OPENROUTER_CHAT_FALLBACK_MODELS = nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3-super-120b-a12b:free
 OPENROUTER_EMBED_MODEL  = nvidia/llama-nemotron-embed-vl-1b-v2:free
 DATABASE_URL            = postgresql://...supabase...:6543/postgres?sslmode=require
-FIRECRAWL_API_URL       = URL do serviço Firecrawl usado só após feedback negativo
+FIRECRAWL_API_URL       = URL do serviço Firecrawl usado no complemento e no fallback web
 FIRECRAWL_API_KEY       = opcional, se o serviço Firecrawl exigir Bearer token
 FIRECRAWL_INCLUDE_DOMAINS = cic.unb.br,www.cic.unb.br,unb.br,www.unb.br,saa.unb.br,sigaa.unb.br
 ```
@@ -125,8 +125,9 @@ FIRECRAWL_INCLUDE_DOMAINS = cic.unb.br,www.cic.unb.br,unb.br,www.unb.br,saa.unb.
 > salvo em `rag_chunk.embedding`, senão as buscas ficam inconsistentes. O chat
 > usa um modelo gratuito fixo para evitar a rotação aleatória do `openrouter/free`;
 > o Nemotron Embed continua necessário para embeddings.
-> A pesquisa Firecrawl é sob demanda: a primeira resposta usa apenas RAG/base
-> local; o Firecrawl só é chamado quando o aluno marca "Não me ajudou".
+> A pesquisa Firecrawl é sob demanda: ela é chamada quando o aluno marca
+> "Não me ajudou" e também como fallback automático quando uma pergunta de
+> escopo UnB não tem contexto local forte o suficiente no RAG.
 
 ## 6. Validar antes de subir
 

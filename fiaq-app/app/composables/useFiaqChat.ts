@@ -146,7 +146,15 @@ export function useFiaqChat() {
           }
 
           if (event.type === 'sources') {
-            updateAssistantMessage(assistantId, { sources: event.items })
+            const sources = (Array.isArray(event.items) ? event.items : []) as Source[]
+            updateAssistantMessage(assistantId, {
+              sources,
+              ...(sources.some(source => source?.kind === 'web') ? { webEnhanced: true } : {})
+            })
+          }
+
+          if (event.type === 'mode' && event.webEnhanced) {
+            updateAssistantMessage(assistantId, { webEnhanced: true })
           }
 
           if (event.type === 'done') {

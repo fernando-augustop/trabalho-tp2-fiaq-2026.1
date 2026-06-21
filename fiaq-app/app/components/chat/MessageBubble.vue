@@ -5,7 +5,7 @@
     v-if="message.role === 'user'"
     class="flex justify-end"
   >
-    <div class="max-w-[88%] rounded-2xl rounded-br-sm bg-[#1a2e5a] px-5 py-3 text-sm leading-relaxed text-white shadow-sm sm:max-w-[75%]">
+    <div class="max-w-[88%] rounded-[1.25rem] rounded-br-md bg-[#1f376b] px-5 py-3.5 text-base leading-relaxed text-white shadow-[0_12px_28px_rgba(26,46,90,0.18)] sm:max-w-[72%]">
       {{ message.content }}
     </div>
   </div>
@@ -14,19 +14,19 @@
        TypingIndicator cobre a espera para não mostrar uma bolha vazia + cursor) -->
   <div
     v-else-if="showBody"
-    class="flex justify-start gap-3"
+    class="flex justify-start gap-3.5"
   >
-    <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl overflow-hidden shadow-sm">
+    <div class="mt-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
       <img
         src="/sarue-avatar.png"
         alt="Assistente"
-        class="h-8 w-8 object-contain"
+        class="h-9 w-9 object-contain"
       >
     </div>
 
-    <div class="flex w-full max-w-[min(56rem,92vw)] flex-col gap-2">
+    <div class="flex w-full max-w-[min(58rem,92vw)] flex-col gap-2.5">
       <!-- Message content -->
-      <div class="rounded-2xl rounded-bl-sm border border-gray-200 bg-white px-5 py-3 text-sm leading-relaxed text-[#1a2e5a] shadow-sm">
+      <div class="rounded-[1.35rem] rounded-bl-md border border-slate-200 bg-white px-6 py-5 text-base leading-8 text-[#142854] shadow-[0_10px_28px_rgba(15,23,42,0.08)]">
         <div
           v-if="message.webEnhanced"
           class="mb-2 inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-100"
@@ -52,7 +52,7 @@
         v-if="message.sources && message.sources.length > 0"
         class="grid gap-2 px-1"
       >
-        <p class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+        <p class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">
           <UIcon
             :name="hasWebSources ? 'i-lucide-globe-2' : 'i-lucide-book-open'"
             class="h-3.5 w-3.5 text-green-600"
@@ -69,12 +69,12 @@
       <div
         v-if="!message.streaming"
         ref="actionsEl"
-        class="flex flex-wrap items-center gap-2 px-1 pt-1"
+        class="flex flex-wrap items-center gap-2 px-1 pt-1.5"
       >
         <button
           type="button"
           :title="copyTitle"
-          class="inline-flex h-8 items-center gap-1.5 rounded-lg border bg-white px-2.5 text-[11px] font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+          class="inline-flex h-9 items-center gap-1.5 rounded-xl border bg-white px-3 text-xs font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
           :class="copyStatus === 'error'
             ? 'border-red-200 text-red-600 hover:border-red-300'
             : 'border-slate-200 text-slate-600 hover:border-[#1a2e5a] hover:text-[#1a2e5a]'"
@@ -82,7 +82,7 @@
         >
           <UIcon
             :name="copyIcon"
-            class="h-3.5 w-3.5"
+            class="h-4 w-4"
           />
           {{ copyLabel }}
         </button>
@@ -97,12 +97,12 @@
             :aria-expanded="showExportMenu"
             aria-haspopup="menu"
             title="Baixar conversa"
-            class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#1a2e5a] hover:text-[#1a2e5a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+            class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#1a2e5a] hover:text-[#1a2e5a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50"
             @click.stop="showExportMenu = !showExportMenu"
           >
             <UIcon
               name="i-lucide-download"
-              class="h-3.5 w-3.5"
+              class="h-4 w-4"
             />
             Baixar
             <UIcon
@@ -143,13 +143,13 @@
             :aria-expanded="showFeedbackMenu"
             aria-haspopup="menu"
             title="Avaliar resposta"
-            class="inline-flex h-8 items-center gap-1.5 rounded-lg border bg-white px-2.5 text-[11px] font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+            class="inline-flex h-9 items-center gap-1.5 rounded-xl border bg-white px-3 text-xs font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50"
             :class="feedbackButtonClass"
             @click.stop="showFeedbackMenu = !showFeedbackMenu"
           >
             <UIcon
               :name="feedbackIcon"
-              class="h-3.5 w-3.5"
+              class="h-4 w-4"
             />
             {{ feedbackLabel }}
             <UIcon
@@ -193,7 +193,7 @@
 
         <span
           v-if="actionStatus || feedbackStatus"
-          class="text-[11px] font-medium"
+          class="text-xs font-medium"
           :class="actionStatusKind === 'error' ? 'text-red-600' : 'text-slate-500'"
         >
           {{ actionStatus || feedbackStatus }}
@@ -206,6 +206,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { Message } from '~/composables/useFiaqChat'
+import { cleanAssistantText } from '~/utils/assistantText'
 import { renderMarkdown } from '~/utils/markdown'
 import {
   exportConversation,
@@ -232,20 +233,9 @@ let copyResetTimeout: number | null = null
 // Só mostra a bolha do assistente quando há texto (ou quando o stream terminou).
 const showBody = computed(() => (props.message.content?.trim().length ?? 0) > 0 || !props.message.streaming)
 
-// Remove links/URLs do texto do assistente — os links oficiais e verificados
-// são exibidos nos chips de Fonte abaixo. Isso evita URLs inventadas pelo modelo.
-function stripLinks(text: string): string {
-  return text
-    .replace(/\[([^\]]+)\]\((?:[^)]*)\)/g, '$1') // [texto](url) -> texto
-    .replace(/<https?:\/\/[^>]+>/gi, '') // <http://...>
-    .replace(/\bhttps?:\/\/\S+/gi, '') // urls cruas
-    .replace(/[ \t]{2,}/g, ' ')
-    .replace(/[ \t]+([.,;:!?])/g, '$1')
-}
-
-// Renderiza o Markdown da resposta do assistente em HTML (sem links no corpo).
+// Renderiza o Markdown da resposta do assistente em HTML, mantendo links só nos chips de fonte.
 const renderedContent = computed(() => {
-  const clean = stripLinks(props.message.content ?? '')
+  const clean = cleanAssistantText(props.message.content ?? '')
   return renderMarkdown(clean)
 })
 
@@ -371,7 +361,7 @@ async function handleExport(format: ConversationExportFormat) {
   exportBusy.value = true
 
   try {
-    await exportConversation(props.allMessages, format)
+    await exportConversation(exportMessages.value, format)
     actionStatus.value = 'Baixado.'
     actionStatusKind.value = 'info'
   } catch {
@@ -400,7 +390,18 @@ function handleDocumentClick(event: MouseEvent) {
   showFeedbackMenu.value = false
 }
 
-const plainCopy = computed(() => stripLinks(props.message.content ?? '').trim())
+const plainCopy = computed(() => cleanAssistantText(props.message.content ?? ''))
+const exportMessages = computed<Message[]>(() => {
+  const currentIndex = props.allMessages.findIndex(message => message.id === props.message.id)
+  if (currentIndex < 0) return [props.message]
+
+  const previousQuestion = props.allMessages
+    .slice(0, currentIndex)
+    .reverse()
+    .find(message => message.role === 'user')
+
+  return previousQuestion ? [previousQuestion, props.message] : [props.message]
+})
 
 watch(showExportMenu, (isOpen) => {
   if (isOpen) document.addEventListener('click', handleDocumentClick)

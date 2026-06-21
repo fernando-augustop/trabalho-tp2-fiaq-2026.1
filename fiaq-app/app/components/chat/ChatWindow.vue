@@ -2,7 +2,7 @@
   <div class="relative">
     <div
       ref="messagesEl"
-      class="fiaq-chat-stream mx-auto flex min-h-[calc(100dvh-18rem)] w-full max-w-7xl flex-col gap-5 bg-white px-4 pb-32 pt-5 sm:px-6 lg:px-8"
+      class="fiaq-chat-stream mx-auto flex min-h-[calc(100dvh-18rem)] w-full max-w-7xl flex-col gap-6 px-4 pb-44 pt-6 sm:px-6 lg:px-8"
     >
       <div
         v-if="messages.length === 0"
@@ -27,7 +27,7 @@
           <button
             v-for="suggestion in suggestions"
             :key="suggestion"
-            class="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-[#1a2e5a] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#1a2e5a] hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+            class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#1a2e5a] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#1a2e5a] hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
             @click="$emit('suggest', suggestion)"
           >
             {{ suggestion }}
@@ -57,7 +57,7 @@
       v-if="showJumpToBottom"
       type="button"
       title="Ir para o fim da conversa"
-      class="fixed bottom-28 left-1/2 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#1a2e5a] px-4 py-2 text-xs font-bold text-white shadow-lg ring-1 ring-white/20 transition-all hover:bg-[#243d75] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+      class="fixed bottom-40 left-1/2 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#1a2e5a] px-4 py-2 text-sm font-bold text-white shadow-lg ring-1 ring-white/20 transition-all hover:-translate-y-0.5 hover:bg-[#243d75] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 sm:bottom-36"
       @click="scrollToBottom('smooth')"
     >
       <UIcon
@@ -79,7 +79,6 @@ const props = defineProps<{
 }>()
 
 const showTyping = computed(() => {
-  if (props.loading) return true
   const last = props.messages[props.messages.length - 1]
   return !!(last && last.role === 'assistant' && last.streaming && !last.content?.trim())
 })
@@ -107,7 +106,7 @@ function measureBottomDistance() {
 }
 
 function handleScroll() {
-  isNearBottom.value = measureBottomDistance() < 120
+  isNearBottom.value = measureBottomDistance() < 280
 }
 
 async function scrollToBottom(behavior: ScrollBehavior = 'auto') {
