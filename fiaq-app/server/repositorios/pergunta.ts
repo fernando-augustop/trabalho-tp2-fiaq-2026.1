@@ -2,6 +2,12 @@ import { getSql, isDatabaseConfigured } from '../db/index'
 import { normalizarTexto } from '../utils-perguntas/normalizar'
 import { cosineSimilarity, THRESHOLD_MESMA_PERGUNTA } from '../utils-perguntas/similaridade'
 
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue }
+
+function toJsonValue(value: unknown): JsonValue {
+  return JSON.parse(JSON.stringify(value ?? null)) as JsonValue
+}
+
 // Registra uma pergunta feita ao chatbot de forma anônima e agregada.
 // Parâmetros vindos do chat.post.ts após o streaming ser concluído com sucesso:
 //   embedding        — vetor já gerado pelo chat (não gerar um segundo embedding)
@@ -38,10 +44,7 @@ export async function registrarPergunta(
     }
   }
 
-  // fontes_usadas é um array de objetos arbitrários vindos do RAG — sempre serializável,
-  // mas o tipo JSONValue do postgres.js não aceita unknown[]. Cast explícito é seguro aqui.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const fontesJson = sql.json(fontesUsadas as any)
+  const fontesJson = sql.json(toJsonValue(fontesUsadas))
 
   if (melhorScore >= THRESHOLD_MESMA_PERGUNTA && melhorId !== null) {
     // c. Pergunta já existe — incrementa contador e registra a ocorrência.
@@ -71,7 +74,7 @@ export async function registrarPergunta(
         VALUES (
           ${textoOriginal},
           ${normalizarTexto(textoOriginal)},
-          ${sql.json(embedding)},
+          ${sql.json(toJsonValue(embedding))},
           ${modeloEmbedding}
         )
         RETURNING id

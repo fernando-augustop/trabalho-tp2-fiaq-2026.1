@@ -18,6 +18,7 @@ export interface Message {
   sources?: Source[]
   feedback?: 'helpful' | 'unhelpful'
   webEnhanced?: boolean
+  webSearchReason?: 'fallback_automatico' | 'feedback_negativo'
 }
 
 export type MessageDraft = Omit<Message, 'id'> & { id?: number }
@@ -53,6 +54,11 @@ function normalizeMessages(nextMessages: MessageDraft[]): Message[] {
         sources: sources.length ? sources : undefined,
         feedback: message.feedback === 'helpful' || message.feedback === 'unhelpful' ? message.feedback : undefined,
         webEnhanced: Boolean(message.webEnhanced)
+          || message.webSearchReason === 'fallback_automatico'
+          || message.webSearchReason === 'feedback_negativo',
+        webSearchReason: message.webSearchReason === 'fallback_automatico' || message.webSearchReason === 'feedback_negativo'
+          ? message.webSearchReason
+          : undefined
       }
     })
     .filter((message): message is Message => Boolean(message))
@@ -86,7 +92,8 @@ export function useFiaqChat() {
             content: message.content,
             sources: message.sources,
             feedback: message.feedback,
-            webEnhanced: message.webEnhanced
+            webEnhanced: message.webEnhanced,
+            webSearchReason: message.webSearchReason
           }))
 
         if (!stableMessages.length) {
@@ -147,14 +154,25 @@ export function useFiaqChat() {
 
           if (event.type === 'sources') {
             const sources = (Array.isArray(event.items) ? event.items : []) as Source[]
+            const currentReason = messages.value.find(message => message.id === assistantId)?.webSearchReason
             updateAssistantMessage(assistantId, {
               sources,
-              ...(sources.some(source => source?.kind === 'web') ? { webEnhanced: true } : {})
+              ...(sources.some(source => source?.kind === 'web')
+                ? {
+                    webEnhanced: true,
+                    webSearchReason: currentReason === 'feedback_negativo'
+                      ? 'feedback_negativo' as const
+                      : 'fallback_automatico' as const
+                  }
+                : {})
             })
           }
 
           if (event.type === 'mode' && event.webEnhanced) {
-            updateAssistantMessage(assistantId, { webEnhanced: true })
+            updateAssistantMessage(assistantId, {
+              webEnhanced: true,
+              webSearchReason: event.reason === 'feedback_negativo' ? 'feedback_negativo' : 'fallback_automatico'
+            })
           }
 
           if (event.type === 'done') {
@@ -231,7 +249,8 @@ export function useFiaqChat() {
           answer: answer.content,
           rating,
           sources: answer.sources ?? [],
-          webSearchRequested
+          webSearchRequested,
+          webSearchReason: answer.webSearchReason
         })
       })
     } catch {
@@ -249,7 +268,8 @@ export function useFiaqChat() {
       role: 'assistant',
       content: '',
       streaming: true,
-      webEnhanced: true
+      webEnhanced: true,
+      webSearchReason: 'feedback_negativo'
     })
 
     const history = messages.value
@@ -283,9 +303,9 @@ export function useFiaqChat() {
     if (!question) return
 
     updateAssistantMessage(messageId, { feedback: rating })
-    await persistFeedback(question, answer, rating, rating === 'unhelpful')
+    await persistFeedback(question, answer, rating, Boolean(answer.webEnhanced) || rating === 'unhelpful')
 
-    if (rating === 'unhelpful' && !answer.webEnhanced) {
+    if (rating === 'unhelpful') {
       await requestWebAnswer(question, answer)
     }
   }

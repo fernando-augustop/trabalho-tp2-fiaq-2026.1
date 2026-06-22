@@ -243,7 +243,7 @@ const hasWebSources = computed(() => props.message.sources?.some(source => sourc
 
 const feedbackLabel = computed(() => {
   if (props.message.feedback === 'helpful') return 'Ajudou'
-  if (props.message.feedback === 'unhelpful') return props.message.webEnhanced ? 'Avaliado' : 'Não ajudou'
+  if (props.message.feedback === 'unhelpful') return 'Não ajudou'
   return 'Avaliar'
 })
 
@@ -260,8 +260,10 @@ const feedbackButtonClass = computed(() => {
 })
 
 const feedbackStatus = computed(() => {
+  if (props.message.feedback === 'helpful' && hasWebSources.value) {
+    return 'Obrigado. Resposta enviada para curadoria.'
+  }
   if (props.message.feedback === 'helpful') return 'Obrigado pelo feedback.'
-  if (props.message.feedback === 'unhelpful' && props.message.webEnhanced) return 'Feedback registrado.'
   if (props.message.feedback === 'unhelpful') return 'Resposta complementar solicitada.'
   return ''
 })

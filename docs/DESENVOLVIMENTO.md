@@ -144,6 +144,49 @@ Valide o reforço web sob demanda:
 4. A resposta seguinte deve exibir o selo "Pesquisa web" e fontes clicáveis
    vindas do Firecrawl.
 
+## Fluxo atual de RAG, pesquisa e curadoria
+
+O fluxo implementado segue o desenho de curadoria da entrega: o chatbot tenta
+responder com RAG primeiro, pesquisa fontes oficiais quando o contexto local não
+é forte o suficiente ou quando o usuário pede complemento, e só transforma uma
+resposta pesquisada em conhecimento permanente depois de feedback positivo e
+aprovação administrativa.
+
+```mermaid
+flowchart LR
+  A[Pergunta] --> B[/api/chat]
+  B --> C[Saruê]
+  C <--> D[(Supabase Postgres)]
+  D <--> E[RAG pgvector]
+  C --> F{Contexto RAG suficiente?}
+  F -- Sim --> G[Responde com fontes RAG]
+  F -- Não --> H[Pesquisa Firecrawl em fontes oficiais]
+  H --> I[Responde com fontes web]
+  G --> J{Avaliação do usuário}
+  I --> J
+  J -- Negativa --> H
+  J -- Positiva + resposta RAG --> K[Obrigado pelo feedback]
+  J -- Positiva + resposta web --> L[web_resposta_candidata]
+  L --> M[/admin: curadoria por mantenedores]
+  M -- Aprovar --> N[rag_documento + rag_chunk]
+  M -- Rejeitar --> O[Resposta rejeitada]
+  N --> D
+```
+
+Diferenças intencionais em relação ao fluxograma manual:
+
+- A decisão "Resposta satisfatória?" não é uma etapa automática antes da
+  resposta. No app, ela acontece depois da resposta, pela avaliação do usuário.
+- A decisão "Resposta veio do RAG?" não aparece como tela separada. O backend
+  marca as fontes como `rag` ou `web`; só respostas com fonte `web` podem virar
+  candidatas de curadoria.
+- O caminho de pesquisa pode acontecer em dois momentos: automaticamente na
+  primeira pergunta, quando o RAG local é fraco para uma pergunta de escopo UnB,
+  ou depois de feedback negativo.
+- O `/admin` não escreve direto no RAG sem revisão: ele lista candidatas,
+  registra aprovação/rejeição e, apenas na aprovação, cria o documento e o chunk
+  permanentes.
+
 ## Simular o deploy localmente
 
 Para uma checagem mais próxima do deploy Vercel, rode:
