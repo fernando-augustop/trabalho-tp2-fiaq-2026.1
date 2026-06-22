@@ -476,6 +476,7 @@ async function seedRag(tx, documents, entryIdsBySlug) {
       SET ativo = FALSE,
           dthr_atualizacao = CURRENT_TIMESTAMP
       WHERE chunk_uid NOT IN ${tx(activeChunkUids)}
+        AND COALESCE(metadados->>'tipo', '') <> 'admin_web_validado'
     `
   }
 
@@ -485,6 +486,7 @@ async function seedRag(tx, documents, entryIdsBySlug) {
       SET ativo = FALSE,
           dthr_atualizacao = CURRENT_TIMESTAMP
       WHERE slug NOT IN ${tx(activeDocumentSlugs)}
+        AND COALESCE(metadados->>'tipo', '') <> 'admin_web_validado'
     `
   }
 }

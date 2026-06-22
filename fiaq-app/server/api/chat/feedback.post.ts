@@ -15,8 +15,60 @@ const FEEDBACK_RATE_LIMIT_MAX = 20
 const FEEDBACK_RATE_LIMIT_CLEANUP_MS = 300_000
 const MAX_QUESTION_CHARS = 2_000
 const MAX_ANSWER_CHARS = 12_000
+const MAX_SOURCE_TITLE_CHARS = 300
 const feedbackRateLimit = new Map<string, { count: number, resetAt: number }>()
 let nextRateLimitCleanup = Date.now() + FEEDBACK_RATE_LIMIT_CLEANUP_MS
+
+type SanitizedFeedbackSource = {
+  id?: string
+  titulo?: string
+  url: string
+  kind: 'web'
+  description?: string
+}
+
+function compactString(value: unknown, maxLength: number): string | undefined {
+  const normalized = String(value || '').replace(/\s+/g, ' ').trim()
+  return normalized ? normalized.slice(0, maxLength) : undefined
+}
+
+function sanitizeWebSource(source: unknown): SanitizedFeedbackSource | null {
+  if (!source || typeof source !== 'object') return null
+  const item = source as Record<string, unknown>
+
+  if (String(item.kind || '') !== 'web') return null
+
+  try {
+    const parsedUrl = new URL(String(item.url || '').trim())
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') return null
+
+    return {
+      id: compactString(item.id, MAX_SOURCE_TITLE_CHARS),
+      titulo: compactString(item.titulo || item.title, MAX_SOURCE_TITLE_CHARS),
+      url: parsedUrl.href,
+      kind: 'web',
+      description: compactString(item.description, 1000)
+    }
+  } catch {
+    return null
+  }
+}
+
+function sanitizeFeedbackSources(sources: unknown): SanitizedFeedbackSource[] {
+  if (!Array.isArray(sources)) return []
+
+  const seen = new Set<string>()
+  const sanitized: SanitizedFeedbackSource[] = []
+
+  for (const source of sources) {
+    const webSource = sanitizeWebSource(source)
+    if (!webSource || seen.has(webSource.url)) continue
+    seen.add(webSource.url)
+    sanitized.push(webSource)
+  }
+
+  return sanitized.slice(0, 10)
+}
 
 function clientKey(event: Parameters<Parameters<typeof defineEventHandler>[0]>[0]): string {
   return getHeader(event, 'cf-connecting-ip')
@@ -91,12 +143,15 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 413, message: 'PAYLOAD_TOO_LARGE' })
   }
 
+  const sanitizedSources = sanitizeFeedbackSources(body?.sources)
+  const webSearchRequested = Boolean(body?.webSearchRequested) && sanitizedSources.length > 0
+
   await registrarAvaliacaoResposta({
     pergunta: question,
     resposta: answer,
     avaliacao: rating,
-    fontesUsadas: Array.isArray(body?.sources) ? body.sources : [],
-    acionouBuscaWeb: Boolean(body?.webSearchRequested),
+    fontesUsadas: sanitizedSources,
+    acionouBuscaWeb: webSearchRequested,
     motivoBuscaWeb: body?.webSearchReason === 'fallback_automatico' || body?.webSearchReason === 'feedback_negativo'
       ? body.webSearchReason
       : undefined

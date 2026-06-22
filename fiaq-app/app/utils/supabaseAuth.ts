@@ -147,7 +147,6 @@ export function readInviteSessionFromHash(): AdminSession | null {
   }
 
   const session = normalizeSession(payload)
-  saveAdminSession(session)
   window.history.replaceState(null, '', window.location.pathname)
   return session
 }

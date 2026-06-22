@@ -268,8 +268,14 @@ export default defineEventHandler(async (event) => {
   try {
     sendEvent(res, { type: 'status', stage: 'searching' })
 
-    let rawResults = await buscarRagPorTextoNoBanco(question, RAG_RESULT_LIMIT)
+    let rawResults: SearchResult[] | null = null
     let contextSource = 'banco'
+
+    try {
+      rawResults = await buscarRagPorTextoNoBanco(question, RAG_RESULT_LIMIT)
+    } catch (error) {
+      console.warn('[chat.post] Busca textual no banco falhou antes do fallback local:', error)
+    }
 
     if (!rawResults?.length) {
       rawResults = buscarRagPorTexto(question, RAG_RESULT_LIMIT)

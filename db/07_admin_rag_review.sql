@@ -4,12 +4,15 @@
 
 CREATE TABLE IF NOT EXISTS admin_usuario (
     id              SERIAL PRIMARY KEY,
-    email           TEXT NOT NULL UNIQUE,
+    email           TEXT NOT NULL,
     ativo           BOOLEAN NOT NULL DEFAULT TRUE,
     criado_por      TEXT,
     dthr_criacao    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     dthr_atualizacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE admin_usuario
+  DROP CONSTRAINT IF EXISTS admin_usuario_email_key;
 
 CREATE TABLE IF NOT EXISTS web_resposta_candidata (
     id                  SERIAL PRIMARY KEY,
