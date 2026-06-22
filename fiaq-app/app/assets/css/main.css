@@ -3,6 +3,13 @@
 
 :root {
   --nav-height: 68px;
+
+  /* Acento de marca compartilhado, consumido por componentes via var()
+     (ex.: FiaqBrand). A paleta canônica completa (navy/verde/superfície) está
+     documentada em docs/qa/mobile-user-stories.md; a CSS crítica em app.vue
+     mantém os hex inline de propósito, para garantir o primeiro paint correto
+     sem depender deste arquivo carregar antes. */
+  --fiaq-green-bright: #00dc82;
 }
 
 @theme static {

@@ -9,10 +9,13 @@ a{color:inherit;text-decoration:none}
 button,input{font:inherit}
 #__nuxt{min-height:100vh}
 .fiaq-shell{min-height:100vh;background:#f4f4f4;display:flex;flex-direction:column}
-.fiaq-nav{background:#1a2e5a;display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;flex-shrink:0;position:sticky;top:0;z-index:50}
-.fiaq-logo{color:#fff;font-size:2.25rem;line-height:1;font-weight:900;letter-spacing:0}
-.fiaq-logo-accent{color:#00a155}
-.fiaq-nav-links{display:flex;gap:1.5rem;color:#fff;font-size:.875rem;font-weight:500}
+.fiaq-nav{background:#1a2e5a;display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.75rem .75rem;flex-shrink:0;position:sticky;top:0;z-index:50}
+.fiaq-brand{display:inline-flex;align-items:center;gap:.5rem;min-width:0;color:#fff;line-height:1;text-decoration:none;flex-shrink:0}
+.fiaq-brand-badge{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:2.1rem;height:2.1rem;border-radius:.7rem;background:#fff;overflow:hidden}
+.fiaq-brand-sarue{width:100%;height:100%;object-fit:contain;padding:.15rem}
+.fiaq-brand-word{font-weight:900;letter-spacing:-.01em;font-size:1.55rem;white-space:nowrap}
+.fiaq-brand-accent{color:#00dc82}
+.fiaq-nav-links{display:flex;align-items:center;gap:.75rem;color:#fff;font-size:.8125rem;font-weight:500;flex-shrink:0}
 .fiaq-main{flex:1}
 .fiaq-home-hero{background:#1a2e5a;padding:3rem 1.5rem 4rem;text-align:center}
 .fiaq-home-badge{display:inline-flex;align-items:center;gap:.375rem;margin-bottom:1.25rem;border:1px solid rgba(0,220,130,.3);border-radius:9999px;background:rgba(0,220,130,.15);color:#75edae;padding:.25rem .75rem;font-size:11px;font-weight:700}
@@ -32,7 +35,7 @@ button,input{font:inherit}
 .fiaq-faq-icon{display:flex;width:3rem;height:3rem;align-items:center;justify-content:center;flex-shrink:0;border-radius:.75rem;background:#f3f4f6;color:#1a2e5a}
 .fiaq-faq-title{margin:0;color:#1a2e5a;font-size:.875rem;font-weight:800}
 .fiaq-faq-count{margin:.125rem 0 0;color:#9ca3af;font-size:.75rem}
-@media (min-width:640px){:root{--nav-height:80px}.fiaq-nav{padding-left:2.5rem;padding-right:2.5rem}.fiaq-logo{font-size:3rem}.fiaq-nav-links{gap:2rem}.fiaq-home-title{font-size:2.25rem;line-height:2.5rem}.fiaq-faq-section{padding-left:2.5rem;padding-right:2.5rem}.fiaq-faq-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:640px){:root{--nav-height:80px}.fiaq-nav{padding:1rem 2.5rem}.fiaq-brand{gap:.65rem}.fiaq-brand-badge{width:2.75rem;height:2.75rem;border-radius:.85rem}.fiaq-brand-word{font-size:2.5rem}.fiaq-nav-links{gap:2rem}.fiaq-home-title{font-size:2.25rem;line-height:2.5rem}.fiaq-faq-section{padding-left:2.5rem;padding-right:2.5rem}.fiaq-faq-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1024px){.fiaq-faq-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 }
 `

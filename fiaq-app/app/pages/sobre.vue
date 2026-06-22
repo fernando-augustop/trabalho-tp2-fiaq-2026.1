@@ -2,10 +2,15 @@
   <div class="flex-1">
     <!-- Cabeçalho -->
     <div class="bg-[#1a2e5a] px-6 sm:px-10 pt-12 pb-14 text-center">
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-white">
-        <span class="text-white">f</span><span class="text-green-400">IA</span><span class="text-white">q</span>
-        <span class="text-white"> — Sobre o Projeto</span>
-      </h1>
+      <div class="flex flex-col items-center gap-3">
+        <FiaqBrand
+          :link="false"
+          size="sm"
+        />
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white">
+          Sobre o Projeto
+        </h1>
+      </div>
       <p class="text-blue-200 text-sm sm:text-base mt-3 max-w-2xl mx-auto">
         Portal de perguntas frequentes e assistente virtual com IA do Departamento de
         Ciência da Computação da Universidade de Brasília.
