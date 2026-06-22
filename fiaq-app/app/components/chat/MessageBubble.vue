@@ -27,15 +27,23 @@
     <div class="flex w-full max-w-[min(58rem,92vw)] flex-col gap-2.5">
       <!-- Message content -->
       <div class="rounded-[1.35rem] rounded-bl-md border border-slate-200 bg-white px-6 py-5 text-base leading-8 text-[#142854] shadow-[0_10px_28px_rgba(15,23,42,0.08)]">
+        <ChatResearchActivity
+          v-if="message.streaming && message.activity?.length"
+          :activities="message.activity"
+          compact
+        />
         <div
           v-if="message.webEnhanced"
-          class="mb-2 inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-100"
+          class="mb-3 inline-flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-2.5 py-1.5 text-xs font-bold text-emerald-700"
         >
           <UIcon
-            name="i-lucide-search-check"
+            name="i-lucide-globe-2"
             class="h-3.5 w-3.5"
           />
-          Pesquisa web
+          <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-700">
+            web
+          </span>
+          <span>Pesquisa web</span>
         </div>
         <div
           class="fiaq-prose"

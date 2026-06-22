@@ -10,12 +10,26 @@ export interface Source {
   description?: string
 }
 
+export type SearchActivityStatus = 'pending' | 'active' | 'done' | 'skipped' | 'error'
+export type SearchActivityKind = 'rag' | 'web' | 'answer'
+
+export interface SearchActivity {
+  id: string
+  kind: SearchActivityKind
+  status: SearchActivityStatus
+  label: string
+  detail?: string
+  sources?: Source[]
+  domains?: string[]
+}
+
 export interface Message {
   id: number
   role: MessageRole
   content: string
   streaming?: boolean
   sources?: Source[]
+  activity?: SearchActivity[]
   feedback?: 'helpful' | 'unhelpful'
   webEnhanced?: boolean
   webSearchReason?: 'fallback_automatico' | 'feedback_negativo'
@@ -26,6 +40,72 @@ export type MessageDraft = Omit<Message, 'id'> & { id?: number }
 let msgId = 0
 const STORAGE_KEY = 'fiaq:temporary-conversation:v1'
 const EMPTY_RESPONSE_MESSAGE = 'A resposta não foi concluída. Tente reenviar a pergunta em instantes.'
+const ACTIVITY_STATUSES: SearchActivityStatus[] = ['pending', 'active', 'done', 'skipped', 'error']
+const ACTIVITY_KINDS: SearchActivityKind[] = ['rag', 'web', 'answer']
+
+function normalizeSource(source: Partial<Source>): Source | null {
+  const titulo = String(source.titulo || '').trim()
+  const url = String(source.url || '').trim()
+  if (!titulo && !url) return null
+
+  const kind = source.kind === 'web' || source.kind === 'official' || source.kind === 'rag'
+    ? source.kind
+    : 'rag'
+
+  return {
+    id: String(source.id || url || titulo || 'fonte'),
+    titulo: titulo || 'Fonte oficial',
+    url,
+    kind,
+    description: String(source.description || '').trim() || undefined
+  }
+}
+
+function normalizeSources(value: unknown): Source[] {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map(source => normalizeSource(source as Partial<Source>))
+    .filter((source): source is Source => Boolean(source))
+}
+
+function normalizeDomains(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined
+
+  const domains = value
+    .map(domain => String(domain || '').trim().replace(/^https?:\/\//i, '').replace(/\/.*$/, ''))
+    .filter(Boolean)
+
+  return domains.length ? [...new Set(domains)] : undefined
+}
+
+function normalizeActivity(value: unknown): SearchActivity | null {
+  if (!value || typeof value !== 'object') return null
+
+  const raw = value as Record<string, unknown>
+  const id = String(raw.id || raw.stage || '').trim()
+  const label = String(raw.label || '').trim()
+  if (!id || !label) return null
+
+  const status = ACTIVITY_STATUSES.includes(raw.status as SearchActivityStatus)
+    ? raw.status as SearchActivityStatus
+    : 'active'
+  const kind = ACTIVITY_KINDS.includes(raw.kind as SearchActivityKind)
+    ? raw.kind as SearchActivityKind
+    : 'answer'
+  const sources = normalizeSources(raw.sources)
+  const domains = normalizeDomains(raw.domains)
+
+  return {
+    id,
+    kind,
+    status,
+    label,
+    detail: String(raw.detail || '').trim() || undefined,
+    sources: sources.length ? sources : undefined,
+    domains
+  }
+}
 
 function normalizeMessages(nextMessages: MessageDraft[]): Message[] {
   return nextMessages
@@ -33,19 +113,7 @@ function normalizeMessages(nextMessages: MessageDraft[]): Message[] {
       const content = String(message.content ?? '').trim()
       if (!content) return null
 
-      const sources = (message.sources ?? [])
-        .filter((source) => {
-          const titulo = String(source.titulo || '').trim()
-          const url = String(source.url || '').trim()
-          return Boolean(titulo || url)
-        })
-        .map(source => ({
-          id: String(source.id || source.url || source.titulo || 'fonte'),
-          titulo: String(source.titulo || 'Fonte oficial').trim() || 'Fonte oficial',
-          url: String(source.url || '').trim(),
-          kind: (source.kind === 'web' || source.kind === 'official' ? source.kind : 'rag') as Source['kind'],
-          description: String(source.description || '').trim() || undefined
-        }))
+      const sources = normalizeSources(message.sources)
 
       return {
         id: ++msgId,
@@ -120,6 +188,47 @@ export function useFiaqChat() {
     }
   }
 
+  function upsertActivity(messageId: number, activity: SearchActivity) {
+    const current = messages.value.find(message => message.id === messageId && message.role === 'assistant')
+    if (!current) return
+
+    const activities = current.activity ?? []
+    const idx = activities.findIndex(item => item.id === activity.id)
+    const nextActivity = idx >= 0
+      ? {
+          ...activities[idx],
+          ...activity,
+          sources: activity.sources ?? activities[idx]?.sources,
+          domains: activity.domains ?? activities[idx]?.domains
+        }
+      : activity
+
+    const next = idx >= 0
+      ? activities.map((item, itemIdx) => itemIdx === idx ? nextActivity : item)
+      : [...activities, nextActivity]
+
+    updateAssistantMessage(messageId, { activity: next })
+  }
+
+  function updateActivityStatus(
+    messageId: number,
+    id: string,
+    status: SearchActivityStatus,
+    label?: string,
+    detail?: string
+  ) {
+    const current = messages.value.find(message => message.id === messageId && message.role === 'assistant')
+    const activity = current?.activity?.find(item => item.id === id)
+    if (!activity) return
+
+    upsertActivity(messageId, {
+      ...activity,
+      status,
+      label: label || activity.label,
+      detail: detail || activity.detail
+    })
+  }
+
   function finalizeAssistantMessage(messageId: number, content: string) {
     updateAssistantMessage(messageId, {
       content: content.trim() ? content : EMPTY_RESPONSE_MESSAGE,
@@ -149,17 +258,78 @@ export function useFiaqChat() {
       try {
         const event = JSON.parse(line.slice(6))
 
+        if (event.type === 'activity') {
+          const activity = normalizeActivity(event)
+          if (activity) upsertActivity(assistantId, activity)
+        }
+
+        if (event.type === 'status') {
+          if (event.stage === 'searching') {
+            upsertActivity(assistantId, {
+              id: 'rag',
+              kind: 'rag',
+              status: 'active',
+              label: 'Consultando o RAG do CIC/UnB',
+              detail: 'Buscando documentos e respostas já indexadas na base.'
+            })
+          }
+
+          if (event.stage === 'web_search') {
+            upsertActivity(assistantId, {
+              id: 'web-search',
+              kind: 'web',
+              status: 'active',
+              label: 'Pesquisando sites oficiais',
+              detail: 'Consultando fontes web autorizadas.'
+            })
+          }
+        }
+
         if (event.type === 'token') {
+          if (!accumulatedContent) {
+            upsertActivity(assistantId, {
+              id: 'answer',
+              kind: 'answer',
+              status: 'active',
+              label: 'Escrevendo resposta',
+              detail: 'Organizando a resposta com base nas fontes selecionadas.'
+            })
+          }
           accumulatedContent += event.content
           updateAssistantMessage(assistantId, { content: accumulatedContent })
         }
 
         if (event.type === 'sources') {
-          const sources = (Array.isArray(event.items) ? event.items : []) as Source[]
+          const sources = normalizeSources(event.items)
           const currentReason = messages.value.find(message => message.id === assistantId)?.webSearchReason
+          const webSources = sources.filter(source => source.kind === 'web')
+          const ragSources = sources.filter(source => source.kind !== 'web')
+
+          if (ragSources.length) {
+            upsertActivity(assistantId, {
+              id: 'rag',
+              kind: 'rag',
+              status: 'done',
+              label: 'Fontes do RAG encontradas',
+              detail: `${ragSources.length} fonte(s) selecionada(s) da base local.`,
+              sources: ragSources.slice(0, 4)
+            })
+          }
+
+          if (webSources.length) {
+            upsertActivity(assistantId, {
+              id: 'web-search',
+              kind: 'web',
+              status: 'done',
+              label: 'Fontes web selecionadas',
+              detail: `${webSources.length} fonte(s) oficial(is) encontradas para responder.`,
+              sources: webSources.slice(0, 4)
+            })
+          }
+
           updateAssistantMessage(assistantId, {
             sources,
-            ...(sources.some(source => source?.kind === 'web')
+            ...(webSources.length
               ? {
                   webEnhanced: true,
                   webSearchReason: currentReason === 'feedback_negativo'
@@ -179,11 +349,13 @@ export function useFiaqChat() {
 
         if (event.type === 'done') {
           receivedTerminalEvent = true
+          updateActivityStatus(assistantId, 'answer', 'done', 'Resposta pronta', 'As fontes usadas aparecem logo abaixo da resposta.')
           finalizeAssistantMessage(assistantId, accumulatedContent)
         }
 
         if (event.type === 'error') {
           receivedTerminalEvent = true
+          updateActivityStatus(assistantId, 'answer', 'error', 'Não foi possível concluir', 'A geração falhou antes de finalizar a resposta.')
           finalizeAssistantMessage(assistantId, accumulatedContent || 'Ocorreu um erro ao processar sua mensagem. Tente novamente.')
         }
       } catch {

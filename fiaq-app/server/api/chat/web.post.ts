@@ -1,5 +1,5 @@
 import { chatStream, type ChatMessage } from '../../utils/llmProvider'
-import { buildFirecrawlContext, searchFirecrawl } from '../../utils/firecrawl'
+import { buildFirecrawlContext, getFirecrawlIncludeDomains, searchFirecrawl } from '../../utils/firecrawl'
 
 interface RequestBody {
   question?: string
@@ -43,6 +43,27 @@ function sendEvent(res: NodeJS.WritableStream, data: object): void {
   res.write(`data: ${JSON.stringify(data)}\n\n`)
 }
 
+function sendActivity(
+  res: NodeJS.WritableStream,
+  data: {
+    id: string
+    kind: 'web' | 'answer'
+    status: 'active' | 'done' | 'skipped' | 'error'
+    label: string
+    detail?: string
+    sources?: Array<{
+      id: string
+      titulo: string
+      url: string
+      kind: 'web'
+      description?: string
+    }>
+    domains?: string[]
+  }
+): void {
+  sendEvent(res, { type: 'activity', ...data })
+}
+
 export default defineEventHandler(async (event) => {
   const body = await readBody<RequestBody>(event)
   const question = String(body?.question || '').trim()
@@ -78,23 +99,60 @@ export default defineEventHandler(async (event) => {
   res.on('close', handleClientClose)
 
   try {
+    const webDomains = getFirecrawlIncludeDomains()
+
     sendEvent(res, { type: 'status', stage: 'web_search' })
+    sendActivity(res, {
+      id: 'web-plan',
+      kind: 'web',
+      status: 'active',
+      label: 'Pesquisa web acionada pelo feedback',
+      detail: 'Vou complementar a resposta com fontes oficiais configuradas.',
+      domains: webDomains
+    })
+    sendActivity(res, {
+      id: 'web-search',
+      kind: 'web',
+      status: 'active',
+      label: 'Pesquisando sites oficiais',
+      detail: 'Consultando resultados restritos aos domínios configurados.',
+      domains: webDomains
+    })
 
     const webSources = await searchFirecrawl(question, { signal: abort.signal })
     if (abort.signal.aborted) return
 
     const context = buildFirecrawlContext(webSources)
+    const responseSources = webSources.map(source => ({
+      id: source.id,
+      titulo: source.titulo,
+      url: source.url,
+      kind: source.kind,
+      description: source.description
+    }))
 
     if (webSources.length) {
+      sendActivity(res, {
+        id: 'web-search',
+        kind: 'web',
+        status: 'done',
+        label: 'Fontes web selecionadas',
+        detail: `${webSources.length} fonte(s) oficial(is) encontradas para complementar.`,
+        sources: responseSources.slice(0, 4),
+        domains: webDomains
+      })
       sendEvent(res, {
         type: 'sources',
-        items: webSources.map(source => ({
-          id: source.id,
-          titulo: source.titulo,
-          url: source.url,
-          kind: source.kind,
-          description: source.description
-        }))
+        items: responseSources
+      })
+    } else {
+      sendActivity(res, {
+        id: 'web-search',
+        kind: 'web',
+        status: 'skipped',
+        label: 'Pesquisa web sem nova fonte',
+        detail: 'Nenhuma fonte oficial nova foi selecionada; vou responder com a orientação mais segura.',
+        domains: webDomains
       })
     }
 
@@ -105,6 +163,13 @@ export default defineEventHandler(async (event) => {
 
     const stream = await chatStream(messages)
     reader = stream.getReader()
+    sendActivity(res, {
+      id: 'answer',
+      kind: 'answer',
+      status: 'active',
+      label: 'Escrevendo resposta complementar',
+      detail: 'Organizando a resposta com base na pesquisa web.'
+    })
 
     while (true) {
       const { done, value } = await reader.read()
@@ -113,10 +178,24 @@ export default defineEventHandler(async (event) => {
       sendEvent(res, { type: 'token', content: value })
     }
 
+    sendActivity(res, {
+      id: 'answer',
+      kind: 'answer',
+      status: 'done',
+      label: 'Resposta pronta',
+      detail: 'As fontes usadas aparecem logo abaixo da resposta.'
+    })
     sendEvent(res, { type: 'done' })
   } catch (e) {
     if (abort.signal.aborted) return
     console.error('[chat.web.post] Error:', e)
+    sendActivity(res, {
+      id: 'web-search',
+      kind: 'web',
+      status: 'error',
+      label: 'Pesquisa web indisponível',
+      detail: 'Não foi possível consultar fontes adicionais agora.'
+    })
     sendEvent(res, { type: 'error', message: 'WEB_SEARCH_UNAVAILABLE' })
   } finally {
     res.off('close', handleClientClose)

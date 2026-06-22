@@ -2,7 +2,7 @@ import { embedQuery } from '../utils/embeddings'
 import { chatStream, embedInfo } from '../utils/llmProvider'
 import { registrarPergunta } from '../repositorios/pergunta'
 import { buscarRagPorTexto, buscarRagPorTextoNoBanco, type SearchResult } from '../repositorios/rag'
-import { buildFirecrawlContext, searchFirecrawl } from '../utils/firecrawl'
+import { buildFirecrawlContext, getFirecrawlIncludeDomains, searchFirecrawl } from '../utils/firecrawl'
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
@@ -220,6 +220,33 @@ function sendEvent(res: NodeJS.WritableStream, data: object): void {
   res.write(`data: ${JSON.stringify(data)}\n\n`)
 }
 
+function sendActivity(
+  res: NodeJS.WritableStream,
+  data: {
+    id: string
+    kind: 'rag' | 'web' | 'answer'
+    status: 'pending' | 'active' | 'done' | 'skipped' | 'error'
+    label: string
+    detail?: string
+    sources?: ResponseSource[]
+    domains?: string[]
+  }
+): void {
+  sendEvent(res, { type: 'activity', ...data })
+}
+
+function activitySources(sources: ResponseSource[], limit = 4): ResponseSource[] {
+  return sources
+    .slice(0, limit)
+    .map(source => ({
+      id: source.id,
+      titulo: source.titulo,
+      url: source.url,
+      kind: source.kind,
+      description: source.description
+    }))
+}
+
 function runAfterResponse(event: Parameters<Parameters<typeof defineEventHandler>[0]>[0], promise: Promise<unknown>): void {
   const runtimeEvent = event as typeof event & {
     waitUntil?: (work: Promise<unknown>) => void
@@ -267,6 +294,13 @@ export default defineEventHandler(async (event) => {
 
   try {
     sendEvent(res, { type: 'status', stage: 'searching' })
+    sendActivity(res, {
+      id: 'rag',
+      kind: 'rag',
+      status: 'active',
+      label: 'Consultando o RAG do CIC/UnB',
+      detail: 'Buscando documentos e respostas já indexadas na base.'
+    })
 
     let rawResults: SearchResult[] | null = null
     let contextSource = 'banco'
@@ -292,9 +326,41 @@ export default defineEventHandler(async (event) => {
       url: r.url,
       kind: 'rag'
     }))
+    const webDomains = getFirecrawlIncludeDomains()
+    const needsWebFallback = shouldUseWebFallback(question, results)
 
-    if (shouldUseWebFallback(question, results)) {
+    sendActivity(res, {
+      id: 'rag',
+      kind: 'rag',
+      status: answerSources.length ? 'done' : 'skipped',
+      label: answerSources.length ? 'Fontes do RAG encontradas' : 'RAG sem fonte suficiente',
+      detail: answerSources.length
+        ? `${answerSources.length} fonte(s) selecionada(s) do ${contextSource}.`
+        : 'A pergunta segue para a pesquisa web oficial quando está no escopo da UnB.',
+      sources: activitySources(answerSources)
+    })
+
+    sendActivity(res, {
+      id: 'web-plan',
+      kind: 'web',
+      status: needsWebFallback ? 'active' : 'skipped',
+      label: needsWebFallback ? 'Preparando pesquisa web oficial' : 'Pesquisa web disponível',
+      detail: needsWebFallback
+        ? 'O RAG não trouxe contexto suficiente; vou checar fontes oficiais na internet.'
+        : 'O RAG trouxe contexto suficiente agora; se você avaliar negativamente, a web oficial pode complementar.',
+      domains: webDomains
+    })
+
+    if (needsWebFallback) {
       sendEvent(res, { type: 'status', stage: 'web_search' })
+      sendActivity(res, {
+        id: 'web-search',
+        kind: 'web',
+        status: 'active',
+        label: 'Pesquisando sites oficiais',
+        detail: 'Consultando resultados restritos aos domínios configurados.',
+        domains: webDomains
+      })
       console.log('[chat.post] Contexto local insuficiente para pergunta UnB; pesquisando fontes oficiais com Firecrawl.')
 
       try {
@@ -309,14 +375,40 @@ export default defineEventHandler(async (event) => {
             kind: source.kind,
             description: source.description
           }))
+          sendActivity(res, {
+            id: 'web-search',
+            kind: 'web',
+            status: 'done',
+            label: 'Fontes web selecionadas',
+            detail: `${answerSources.length} fonte(s) oficial(is) encontradas para responder.`,
+            sources: activitySources(answerSources),
+            domains: webDomains
+          })
           sendEvent(res, {
             type: 'mode',
             webEnhanced: true,
             reason: 'fallback_automatico'
           })
+        } else {
+          sendActivity(res, {
+            id: 'web-search',
+            kind: 'web',
+            status: 'skipped',
+            label: 'Pesquisa web sem nova fonte',
+            detail: 'Nenhuma fonte oficial nova foi selecionada; vou responder com a orientação mais segura.',
+            domains: webDomains
+          })
         }
       } catch (error) {
         console.warn('[chat.post] Falha na pesquisa Firecrawl; usando contexto local disponível:', error)
+        sendActivity(res, {
+          id: 'web-search',
+          kind: 'web',
+          status: 'error',
+          label: 'Pesquisa web indisponível',
+          detail: 'Vou seguir com o contexto local disponível agora.',
+          domains: webDomains
+        })
       }
     }
 
@@ -337,6 +429,14 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    sendActivity(res, {
+      id: 'answer',
+      kind: 'answer',
+      status: 'active',
+      label: 'Escrevendo resposta',
+      detail: 'Organizando a resposta com base nas fontes selecionadas.'
+    })
+
     const stream = await chatStream(messages)
     const reader = stream.getReader()
     let respostaCompleta = ''
@@ -348,6 +448,13 @@ export default defineEventHandler(async (event) => {
       sendEvent(res, { type: 'token', content: value })
     }
 
+    sendActivity(res, {
+      id: 'answer',
+      kind: 'answer',
+      status: 'done',
+      label: 'Resposta pronta',
+      detail: 'As fontes usadas aparecem logo abaixo da resposta.'
+    })
     sendEvent(res, { type: 'done' })
     closeResponse()
 
@@ -364,6 +471,13 @@ export default defineEventHandler(async (event) => {
       }))
   } catch (e) {
     console.error('[chat.post] Error:', e)
+    sendActivity(res, {
+      id: 'answer',
+      kind: 'answer',
+      status: 'error',
+      label: 'Não foi possível concluir',
+      detail: 'A geração falhou antes de finalizar a resposta.'
+    })
     sendEvent(res, { type: 'error', message: 'LLM_UNAVAILABLE' })
   } finally {
     closeResponse()

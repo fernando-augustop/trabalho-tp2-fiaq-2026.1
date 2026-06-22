@@ -66,6 +66,10 @@ function firecrawlBaseUrl(): string {
   return (process.env.FIRECRAWL_API_URL || FIRECRAWL_DEFAULT_API_URL).replace(/\/$/, '')
 }
 
+export function getFirecrawlIncludeDomains(): string[] {
+  return parseDomains(process.env.FIRECRAWL_INCLUDE_DOMAINS)
+}
+
 function firecrawlHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   const apiKey = process.env.FIRECRAWL_API_KEY?.trim()
@@ -120,7 +124,7 @@ export async function searchFirecrawl(question: string, options: SearchFirecrawl
         query: trimmed,
         limit: FIRECRAWL_SEARCH_LIMIT,
         sources: [{ type: 'web' }],
-        includeDomains: parseDomains(process.env.FIRECRAWL_INCLUDE_DOMAINS),
+        includeDomains: getFirecrawlIncludeDomains(),
         ignoreInvalidURLs: true,
         scrapeOptions: {
           formats: [{ type: 'markdown' }],

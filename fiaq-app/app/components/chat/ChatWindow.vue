@@ -46,7 +46,10 @@
           @feedback="(messageId, rating) => $emit('feedback', messageId, rating)"
         />
       </template>
-      <ChatTypingIndicator v-if="showTyping" />
+      <ChatTypingIndicator
+        v-if="typingMessage"
+        :message="typingMessage"
+      />
       <div
         ref="bottomSentinel"
         class="h-1"
@@ -79,9 +82,11 @@ const props = defineProps<{
   loading: boolean
 }>()
 
-const showTyping = computed(() => {
+const typingMessage = computed(() => {
   const last = props.messages[props.messages.length - 1]
-  return !!(last && last.role === 'assistant' && last.streaming && !last.content?.trim())
+  return last && last.role === 'assistant' && last.streaming && !last.content?.trim()
+    ? last
+    : null
 })
 
 defineEmits<{
