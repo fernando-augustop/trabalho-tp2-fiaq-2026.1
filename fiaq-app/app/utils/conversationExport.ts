@@ -517,6 +517,51 @@ function drawPdfBlocks(
   return cursorY
 }
 
+function drawPdfSourceRefs(
+  doc: InstanceType<typeof import('jspdf').jsPDF>,
+  refs: number[],
+  sourcesByIndex: Map<number, Source>,
+  x: number,
+  y: number,
+  maxWidth: number
+): number {
+  if (!refs.length) return y
+
+  let cursorY = ensurePdfSpace(doc, y, 26)
+  let cursorX = x
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(9.5)
+  doc.setTextColor('#475569')
+
+  const label = 'Fontes:'
+  doc.text(label, cursorX, cursorY)
+  cursorX += doc.getTextWidth(`${label} `) + 2
+
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(37, 99, 235)
+
+  for (const ref of refs) {
+    const source = sourcesByIndex.get(ref)
+    const marker = `[${ref}]`
+    const markerWidth = doc.getTextWidth(marker)
+
+    if (cursorX + markerWidth > x + maxWidth) {
+      cursorY = ensurePdfSpace(doc, cursorY + 14, 18)
+      cursorX = x
+    }
+
+    doc.text(marker, cursorX, cursorY)
+    if (source?.url) {
+      doc.link(cursorX, cursorY - 9, markerWidth, 12, { url: source.url })
+    }
+
+    cursorX += markerWidth + 8
+  }
+
+  return cursorY + 24
+}
+
 function drawPdfReferences(
   doc: InstanceType<typeof import('jspdf').jsPDF>,
   records: SourceRecord[],
@@ -550,8 +595,12 @@ function drawPdfReferences(
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor('#111111')
-    const label = `${record.index}. ${title}`
+    const label = `[${record.index}] ${title}`
+    const labelY = cursorY
     cursorY = drawWrappedPdfText(doc, label, x, cursorY, maxWidth, 12)
+    if (source.url) {
+      doc.link(x, labelY - 10, Math.min(doc.getTextWidth(`[${record.index}]`), maxWidth), 14, { url: source.url })
+    }
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8.5)
@@ -571,6 +620,7 @@ async function exportPdf(messages: Message[], filename: string) {
   const { jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit: 'pt', format: 'letter', compress: true })
   const registry = createSourceRegistry(messages)
+  const sourcesByIndex = new Map(registry.records.map(record => [record.index, record.source]))
   const width = doc.internal.pageSize.getWidth()
   const marginX = 72
   const contentWidth = width - marginX * 2
@@ -594,6 +644,7 @@ async function exportPdf(messages: Message[], filename: string) {
   for (const message of messages) {
     if (message.role !== 'assistant') continue
     y = drawPdfBlocks(doc, markdownBlocks(message.content), marginX, y, contentWidth)
+    y = drawPdfSourceRefs(doc, registry.byMessageId.get(message.id) ?? [], sourcesByIndex, marginX, y, contentWidth)
   }
 
   y = drawPdfReferences(doc, registry.records, marginX, y, contentWidth)

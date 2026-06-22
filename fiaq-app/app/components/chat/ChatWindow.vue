@@ -48,6 +48,7 @@
       </template>
       <ChatTypingIndicator v-if="showTyping" />
       <div
+        ref="bottomSentinel"
         class="h-1"
         aria-hidden="true"
       />
@@ -96,8 +97,12 @@ const suggestions = [
 ]
 
 const messagesEl = ref<HTMLElement | null>(null)
+const bottomSentinel = ref<HTMLElement | null>(null)
 const isNearBottom = ref(true)
 const showJumpToBottom = computed(() => props.messages.length > 0 && !isNearBottom.value)
+const shouldFollowStream = ref(true)
+let scrollFrame: number | null = null
+let programmaticScrollUntil = 0
 
 function measureBottomDistance() {
   if (!import.meta.client) return 0
@@ -106,13 +111,33 @@ function measureBottomDistance() {
 }
 
 function handleScroll() {
-  isNearBottom.value = measureBottomDistance() < 280
+  const nearBottom = measureBottomDistance() < 320
+  isNearBottom.value = nearBottom
+
+  if (nearBottom) {
+    shouldFollowStream.value = true
+    return
+  }
+
+  if (Date.now() > programmaticScrollUntil) {
+    shouldFollowStream.value = false
+  }
 }
 
 async function scrollToBottom(behavior: ScrollBehavior = 'auto') {
   await nextTick()
-  window.scrollTo({ top: document.documentElement.scrollHeight, behavior })
+  programmaticScrollUntil = Date.now() + 280
+  ;(bottomSentinel.value ?? messagesEl.value)?.scrollIntoView({ block: 'end', behavior })
   isNearBottom.value = true
+}
+
+function queueFollowScroll() {
+  if (!import.meta.client || !shouldFollowStream.value || scrollFrame !== null) return
+
+  scrollFrame = window.requestAnimationFrame(() => {
+    scrollFrame = null
+    if (shouldFollowStream.value) void scrollToBottom('auto')
+  })
 }
 
 onMounted(() => {
@@ -125,14 +150,23 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll)
   window.removeEventListener('resize', handleScroll)
+  if (scrollFrame !== null) window.cancelAnimationFrame(scrollFrame)
 })
 
 watch(
   () => props.messages.length,
   () => {
     const last = props.messages[props.messages.length - 1]
-    if (props.loading || last?.streaming) {
-      scrollToBottom(props.messages.length > 1 ? 'smooth' : 'auto')
+    if (!last) return
+
+    if (last.role === 'user') {
+      shouldFollowStream.value = true
+      void scrollToBottom('smooth')
+      return
+    }
+
+    if (last.streaming && shouldFollowStream.value) {
+      void scrollToBottom(props.messages.length > 1 ? 'smooth' : 'auto')
     }
   }
 )
@@ -140,15 +174,19 @@ watch(
 watch(
   () => props.loading,
   () => {
-    if (isNearBottom.value) scrollToBottom('smooth')
+    if (props.loading && isNearBottom.value) {
+      shouldFollowStream.value = true
+      void scrollToBottom('smooth')
+    }
   }
 )
 
-// Scroll on every token during streaming by watching the last message's content
+// Durante o streaming, acompanhe a resposta apenas se o usuário ainda estiver no fim.
+// Se ele rolar para cima, o botão "Última resposta" assume esse controle.
 watch(
   () => props.messages[props.messages.length - 1]?.content,
   () => {
-    if (isNearBottom.value) scrollToBottom('auto')
+    queueFollowScroll()
   }
 )
 </script>
