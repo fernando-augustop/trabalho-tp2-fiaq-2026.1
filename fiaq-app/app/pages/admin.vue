@@ -15,18 +15,40 @@
           </h1>
         </div>
 
-        <button
+        <div
           v-if="session"
-          type="button"
-          class="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 shadow-sm transition-colors hover:border-[#1a2e5a] hover:text-[#1a2e5a]"
-          @click="logout"
+          class="flex flex-wrap items-center gap-2"
         >
-          <UIcon
-            name="i-lucide-log-out"
-            class="h-4 w-4"
-          />
-          Sair
-        </button>
+          <span
+            class="inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-xs font-black shadow-sm"
+            :class="realtimeStatusClass"
+            aria-live="polite"
+          >
+            <span
+              class="h-2 w-2 rounded-full"
+              :class="realtimeDotClass"
+            />
+            {{ realtimeStatusLabel }}
+            <span
+              v-if="realtimeLastSync"
+              class="font-semibold opacity-75"
+            >
+              {{ realtimeLastSync }}
+            </span>
+          </span>
+
+          <button
+            type="button"
+            class="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 shadow-sm transition-colors hover:border-[#1a2e5a] hover:text-[#1a2e5a]"
+            @click="logout"
+          >
+            <UIcon
+              name="i-lucide-log-out"
+              class="h-4 w-4"
+            />
+            Sair
+          </button>
+        </div>
       </header>
 
       <div
@@ -314,7 +336,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import {
   clearAdminSession,
   loadAdminSession,
@@ -326,6 +348,13 @@ import {
   updateAdminPassword,
   type AdminSession
 } from '~/utils/supabaseAuth'
+import {
+  subscribeAdminCurationRealtime,
+  type AdminCurationRealtimePayload,
+  type AdminCurationRealtimeRecord,
+  type AdminCurationRealtimeStatus,
+  type AdminCurationRealtimeSubscription
+} from '~/utils/supabaseRealtime'
 
 type CandidateStatus = 'pendente' | 'aprovada' | 'rejeitada'
 type CandidateFilter = CandidateStatus | 'todas'
@@ -338,6 +367,8 @@ interface Candidate {
   fontes_usadas: unknown[]
   motivo_busca_web: 'fallback_automatico' | 'feedback_negativo'
   status: CandidateStatus
+  dthr_criacao?: string
+  dthr_atualizacao?: string
 }
 
 interface CandidateResponse {
@@ -369,12 +400,43 @@ const status = ref<CandidateFilter>('pendente')
 const candidates = ref<Candidate[]>([])
 const totals = ref<Record<CandidateStatus, number>>({ pendente: 0, aprovada: 0, rejeitada: 0 })
 const reviewNotes = ref<Record<number, string>>({})
+const realtimeStatus = ref<AdminCurationRealtimeStatus | 'disabled'>('disabled')
+const realtimeLastSync = ref('')
+const realtimeError = ref('')
+let realtimeSubscription: AdminCurationRealtimeSubscription | null = null
+let realtimeRefreshTimeout: number | null = null
+let candidateFetchRequestId = 0
 
 const tabs: Array<{ label: string, status: CandidateFilter, countKey: CandidateStatus }> = [
   { label: 'Pendentes', status: 'pendente', countKey: 'pendente' },
   { label: 'Aprovadas', status: 'aprovada', countKey: 'aprovada' },
   { label: 'Rejeitadas', status: 'rejeitada', countKey: 'rejeitada' }
 ]
+
+const realtimeStatusLabel = computed(() => {
+  if (realtimeStatus.value === 'connected') return 'Tempo real ativo'
+  if (realtimeStatus.value === 'connecting') return 'Conectando tempo real'
+  if (realtimeStatus.value === 'timed_out') return 'Tempo real lento'
+  if (realtimeStatus.value === 'error') return realtimeError.value || 'Tempo real indisponível'
+  if (realtimeStatus.value === 'closed') return 'Tempo real pausado'
+  return 'Tempo real desligado'
+})
+
+const realtimeStatusClass = computed(() => {
+  if (realtimeStatus.value === 'connected') return 'border-emerald-200 bg-emerald-50 text-emerald-800'
+  if (realtimeStatus.value === 'connecting') return 'border-sky-200 bg-sky-50 text-sky-800'
+  if (realtimeStatus.value === 'timed_out') return 'border-amber-200 bg-amber-50 text-amber-800'
+  if (realtimeStatus.value === 'error') return 'border-red-200 bg-red-50 text-red-700'
+  return 'border-slate-200 bg-white text-slate-500'
+})
+
+const realtimeDotClass = computed(() => {
+  if (realtimeStatus.value === 'connected') return 'bg-emerald-500'
+  if (realtimeStatus.value === 'connecting') return 'bg-sky-500 motion-safe:animate-pulse'
+  if (realtimeStatus.value === 'timed_out') return 'bg-amber-500'
+  if (realtimeStatus.value === 'error') return 'bg-red-500'
+  return 'bg-slate-300'
+})
 
 onMounted(async () => {
   if (!authConfigured.value) return
@@ -392,11 +454,17 @@ onMounted(async () => {
   }
 })
 
+onBeforeUnmount(() => {
+  clearRealtimeRefresh()
+  void stopCurationRealtime()
+})
+
 async function adminFetch<T>(url: string, options: AdminFetchOptions = {}): Promise<T> {
   if (!session.value) throw new Error('AUTH_REQUIRED')
 
   const nextSession = await refreshAdminSession(session.value)
   session.value = nextSession
+  await realtimeSubscription?.refreshAuth().catch(() => {})
 
   return await $fetch(url, {
     ...options,
@@ -414,8 +482,10 @@ async function validateSession() {
     await adminFetch('/api/admin/me')
     authorized.value = true
     await fetchCandidates()
+    await startCurationRealtime()
   } catch (error) {
     authorized.value = false
+    await stopCurationRealtime()
     notice.value = error instanceof Error ? error.message : 'Acesso não autorizado.'
   }
 }
@@ -458,6 +528,7 @@ async function logout() {
   try {
     await signOutAdmin(session.value)
   } finally {
+    await stopCurationRealtime()
     clearAdminSession()
     session.value = null
     inviteSession.value = null
@@ -466,22 +537,25 @@ async function logout() {
   }
 }
 
-async function fetchCandidates() {
+async function fetchCandidates(nextStatus: CandidateFilter = status.value, options: { quiet?: boolean } = {}) {
   if (!session.value || !authorized.value) return
-  loading.value = true
+  const requestId = ++candidateFetchRequestId
+  if (!options.quiet) loading.value = true
 
   try {
-    const response = await adminFetch<CandidateResponse>(`/api/admin/candidates?status=${status.value}`)
+    const response = await adminFetch<CandidateResponse>(`/api/admin/candidates?status=${nextStatus}`)
+    if (requestId !== candidateFetchRequestId || status.value !== nextStatus) return
     candidates.value = response.items
     totals.value = response.totals
   } finally {
-    loading.value = false
+    if (requestId === candidateFetchRequestId) loading.value = false
   }
 }
 
 async function setStatus(nextStatus: CandidateFilter) {
+  if (status.value !== nextStatus) candidates.value = []
   status.value = nextStatus
-  await fetchCandidates()
+  await fetchCandidates(nextStatus)
 }
 
 async function review(id: number, action: ReviewAction) {
@@ -499,7 +573,7 @@ async function review(id: number, action: ReviewAction) {
     notice.value = action === 'approve'
       ? 'Resposta aprovada e adicionada ao RAG.'
       : 'Resposta rejeitada.'
-    await fetchCandidates()
+    await fetchCandidates(status.value, { quiet: true })
   } catch (error) {
     notice.value = error instanceof Error ? error.message : 'Não foi possível revisar.'
   } finally {
@@ -523,6 +597,127 @@ async function sendInvite() {
   } finally {
     busy.value = false
   }
+}
+
+async function startCurationRealtime() {
+  if (!import.meta.client || !authConfigured.value || !session.value || !authorized.value) return
+
+  await stopCurationRealtime()
+  realtimeSubscription = subscribeAdminCurationRealtime({
+    url: String(runtimeConfig.public.supabaseUrl || ''),
+    anonKey: String(runtimeConfig.public.supabaseAnonKey || ''),
+    getSession: () => session.value,
+    onChange: handleCurationRealtimeChange,
+    onStatus: handleCurationRealtimeStatus
+  })
+}
+
+async function stopCurationRealtime() {
+  clearRealtimeRefresh()
+  const subscription = realtimeSubscription
+  realtimeSubscription = null
+  if (subscription) await subscription.unsubscribe()
+  realtimeStatus.value = authConfigured.value ? 'closed' : 'disabled'
+}
+
+function handleCurationRealtimeStatus(nextStatus: AdminCurationRealtimeStatus, error?: Error) {
+  realtimeStatus.value = nextStatus
+  realtimeError.value = error?.message ? `Tempo real: ${error.message}` : ''
+}
+
+function handleCurationRealtimeChange(payload: AdminCurationRealtimePayload) {
+  realtimeLastSync.value = new Intl.DateTimeFormat('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).format(new Date())
+
+  if (payload.eventType === 'DELETE') {
+    const id = Number(payload.old?.id)
+    if (Number.isInteger(id)) removeCandidate(id)
+  } else {
+    const candidate = normalizeRealtimeCandidate(payload.new)
+    if (candidate) applyRealtimeCandidate(candidate)
+  }
+
+  scheduleRealtimeRefresh()
+}
+
+function scheduleRealtimeRefresh() {
+  if (!import.meta.client || !authorized.value || !session.value) return
+
+  clearRealtimeRefresh()
+  realtimeRefreshTimeout = window.setTimeout(() => {
+    realtimeRefreshTimeout = null
+    void fetchCandidates(status.value, { quiet: true })
+  }, 250)
+}
+
+function clearRealtimeRefresh() {
+  if (realtimeRefreshTimeout === null) return
+  clearTimeout(realtimeRefreshTimeout)
+  realtimeRefreshTimeout = null
+}
+
+function applyRealtimeCandidate(candidate: Candidate) {
+  const idx = candidates.value.findIndex(item => item.id === candidate.id)
+  const belongsToCurrentFilter = status.value === 'todas' || candidate.status === status.value
+
+  if (!belongsToCurrentFilter) {
+    if (idx >= 0) removeCandidate(candidate.id)
+    return
+  }
+
+  const next = idx >= 0
+    ? candidates.value.map(item => item.id === candidate.id ? candidate : item)
+    : [candidate, ...candidates.value]
+
+  candidates.value = sortCandidates(next).slice(0, 100)
+}
+
+function removeCandidate(id: number) {
+  candidates.value = candidates.value.filter(candidate => candidate.id !== id)
+}
+
+function sortCandidates(items: Candidate[]): Candidate[] {
+  return [...items].sort((a, b) => candidateTime(b) - candidateTime(a))
+}
+
+function candidateTime(candidate: Candidate): number {
+  const raw = candidate.dthr_criacao || candidate.dthr_atualizacao || ''
+  const parsed = Date.parse(raw)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function normalizeRealtimeCandidate(record: AdminCurationRealtimeRecord): Candidate | null {
+  const id = Number(record.id)
+  const status = normalizeCandidateStatus(record.status)
+  const motivo = normalizeMotivoBuscaWeb(record.motivo_busca_web)
+
+  if (!Number.isInteger(id) || !status || !motivo) return null
+
+  return {
+    id,
+    pergunta: String(record.pergunta || ''),
+    resposta: String(record.resposta || ''),
+    fontes_usadas: Array.isArray(record.fontes_usadas) ? record.fontes_usadas : [],
+    motivo_busca_web: motivo,
+    status,
+    dthr_criacao: typeof record.dthr_criacao === 'string' ? record.dthr_criacao : undefined,
+    dthr_atualizacao: typeof record.dthr_atualizacao === 'string' ? record.dthr_atualizacao : undefined
+  }
+}
+
+function normalizeCandidateStatus(value: unknown): CandidateStatus | null {
+  return value === 'pendente' || value === 'aprovada' || value === 'rejeitada'
+    ? value
+    : null
+}
+
+function normalizeMotivoBuscaWeb(value: unknown): Candidate['motivo_busca_web'] | null {
+  return value === 'fallback_automatico' || value === 'feedback_negativo'
+    ? value
+    : null
 }
 
 function sourceTitle(source: unknown): string {

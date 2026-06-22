@@ -2,7 +2,7 @@
 
 ## Tabelas
 
-O banco possui seis tabelas organizadas em três domínios:
+O banco possui tabelas organizadas em três domínios principais:
 
 **FAQ (conteúdo)**
 | Tabela | Descrição |
@@ -24,6 +24,20 @@ O banco possui seis tabelas organizadas em três domínios:
 | `avaliacao_resposta` | Registra feedback anônimo sobre respostas do chatbot |
 | `web_resposta_candidata` | Fila de respostas web marcadas como úteis e aguardando curadoria |
 | `admin_usuario` | Allowlist de administradores autorizados a acessar `/admin` |
+
+---
+
+## Realtime da curadoria
+
+A fila `web_resposta_candidata` é publicada em `supabase_realtime` para que o
+painel `/admin` receba inserts/updates/deletes enquanto está aberto. O script
+`08_admin_curadoria_realtime.sql` mantém `anon` sem acesso, concede apenas
+`SELECT` para `authenticated` e usa RLS para liberar eventos somente a usuários
+cujo e-mail esteja ativo em `admin_usuario`.
+
+O app ainda usa as rotas `/api/admin` como fonte autoritativa para carregar a
+lista completa e revisar itens. O Realtime funciona como gatilho de atualização
+instantânea e evita que a tela fique presa em uma aba ou contador antigo.
 
 ---
 

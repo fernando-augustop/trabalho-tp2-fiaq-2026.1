@@ -13,10 +13,13 @@
 | `04_rag_pgvector.sql` | Extensão pgvector, tabelas RAG e função de busca | 3º |
 | `05_supabase_rag_search_hardening.sql` | Hardening idempotente da função RAG | 4º |
 | `03_supabase_app_role.sql` | Role limitada, grants e RLS | 5º |
+| `07_admin_rag_review.sql` | Admin, fila de curadoria e aprovação para RAG | 6º |
+| `08_admin_curadoria_realtime.sql` | Publicação Realtime segura da fila de curadoria | 7º |
 
 `02_perguntas_tabelas.sql` e `04_rag_pgvector.sql` dependem de `faq_entrada`.
-O `03_` deve rodar por último para conceder permissões nas tabelas e funções já
-criadas.
+Os scripts de role/RLS/admin devem rodar depois das tabelas e funções que eles
+protegem. O `08_` pressupõe Supabase Realtime disponível e adiciona apenas
+`web_resposta_candidata` à publicação `supabase_realtime`.
 
 ## Variáveis de ambiente
 
