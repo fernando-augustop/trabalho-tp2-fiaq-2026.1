@@ -163,6 +163,27 @@ function isStrikeQuery(question: string): boolean {
   return normalized.includes('greve') || normalized.includes('paralisacao')
 }
 
+function requestedYears(question: string): string[] {
+  return [...new Set(normalizeSearchText(question).match(/\b20\d{2}\b/g) || [])]
+}
+
+function sourceYearText(source: FirecrawlSource): string {
+  return normalizeSearchText(`${source.titulo} ${source.url} ${source.description || ''}`)
+}
+
+function sourceHasRequestedYear(source: FirecrawlSource, years: string[]): boolean {
+  if (!years.length) return true
+  const text = sourceYearText(source)
+  return years.some(year => text.includes(year))
+}
+
+function sourceHasConflictingYear(source: FirecrawlSource, years: string[]): boolean {
+  if (!years.length) return false
+  const text = sourceYearText(source)
+  const sourceYears = text.match(/\b20\d{2}\b/g) || []
+  return sourceYears.some(year => !years.includes(year))
+}
+
 function buildSearchQueries(question: string): string[] {
   const queries = [question]
 
@@ -286,16 +307,21 @@ function sourceScore(question: string, source: FirecrawlSource, index: number): 
   const normalizedUrl = normalizeSearchText(source.url)
   const normalizedSource = normalizeSearchText(`${source.titulo} ${source.url} ${source.description || ''} ${source.markdown || ''}`)
   const host = sourceHost(source.url)
+  const years = requestedYears(question)
   let score = 100 - index
 
   for (const term of normalizedQuestion.split(/\s+/).filter(term => term.length > 3)) {
     if (normalizedSource.includes(term)) score += 4
   }
 
-  if (normalizedQuestion.includes('2026') && normalizedSource.includes('2026')) score += 18
-  if (normalizedQuestion.includes('2026') && normalizedTitle.includes('2026')) score += 18
-  if (normalizedQuestion.includes('2026') && normalizedUrl.includes('2026')) score += 30
-  if (normalizedQuestion.includes('2026') && normalizedUrl.includes('2025')) score -= 14
+  for (const year of years) {
+    if (normalizedSource.includes(year)) score += 18
+    if (normalizedTitle.includes(year)) score += 18
+    if (normalizedUrl.includes(year)) score += 30
+  }
+
+  if (sourceHasRequestedYear(source, years)) score += 24
+  if (sourceHasConflictingYear(source, years) && !sourceHasRequestedYear(source, years)) score -= 60
   if (normalizedQuestion.includes('greve') && normalizedSource.includes('greve')) score += 14
   if (normalizedQuestion.includes('greve') && normalizedTitle.includes('greve')) score += 22
   if (normalizedQuestion.includes('paralisacao') && normalizedSource.includes('paralisacao')) score += 10
@@ -315,10 +341,24 @@ function mergeAndRankSources(question: string, sourceGroups: FirecrawlSource[][]
     if (!byUrl.has(key)) byUrl.set(key, { source, index: byUrl.size })
   }
 
-  return [...byUrl.values()]
+  const rankedSources = [...byUrl.values()]
     .sort((a, b) => sourceScore(question, b.source, b.index) - sourceScore(question, a.source, a.index))
     .map(item => item.source)
-    .slice(0, FIRECRAWL_SEARCH_LIMIT)
+  const years = requestedYears(question)
+  const exactYearSources = rankedSources.filter(source => sourceHasRequestedYear(source, years))
+
+  if (years.length && exactYearSources.length >= 2) {
+    return exactYearSources.slice(0, FIRECRAWL_SEARCH_LIMIT)
+  }
+
+  if (years.length && exactYearSources.length === 1) {
+    const compatibleSources = rankedSources.filter(source =>
+      !sourceHasRequestedYear(source, years) && !sourceHasConflictingYear(source, years)
+    )
+    return [...exactYearSources, ...compatibleSources].slice(0, FIRECRAWL_SEARCH_LIMIT)
+  }
+
+  return rankedSources.slice(0, FIRECRAWL_SEARCH_LIMIT)
 }
 
 export async function searchFirecrawl(question: string, options: SearchFirecrawlOptions = {}): Promise<FirecrawlSource[]> {
