@@ -75,7 +75,7 @@ export default defineEventHandler(async (event) => {
   await sql`
     INSERT INTO admin_usuario (email, ativo, criado_por, dthr_atualizacao)
     VALUES (${email}, TRUE, ${admin.email}, CURRENT_TIMESTAMP)
-    ON CONFLICT (email) DO UPDATE SET
+    ON CONFLICT ((lower(email))) DO UPDATE SET
       ativo = TRUE,
       criado_por = EXCLUDED.criado_por,
       dthr_atualizacao = CURRENT_TIMESTAMP
