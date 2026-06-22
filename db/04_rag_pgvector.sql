@@ -71,6 +71,9 @@ CREATE INDEX IF NOT EXISTS idx_rag_chunk_modelo_ativo
 CREATE INDEX IF NOT EXISTS idx_rag_chunk_origem
   ON rag_chunk(origem);
 
+CREATE INDEX IF NOT EXISTS idx_rag_chunk_origem_dthr
+  ON rag_chunk(origem, dthr_atualizacao DESC);
+
 CREATE INDEX IF NOT EXISTS idx_rag_chunk_metadados
   ON rag_chunk USING GIN (metadados);
 

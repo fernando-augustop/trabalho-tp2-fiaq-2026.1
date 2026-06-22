@@ -1,6 +1,12 @@
 import { getSql, isDatabaseConfigured } from '../db/index'
+import { registrarCandidataWeb, temFonteWeb, type MotivoBuscaWeb } from './candidatos'
 
 export type RespostaFeedback = 'helpful' | 'unhelpful'
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue }
+
+function toJsonValue(value: unknown): JsonValue {
+  return JSON.parse(JSON.stringify(value ?? null)) as JsonValue
+}
 
 interface RegistrarAvaliacaoInput {
   pergunta: string
@@ -8,6 +14,7 @@ interface RegistrarAvaliacaoInput {
   avaliacao: RespostaFeedback
   fontesUsadas: unknown[]
   acionouBuscaWeb: boolean
+  motivoBuscaWeb?: MotivoBuscaWeb
 }
 
 export async function registrarAvaliacaoResposta(input: RegistrarAvaliacaoInput): Promise<void> {
@@ -21,8 +28,7 @@ export async function registrarAvaliacaoResposta(input: RegistrarAvaliacaoInput)
 
   try {
     const fontesUsadas = Array.isArray(input.fontesUsadas) ? input.fontesUsadas : []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fontesJson = sql.json(fontesUsadas as any)
+    const fontesJson = sql.json(toJsonValue(fontesUsadas))
 
     await sql`
       INSERT INTO avaliacao_resposta
@@ -35,6 +41,20 @@ export async function registrarAvaliacaoResposta(input: RegistrarAvaliacaoInput)
         ${input.acionouBuscaWeb}
       )
     `
+
+    if (
+      input.avaliacao === 'helpful'
+      && input.acionouBuscaWeb
+      && input.motivoBuscaWeb
+      && temFonteWeb(fontesUsadas)
+    ) {
+      await registrarCandidataWeb({
+        pergunta,
+        resposta,
+        fontesUsadas,
+        motivoBuscaWeb: input.motivoBuscaWeb
+      })
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.warn(`[feedback] Não foi possível registrar avaliação da resposta: ${message}`)

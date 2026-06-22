@@ -21,7 +21,7 @@
         class="fiaq-search-form flex justify-center"
         @submit.prevent="ask"
       >
-        <div class="fiaq-search-box flex w-full max-w-2xl overflow-hidden rounded-xl border border-white/30 bg-white shadow-[0_18px_42px_rgba(4,12,30,0.22)] ring-1 ring-slate-900/10">
+        <div class="fiaq-search-box flex w-full max-w-2xl overflow-hidden rounded-xl border border-[#00a155] bg-white shadow-[0_18px_42px_rgba(4,12,30,0.22)] ring-1 ring-[#00dc82]/35">
           <input
             v-model="query"
             type="text"

@@ -19,7 +19,7 @@ button,input{font:inherit}
 .fiaq-home-title{margin:0 0 .75rem;color:#fff;font-size:1.875rem;line-height:2.25rem;font-weight:800}
 .fiaq-home-subtitle{max-width:42rem;margin:0 auto 2rem;color:#bfdbfe;font-size:1rem;line-height:1.5rem}
 .fiaq-search-form{display:flex;justify-content:center}
-.fiaq-search-box{display:flex;width:100%;max-width:42rem;overflow:hidden;border:1px solid rgba(255,255,255,.3);border-radius:.75rem;background:#fff;box-shadow:0 18px 42px rgba(4,12,30,.22),0 0 0 1px rgba(15,23,42,.1)}
+.fiaq-search-box{display:flex;width:100%;max-width:42rem;overflow:hidden;border:1px solid rgba(0,161,85,.95);border-radius:.75rem;background:#fff;box-shadow:0 18px 42px rgba(4,12,30,.22),0 0 0 1px rgba(0,220,130,.35)}
 .fiaq-search-input{min-width:0;flex:1;border:0;background:#fff;color:#1a2e5a;padding:1rem 1.25rem;font-size:1rem;outline:0}
 .fiaq-search-input::placeholder{color:#64748b}
 .fiaq-search-button{display:flex;align-items:center;gap:.5rem;flex-shrink:0;border:0;border-left:1px solid rgba(6,95,70,.25);background:#00a155;color:#0a2e1a;padding:1rem 1.5rem;font-size:1rem;font-weight:800;cursor:pointer}

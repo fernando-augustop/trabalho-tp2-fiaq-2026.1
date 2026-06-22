@@ -48,7 +48,8 @@ Supabase e variáveis do OpenRouter.
 -- depois:   db/04_rag_pgvector.sql
 -- depois:   db/05_supabase_rag_search_hardening.sql
 -- depois:   db/06_avaliacao_resposta.sql
--- por fim:  db/03_supabase_app_role.sql
+-- depois:   db/03_supabase_app_role.sql
+-- por fim:  db/07_admin_rag_review.sql
 ```
 
 Os SQLs usam `IF NOT EXISTS`, então podem ser reaplicados durante setup sem
@@ -119,6 +120,11 @@ DATABASE_URL            = postgresql://...supabase...:6543/postgres?sslmode=requ
 FIRECRAWL_API_URL       = URL do serviço Firecrawl usado no complemento e no fallback web
 FIRECRAWL_API_KEY       = opcional, se o serviço Firecrawl exigir Bearer token
 FIRECRAWL_INCLUDE_DOMAINS = cic.unb.br,www.cic.unb.br,unb.br,www.unb.br,saa.unb.br,sigaa.unb.br
+NUXT_PUBLIC_SUPABASE_URL = https://PROJECT_REF.supabase.co
+NUXT_PUBLIC_SUPABASE_ANON_KEY = anon key do projeto Supabase
+SUPABASE_SERVICE_ROLE_KEY = service_role key do projeto Supabase (somente server-side)
+ADMIN_BOOTSTRAP_EMAILS = primeiro(s) admin(s), separados por vírgula, para acessar /admin antes dos convites
+ADMIN_BASE_URL = opcional; URL canônica para redirect dos convites, se quiser fixar domínio
 ```
 
 > O modelo de embedding **precisa ser o mesmo** usado para gerar o índice
@@ -128,6 +134,30 @@ FIRECRAWL_INCLUDE_DOMAINS = cic.unb.br,www.cic.unb.br,unb.br,www.unb.br,saa.unb.
 > A pesquisa Firecrawl é sob demanda: ela é chamada quando o aluno marca
 > "Não me ajudou" e também como fallback automático quando uma pergunta de
 > escopo UnB não tem contexto local forte o suficiente no RAG.
+
+### Convites de administradores
+
+O `/admin` usa Supabase Auth. Para o primeiro acesso, configure
+`ADMIN_BOOTSTRAP_EMAILS` com o e-mail do administrador inicial e crie esse usuário
+em **Authentication → Users** no dashboard do Supabase, ou envie um convite pelo
+próprio dashboard. Depois que esse usuário entrar no `/admin`, ele pode convidar
+outros administradores pela interface; o servidor usa `SUPABASE_SERVICE_ROLE_KEY`
+para chamar o endpoint de convite do Supabase Auth e adiciona o e-mail na tabela
+`admin_usuario`.
+Por segurança, os convites não usam `Host`/`x-forwarded-host` da requisição para
+montar redirect; em produção a URL vem de `ADMIN_BASE_URL`, `APP_URL` ou
+`VERCEL_URL`.
+
+O caminho manual no dashboard é:
+
+1. Abra **Authentication → Users**.
+2. Clique em **Add user**.
+3. Use **Send invitation** para enviar o convite por e-mail.
+4. Adicione ou mantenha o e-mail em `admin_usuario` para liberar o painel.
+
+Ao aprovar uma resposta candidata no `/admin`, o app cria um documento
+`admin-web-*` em `rag_documento` e um chunk correspondente em `rag_chunk`, usando
+o mesmo modelo de embedding configurado em produção.
 
 ## 6. Validar antes de subir
 

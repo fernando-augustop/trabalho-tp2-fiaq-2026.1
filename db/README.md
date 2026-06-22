@@ -21,6 +21,9 @@ O banco possui seis tabelas organizadas em três domínios:
 |---|---|
 | `pergunta_registrada` | Agrega perguntas semanticamente similares — uma linha por "pergunta única" |
 | `ocorrencia_pergunta` | Registra cada vez que uma pergunta é feita — permite análise temporal |
+| `avaliacao_resposta` | Registra feedback anônimo sobre respostas do chatbot |
+| `web_resposta_candidata` | Fila de respostas web marcadas como úteis e aguardando curadoria |
+| `admin_usuario` | Allowlist de administradores autorizados a acessar `/admin` |
 
 ---
 
@@ -34,6 +37,9 @@ O chatbot usa uma arquitetura **DB-first**:
    `pgvector`, aplica threshold e retorna os melhores trechos.
 4. O modelo de chat (`google/gemma-4-31b-it:free`) recebe os trechos como contexto.
 5. A pergunta e as fontes usadas são registradas nas tabelas de análise.
+6. Se uma resposta com pesquisa web receber avaliação positiva, ela entra em
+   `web_resposta_candidata`. Um administrador pode aprovar a resposta no `/admin`
+   para transformá-la em novo chunk RAG.
 
 O modelo de chat e o modelo de embedding são papéis diferentes.
 `google/gemma-4-31b-it:free` escreve a resposta; o embedding model

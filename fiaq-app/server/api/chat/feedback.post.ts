@@ -1,4 +1,5 @@
 import { registrarAvaliacaoResposta, type RespostaFeedback } from '../../repositorios/feedback'
+import type { MotivoBuscaWeb } from '../../repositorios/candidatos'
 
 interface RequestBody {
   question?: string
@@ -6,6 +7,7 @@ interface RequestBody {
   rating?: RespostaFeedback
   sources?: unknown[]
   webSearchRequested?: boolean
+  webSearchReason?: MotivoBuscaWeb
 }
 
 const FEEDBACK_RATE_LIMIT_WINDOW_MS = 60_000
@@ -94,7 +96,10 @@ export default defineEventHandler(async (event) => {
     resposta: answer,
     avaliacao: rating,
     fontesUsadas: Array.isArray(body?.sources) ? body.sources : [],
-    acionouBuscaWeb: Boolean(body?.webSearchRequested)
+    acionouBuscaWeb: Boolean(body?.webSearchRequested),
+    motivoBuscaWeb: body?.webSearchReason === 'fallback_automatico' || body?.webSearchReason === 'feedback_negativo'
+      ? body.webSearchReason
+      : undefined
   })
 
   return { ok: true }

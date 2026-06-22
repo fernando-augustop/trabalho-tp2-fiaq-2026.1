@@ -1,7 +1,7 @@
 import { embedQuery } from '../utils/embeddings'
 import { chatStream, embedInfo } from '../utils/llmProvider'
 import { registrarPergunta } from '../repositorios/pergunta'
-import { buscarRagPorTexto, type SearchResult } from '../repositorios/rag'
+import { buscarRagPorTexto, buscarRagPorTextoNoBanco, type SearchResult } from '../repositorios/rag'
 import { buildFirecrawlContext, searchFirecrawl } from '../utils/firecrawl'
 
 interface ChatMessage {
@@ -268,9 +268,16 @@ export default defineEventHandler(async (event) => {
   try {
     sendEvent(res, { type: 'status', stage: 'searching' })
 
-    const rawResults = buscarRagPorTexto(question, RAG_RESULT_LIMIT)
+    let rawResults = await buscarRagPorTextoNoBanco(question, RAG_RESULT_LIMIT)
+    let contextSource = 'banco'
+
+    if (!rawResults?.length) {
+      rawResults = buscarRagPorTexto(question, RAG_RESULT_LIMIT)
+      contextSource = 'índice local'
+    }
+
     const results = rankContextResults(question, rawResults)
-    console.log('[chat.post] Contexto RAG carregado do índice local por texto.')
+    console.log(`[chat.post] Contexto RAG carregado do ${contextSource} por texto.`)
 
     let context = buildCompactContext(results)
     let answerSources: ResponseSource[] = results.map(r => ({
@@ -296,7 +303,11 @@ export default defineEventHandler(async (event) => {
             kind: source.kind,
             description: source.description
           }))
-          sendEvent(res, { type: 'mode', webEnhanced: true })
+          sendEvent(res, {
+            type: 'mode',
+            webEnhanced: true,
+            reason: 'fallback_automatico'
+          })
         }
       } catch (error) {
         console.warn('[chat.post] Falha na pesquisa Firecrawl; usando contexto local disponível:', error)
