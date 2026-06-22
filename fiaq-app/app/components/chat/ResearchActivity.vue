@@ -36,10 +36,10 @@
           />
         </span>
         <span
-          class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-black uppercase"
-          :class="lineBadgeClass(line)"
+          v-if="line.kind === 'web'"
+          class="shrink-0 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-black uppercase text-emerald-700 ring-1 ring-emerald-100"
         >
-          {{ line.kind === 'web' ? 'web' : 'rag' }}
+          web
         </span>
         <span class="min-w-0 flex-1 truncate font-semibold text-[#1a2e5a]">
           {{ line.title }}
@@ -84,8 +84,8 @@ const fallbackActivities = computed<SearchActivity[]>(() => [
     id: 'preparing',
     kind: 'rag',
     status: 'active',
-    label: 'Abrindo a base do fIAq',
-    detail: 'Consultando o RAG local e as fontes oficiais disponíveis.'
+    label: 'Abrindo fontes do fIAq',
+    detail: 'Consultando documentos e respostas oficiais disponíveis.'
   }
 ])
 
@@ -114,7 +114,7 @@ const sourceLines = computed<SourceLine[]>(() => {
         kind: source.kind === 'web' ? 'web' : 'rag',
         status: activity.status,
         title: sourceTitle(source),
-        host: sourceHost(source.url) || (source.kind === 'web' ? '' : 'base fIAq')
+        host: sourceHost(source.url) || (source.kind === 'web' ? '' : 'fonte oficial')
       })
     }
   }
@@ -129,7 +129,7 @@ const sourceLines = computed<SourceLine[]>(() => {
     kind: activity.kind === 'web' ? 'web' : 'rag',
     status: activity.status,
     title: activity.label,
-    host: activity.kind === 'web' ? 'fontes oficiais' : 'base fIAq'
+    host: activity.kind === 'web' ? 'fontes oficiais' : 'fonte oficial'
   }]
 })
 
@@ -137,7 +137,7 @@ function lineIcon(line: SourceLine): string {
   if (line.status === 'done') return 'i-lucide-check'
   if (line.status === 'error') return 'i-lucide-circle-alert'
   if (line.kind === 'web') return 'i-lucide-globe-2'
-  return 'i-lucide-database'
+  return 'i-lucide-book-open'
 }
 
 function lineIconClass(line: SourceLine): string {
@@ -145,11 +145,6 @@ function lineIconClass(line: SourceLine): string {
   if (line.status === 'done') return 'bg-emerald-50 text-emerald-700'
   if (line.kind === 'web') return 'bg-emerald-50 text-emerald-700'
   return 'bg-slate-100 text-[#1a2e5a]'
-}
-
-function lineBadgeClass(line: SourceLine): string {
-  if (line.kind === 'web') return 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
-  return 'bg-blue-50 text-[#1a2e5a] ring-1 ring-blue-100'
 }
 
 function sourceTitle(source: Source): string {

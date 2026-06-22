@@ -34,9 +34,11 @@ interface SearchFirecrawlOptions {
 }
 
 const FIRECRAWL_DEFAULT_API_URL = 'https://api.firecrawl.dev'
-const FIRECRAWL_SEARCH_LIMIT = readPositiveInt(process.env.FIRECRAWL_SEARCH_LIMIT, 4)
-const FIRECRAWL_TIMEOUT_MS = readPositiveInt(process.env.FIRECRAWL_TIMEOUT_MS, 25000)
+const FIRECRAWL_SEARCH_LIMIT = readPositiveInt(process.env.FIRECRAWL_SEARCH_LIMIT, 6)
+const FIRECRAWL_BROAD_SEARCH_LIMIT = readPositiveInt(process.env.FIRECRAWL_BROAD_SEARCH_LIMIT, 8)
+const FIRECRAWL_TIMEOUT_MS = readPositiveInt(process.env.FIRECRAWL_TIMEOUT_MS, 30000)
 const FIRECRAWL_MAX_AGE_MS = readPositiveInt(process.env.FIRECRAWL_MAX_AGE_MS, 604800000)
+const FIRECRAWL_FRESH_MAX_AGE_MS = readPositiveInt(process.env.FIRECRAWL_FRESH_MAX_AGE_MS, 86400000)
 const FIRECRAWL_RESULT_CHARS = readPositiveInt(process.env.FIRECRAWL_RESULT_CHARS, 1200)
 const FIRECRAWL_TOTAL_CHARS = readPositiveInt(process.env.FIRECRAWL_TOTAL_CHARS, 4800)
 const DEFAULT_INCLUDE_DOMAINS = [
@@ -46,6 +48,35 @@ const DEFAULT_INCLUDE_DOMAINS = [
   'www.unb.br',
   'saa.unb.br',
   'sigaa.unb.br'
+]
+const DEFAULT_TRUSTED_DISCOVERY_DOMAINS = [
+  ...DEFAULT_INCLUDE_DOMAINS,
+  'noticias.unb.br',
+  'informa.unb.br',
+  'adunb.org',
+  'sintfub.org.br',
+  'correiobraziliense.com.br',
+  'metropoles.com',
+  'brasildefato.com.br'
+]
+const FRESHNESS_TERMS = [
+  '2026',
+  'atual',
+  'atualmente',
+  'agora',
+  'hoje',
+  'recente',
+  'noticia',
+  'noticias',
+  'greve',
+  'paralisacao',
+  'paralisar',
+  'indicativo',
+  'assembleia',
+  'reitoria',
+  'servidores',
+  'docentes',
+  'tecnicos'
 ]
 
 function readPositiveInt(value: string | undefined, fallback: number): number {
@@ -62,12 +93,22 @@ function parseDomains(value: string | undefined): string[] {
   return domains?.length ? [...new Set(domains)] : DEFAULT_INCLUDE_DOMAINS
 }
 
+function parseTrustedDomains(value: string | undefined): string[] {
+  const configured = parseDomains(value)
+  const domains = configured.length ? configured : DEFAULT_TRUSTED_DISCOVERY_DOMAINS
+  return [...new Set([...domains, ...DEFAULT_TRUSTED_DISCOVERY_DOMAINS])]
+}
+
 function firecrawlBaseUrl(): string {
   return (process.env.FIRECRAWL_API_URL || FIRECRAWL_DEFAULT_API_URL).replace(/\/$/, '')
 }
 
 export function getFirecrawlIncludeDomains(): string[] {
   return parseDomains(process.env.FIRECRAWL_INCLUDE_DOMAINS)
+}
+
+export function getFirecrawlTrustedDomains(): string[] {
+  return parseTrustedDomains(process.env.FIRECRAWL_TRUSTED_DOMAINS)
 }
 
 function firecrawlHeaders(): Record<string, string> {
@@ -86,6 +127,56 @@ function normalizeWhitespace(text: string): string {
     .trim()
 }
 
+function normalizeSearchText(text: string): string {
+  return normalizeWhitespace(text)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
+function sourceHost(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return ''
+  }
+}
+
+function hostMatchesDomain(host: string, domain: string): boolean {
+  const cleanHost = host.toLowerCase()
+  const cleanDomain = domain.toLowerCase().replace(/^www\./, '')
+  return cleanHost === cleanDomain || cleanHost.endsWith(`.${cleanDomain}`)
+}
+
+function isTrustedSource(url: string): boolean {
+  const host = sourceHost(url)
+  return Boolean(host) && getFirecrawlTrustedDomains().some(domain => hostMatchesDomain(host, domain))
+}
+
+function isFreshnessSensitiveQuery(question: string): boolean {
+  const normalized = normalizeSearchText(question)
+  return FRESHNESS_TERMS.some(term => normalized.includes(normalizeSearchText(term)))
+}
+
+function isStrikeQuery(question: string): boolean {
+  const normalized = normalizeSearchText(question)
+  return normalized.includes('greve') || normalized.includes('paralisacao')
+}
+
+function buildSearchQueries(question: string): string[] {
+  const queries = [question]
+
+  if (isFreshnessSensitiveQuery(question)) {
+    queries.push(`${question} UnB 2026 reitoria noticias atual`)
+
+    if (isStrikeQuery(question)) {
+      queries.push('greve UnB 2026 adunb sintfub reitoria')
+    }
+  }
+
+  return [...new Set(queries.map(query => query.trim()).filter(Boolean))].slice(0, 3)
+}
+
 function compactText(text: string | undefined | null, maxChars: number): string {
   const normalized = normalizeWhitespace(String(text || ''))
   if (normalized.length <= maxChars) return normalized
@@ -101,13 +192,39 @@ function sourceId(url: string, index: number): string {
   }
 }
 
-export async function searchFirecrawl(question: string, options: SearchFirecrawlOptions = {}): Promise<FirecrawlSource[]> {
-  const trimmed = question.trim().slice(0, 500)
-  if (!trimmed) return []
+function normalizeFirecrawlResult(result: FirecrawlWebResult, index: number): FirecrawlSource | null {
+  const url = String(result.url || result.metadata?.sourceURL || result.metadata?.url || '').trim()
+  if (!/^https?:\/\//i.test(url)) return null
 
+  const titulo = normalizeWhitespace(String(result.title || result.metadata?.title || url)) || 'Fonte web'
+  const description = compactText(result.description || result.metadata?.description, 260)
+  const markdown = compactText(result.markdown, FIRECRAWL_RESULT_CHARS)
+
+  return {
+    id: sourceId(url, index),
+    titulo,
+    url,
+    description: description || undefined,
+    markdown: markdown || undefined,
+    kind: 'web'
+  }
+}
+
+async function runFirecrawlSearch(
+  query: string,
+  options: {
+    signal?: AbortSignal
+    includeDomains?: string[]
+    broad?: boolean
+    fresh?: boolean
+    scrape?: boolean
+    limit?: number
+    timeoutMs?: number
+  }
+): Promise<FirecrawlSource[]> {
   const abort = new AbortController()
   const abortFromCaller = () => abort.abort(options.signal?.reason)
-  const timeout = setTimeout(() => abort.abort(), FIRECRAWL_TIMEOUT_MS)
+  const timeout = setTimeout(() => abort.abort(), options.timeoutMs ?? FIRECRAWL_TIMEOUT_MS)
 
   if (options.signal?.aborted) {
     abortFromCaller()
@@ -115,23 +232,29 @@ export async function searchFirecrawl(question: string, options: SearchFirecrawl
     options.signal?.addEventListener('abort', abortFromCaller, { once: true })
   }
 
+  const body: Record<string, unknown> = {
+    query,
+    limit: options.limit ?? (options.broad ? FIRECRAWL_BROAD_SEARCH_LIMIT : FIRECRAWL_SEARCH_LIMIT),
+    sources: [{ type: 'web' }],
+    ignoreInvalidURLs: true
+  }
+
+  if (options.scrape !== false) {
+    body.scrapeOptions = {
+      formats: [{ type: 'markdown' }],
+      onlyMainContent: true,
+      maxAge: options.fresh ? FIRECRAWL_FRESH_MAX_AGE_MS : FIRECRAWL_MAX_AGE_MS
+    }
+  }
+
+  if (options.includeDomains?.length) body.includeDomains = options.includeDomains
+
   try {
     const res = await fetch(`${firecrawlBaseUrl()}/v2/search`, {
       method: 'POST',
       headers: firecrawlHeaders(),
       signal: abort.signal,
-      body: JSON.stringify({
-        query: trimmed,
-        limit: FIRECRAWL_SEARCH_LIMIT,
-        sources: [{ type: 'web' }],
-        includeDomains: getFirecrawlIncludeDomains(),
-        ignoreInvalidURLs: true,
-        scrapeOptions: {
-          formats: [{ type: 'markdown' }],
-          onlyMainContent: true,
-          maxAge: FIRECRAWL_MAX_AGE_MS
-        }
-      })
+      body: JSON.stringify(body)
     })
 
     const responseText = await res.text()
@@ -149,23 +272,7 @@ export async function searchFirecrawl(question: string, options: SearchFirecrawl
 
     const web = payload.data?.web ?? payload.web ?? []
     return web
-      .map((result, index): FirecrawlSource | null => {
-        const url = String(result.url || result.metadata?.sourceURL || result.metadata?.url || '').trim()
-        if (!/^https?:\/\//i.test(url)) return null
-
-        const titulo = normalizeWhitespace(String(result.title || result.metadata?.title || url)) || 'Fonte web'
-        const description = compactText(result.description || result.metadata?.description, 260)
-        const markdown = compactText(result.markdown, FIRECRAWL_RESULT_CHARS)
-
-        return {
-          id: sourceId(url, index),
-          titulo,
-          url,
-          description: description || undefined,
-          markdown: markdown || undefined,
-          kind: 'web'
-        }
-      })
+      .map(normalizeFirecrawlResult)
       .filter((source): source is FirecrawlSource => Boolean(source))
   } finally {
     clearTimeout(timeout)
@@ -173,8 +280,121 @@ export async function searchFirecrawl(question: string, options: SearchFirecrawl
   }
 }
 
+function sourceScore(question: string, source: FirecrawlSource, index: number): number {
+  const normalizedQuestion = normalizeSearchText(question)
+  const normalizedTitle = normalizeSearchText(source.titulo)
+  const normalizedSource = normalizeSearchText(`${source.titulo} ${source.description || ''} ${source.markdown || ''}`)
+  const host = sourceHost(source.url)
+  let score = 100 - index
+
+  for (const term of normalizedQuestion.split(/\s+/).filter(term => term.length > 3)) {
+    if (normalizedSource.includes(term)) score += 4
+  }
+
+  if (normalizedQuestion.includes('2026') && normalizedSource.includes('2026')) score += 18
+  if (normalizedQuestion.includes('greve') && normalizedSource.includes('greve')) score += 14
+  if (normalizedQuestion.includes('greve') && normalizedTitle.includes('greve')) score += 22
+  if (normalizedQuestion.includes('paralisacao') && normalizedSource.includes('paralisacao')) score += 10
+  if (normalizedQuestion.includes('paralisacao') && normalizedTitle.includes('paralisacao')) score += 16
+  if (normalizedQuestion.includes('greve') && normalizedTitle.includes('edital')) score -= 24
+  if (hostMatchesDomain(host, 'unb.br')) score += 14
+  if (hostMatchesDomain(host, 'adunb.org') || hostMatchesDomain(host, 'sintfub.org.br')) score += 10
+
+  return score
+}
+
+function mergeAndRankSources(question: string, sourceGroups: FirecrawlSource[][]): FirecrawlSource[] {
+  const byUrl = new Map<string, { source: FirecrawlSource, index: number }>()
+
+  for (const source of sourceGroups.flat()) {
+    const key = source.url.replace(/#.*$/, '').replace(/\/$/, '')
+    if (!byUrl.has(key)) byUrl.set(key, { source, index: byUrl.size })
+  }
+
+  return [...byUrl.values()]
+    .sort((a, b) => sourceScore(question, b.source, b.index) - sourceScore(question, a.source, a.index))
+    .map(item => item.source)
+    .slice(0, FIRECRAWL_SEARCH_LIMIT)
+}
+
+export async function searchFirecrawl(question: string, options: SearchFirecrawlOptions = {}): Promise<FirecrawlSource[]> {
+  const trimmed = question.trim().slice(0, 500)
+  if (!trimmed) return []
+
+  if (options.signal?.aborted) return []
+
+  const fresh = isFreshnessSensitiveQuery(trimmed)
+  const strike = isStrikeQuery(trimmed)
+  const includeDomains = getFirecrawlIncludeDomains()
+  const queries = buildSearchQueries(trimmed)
+  const firstQuery = queries[0] ?? trimmed
+  const restrictedQueries = fresh && strike ? [] : fresh ? [firstQuery] : queries
+  const broadQueries = fresh ? [strike ? 'greve UnB 2026 adunb sintfub reitoria' : queries[queries.length - 1] ?? firstQuery] : []
+  const restrictedSearches = restrictedQueries.map(query =>
+    runFirecrawlSearch(query, {
+      signal: options.signal,
+      includeDomains,
+      fresh
+    }).catch((error) => {
+      console.warn('[firecrawl] Busca restrita falhou:', error)
+      return []
+    })
+  )
+  const broadSearches = fresh
+    ? broadQueries.map(query =>
+        runFirecrawlSearch(query, {
+          signal: options.signal,
+          broad: true,
+          fresh,
+          limit: strike ? Math.min(6, FIRECRAWL_BROAD_SEARCH_LIMIT) : undefined
+        })
+          .then(sources => sources.filter(source => isTrustedSource(source.url)))
+          .catch((error) => {
+            console.warn('[firecrawl] Busca ampla falhou:', error)
+            return []
+          })
+      )
+    : []
+
+  const sourceGroups = await Promise.all([...restrictedSearches, ...broadSearches])
+  const rankedSources = mergeAndRankSources(trimmed, sourceGroups)
+  if (rankedSources.length || !fresh) return rankedSources
+
+  const fallbackQuery = broadQueries[0] ?? queries[0] ?? trimmed
+  const fallbackScrapeSources = await runFirecrawlSearch(fallbackQuery, {
+    signal: options.signal,
+    broad: true,
+    fresh: false,
+    limit: Math.min(4, FIRECRAWL_BROAD_SEARCH_LIMIT),
+    timeoutMs: Math.min(18000, FIRECRAWL_TIMEOUT_MS)
+  })
+    .then(sources => sources.filter(source => isTrustedSource(source.url)))
+    .catch((error) => {
+      console.warn('[firecrawl] Busca ampla reduzida falhou:', error)
+      return []
+    })
+
+  const fallbackRankedSources = mergeAndRankSources(trimmed, [fallbackScrapeSources])
+  if (fallbackRankedSources.length) return fallbackRankedSources
+
+  const fallbackSources = await runFirecrawlSearch(fallbackQuery, {
+    signal: options.signal,
+    broad: true,
+    scrape: false,
+    limit: Math.min(4, FIRECRAWL_BROAD_SEARCH_LIMIT),
+    timeoutMs: Math.min(10000, FIRECRAWL_TIMEOUT_MS)
+  })
+    .then(sources => sources.filter(source => isTrustedSource(source.url)))
+    .catch((error) => {
+      console.warn('[firecrawl] Busca ampla sem scrape falhou:', error)
+      return []
+    })
+
+  return mergeAndRankSources(trimmed, [fallbackSources])
+}
+
 export function buildFirecrawlContext(sources: FirecrawlSource[]): string {
-  if (!sources.length) return 'Nenhuma fonte web oficial foi encontrada.'
+  if (!sources.length) return 'Nenhuma fonte web confiável foi encontrada.'
 
   const parts: string[] = []
   let usedChars = 0

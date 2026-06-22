@@ -269,8 +269,8 @@ export function useFiaqChat() {
               id: 'rag',
               kind: 'rag',
               status: 'active',
-              label: 'Consultando o RAG do CIC/UnB',
-              detail: 'Buscando documentos e respostas já indexadas na base.'
+              label: 'Verificando fontes do fIAq',
+              detail: 'Buscando documentos e respostas oficiais disponíveis.'
             })
           }
 
@@ -279,8 +279,8 @@ export function useFiaqChat() {
               id: 'web-search',
               kind: 'web',
               status: 'active',
-              label: 'Pesquisando sites oficiais',
-              detail: 'Consultando fontes web autorizadas.'
+              label: 'Pesquisando fontes web',
+              detail: 'Consultando fontes oficiais e confiáveis.'
             })
           }
         }
@@ -310,8 +310,8 @@ export function useFiaqChat() {
               id: 'rag',
               kind: 'rag',
               status: 'done',
-              label: 'Fontes do RAG encontradas',
-              detail: `${ragSources.length} fonte(s) selecionada(s) da base local.`,
+              label: 'Fontes encontradas',
+              detail: `${ragSources.length} fonte(s) selecionada(s).`,
               sources: ragSources.slice(0, 4)
             })
           }
@@ -322,7 +322,7 @@ export function useFiaqChat() {
               kind: 'web',
               status: 'done',
               label: 'Fontes web selecionadas',
-              detail: `${webSources.length} fonte(s) oficial(is) encontradas para responder.`,
+              detail: `${webSources.length} fonte(s) confiável(is) encontradas para responder.`,
               sources: webSources.slice(0, 4)
             })
           }

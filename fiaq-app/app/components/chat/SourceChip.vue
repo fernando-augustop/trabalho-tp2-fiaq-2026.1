@@ -9,18 +9,16 @@
   >
     <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-emerald-50 text-[#00a155] ring-1 ring-emerald-100">
       <UIcon
-        :name="source.kind === 'web' ? 'i-lucide-globe-2' : 'i-lucide-database'"
+        :name="source.kind === 'web' ? 'i-lucide-globe-2' : 'i-lucide-book-open'"
         class="h-3.5 w-3.5"
       />
     </span>
 
     <span
-      class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-black uppercase"
-      :class="source.kind === 'web'
-        ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
-        : 'bg-blue-50 text-[#1a2e5a] ring-1 ring-blue-100'"
+      v-if="source.kind === 'web'"
+      class="shrink-0 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-black uppercase text-emerald-700 ring-1 ring-emerald-100"
     >
-      {{ source.kind === 'web' ? 'web' : 'rag' }}
+      web
     </span>
 
     <span class="min-w-0 flex-1 truncate text-sm font-semibold leading-5">
@@ -42,12 +40,9 @@
   >
     <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[#1a2e5a]">
       <UIcon
-        name="i-lucide-database"
+        name="i-lucide-book-open"
         class="h-3.5 w-3.5"
       />
-    </span>
-    <span class="shrink-0 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-black uppercase text-[#1a2e5a] ring-1 ring-blue-100">
-      rag
     </span>
     <span class="min-w-0 flex-1 truncate text-sm font-semibold leading-5">
       {{ cleanTitle }}
@@ -78,7 +73,7 @@ const sourceHost = computed(() => {
   try {
     return new URL(props.source.url).hostname.replace(/^www\./, '')
   } catch {
-    return 'base fIAq'
+    return 'fonte oficial'
   }
 })
 

@@ -12,12 +12,13 @@ interface RequestBody {
 
 const SYSTEM_PROMPT = `Você é o assistente virtual do fIAq, portal de informações acadêmicas da Universidade de Brasília (UnB), voltado para alunos do curso de Ciência da Computação.
 
-O aluno marcou a resposta anterior como insuficiente. Agora você deve complementar a resposta usando a pesquisa web oficial fornecida no contexto.
+O aluno marcou a resposta anterior como insuficiente. Agora você deve complementar a resposta usando a pesquisa web fornecida no contexto.
 
 REGRAS:
 
 * Responda sempre em português brasileiro.
 * Use somente as fontes web listadas no contexto.
+* Quando a fonte for sindicato ou veículo jornalístico, trate como indício/contexto externo e recomende confirmar decisões acadêmicas em canais institucionais da UnB.
 * Seja direto e prático, explicando o que o aluno deve fazer.
 * Não use marcadores de fonte no corpo, como [1], [2] ou [3]; as fontes aparecem automaticamente abaixo da resposta.
 * Não escreva URLs no corpo da resposta; os links clicáveis aparecem automaticamente abaixo.
@@ -107,15 +108,15 @@ export default defineEventHandler(async (event) => {
       kind: 'web',
       status: 'active',
       label: 'Pesquisa web acionada pelo feedback',
-      detail: 'Vou complementar a resposta com fontes oficiais configuradas.',
+      detail: 'Vou complementar a resposta com fontes confiáveis configuradas.',
       domains: webDomains
     })
     sendActivity(res, {
       id: 'web-search',
       kind: 'web',
       status: 'active',
-      label: 'Pesquisando sites oficiais',
-      detail: 'Consultando resultados restritos aos domínios configurados.',
+      label: 'Pesquisando fontes web',
+      detail: 'Consultando fontes oficiais e confiáveis.',
       domains: webDomains
     })
 
@@ -137,7 +138,7 @@ export default defineEventHandler(async (event) => {
         kind: 'web',
         status: 'done',
         label: 'Fontes web selecionadas',
-        detail: `${webSources.length} fonte(s) oficial(is) encontradas para complementar.`,
+        detail: `${webSources.length} fonte(s) confiável(is) encontradas para complementar.`,
         sources: responseSources.slice(0, 4),
         domains: webDomains
       })
@@ -151,7 +152,7 @@ export default defineEventHandler(async (event) => {
         kind: 'web',
         status: 'skipped',
         label: 'Pesquisa web sem nova fonte',
-        detail: 'Nenhuma fonte oficial nova foi selecionada; vou responder com a orientação mais segura.',
+        detail: 'Nenhuma fonte nova foi selecionada; vou responder com a orientação mais segura.',
         domains: webDomains
       })
     }

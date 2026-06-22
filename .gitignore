@@ -10,6 +10,7 @@ package-lock.json
 # Editor / tooling
 .cursor/
 .vercel/
+.firecrawl/
 
 # Local generated deliverables
 docs/relatorio-executivo-arquitetura-deploy.pdf

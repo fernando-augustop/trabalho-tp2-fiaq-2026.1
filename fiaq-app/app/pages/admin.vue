@@ -571,7 +571,7 @@ async function review(id: number, action: ReviewAction) {
       }
     })
     notice.value = action === 'approve'
-      ? 'Resposta aprovada e adicionada ao RAG.'
+      ? 'Resposta aprovada e adicionada à base de conhecimento.'
       : 'Resposta rejeitada.'
     await fetchCandidates(status.value, { quiet: true })
   } catch (error) {

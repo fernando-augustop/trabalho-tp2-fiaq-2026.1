@@ -32,6 +32,7 @@ Regras:
 * Responda sempre em português brasileiro, de forma direta, clara e acolhedora.
 * Use o <contexto> como fonte principal. Combine trechos relacionados antes de responder.
 * Não invente URLs, e-mails, prazos, documentos, regras ou procedimentos.
+* Quando o contexto vier de sindicato ou veículo jornalístico, trate como indício/contexto externo e recomende confirmar decisões acadêmicas em canais institucionais da UnB.
 * Não escreva URLs no corpo; os links clicáveis aparecem abaixo da resposta.
 * Não crie seções "Links úteis", "Fontes", "Referências" ou listas de links no corpo da resposta.
 * Não use marcadores de fonte no corpo, como [1], [2] ou [3]; as fontes aparecem automaticamente abaixo da resposta.
@@ -142,6 +143,26 @@ const UNB_SCOPE_TERMS = [
   'caep'
 ]
 
+const FRESHNESS_SENSITIVE_TERMS = [
+  '2026',
+  'atual',
+  'atualmente',
+  'agora',
+  'hoje',
+  'recente',
+  'novidade',
+  'noticia',
+  'noticias',
+  'greve',
+  'paralisacao',
+  'paralisar',
+  'indicativo',
+  'assembleia',
+  'reitoria',
+  'orçamento',
+  'orcamento'
+]
+
 function normalizeText(text: string): string {
   return text
     .normalize('NFD')
@@ -161,6 +182,11 @@ function terms(text: string): string[] {
 function isUnbScopedQuestion(question: string): boolean {
   const normalized = normalizeText(question)
   return UNB_SCOPE_TERMS.some(term => normalized.includes(term))
+}
+
+function isFreshnessSensitiveQuestion(question: string): boolean {
+  const normalized = normalizeText(question)
+  return FRESHNESS_SENSITIVE_TERMS.some(term => normalized.includes(normalizeText(term)))
 }
 
 function hasEnoughLocalContext(question: string, results: SearchResult[]): boolean {
@@ -185,7 +211,8 @@ function hasEnoughLocalContext(question: string, results: SearchResult[]): boole
 }
 
 function shouldUseWebFallback(question: string, results: SearchResult[]): boolean {
-  return isUnbScopedQuestion(question) && !hasEnoughLocalContext(question, results)
+  return isUnbScopedQuestion(question)
+    && (isFreshnessSensitiveQuestion(question) || !hasEnoughLocalContext(question, results))
 }
 
 function rankContextResults(question: string, results: SearchResult[]): SearchResult[] {
@@ -298,8 +325,8 @@ export default defineEventHandler(async (event) => {
       id: 'rag',
       kind: 'rag',
       status: 'active',
-      label: 'Consultando o RAG do CIC/UnB',
-      detail: 'Buscando documentos e respostas já indexadas na base.'
+      label: 'Verificando fontes do fIAq',
+      detail: 'Buscando documentos e respostas oficiais disponíveis.'
     })
 
     let rawResults: SearchResult[] | null = null
@@ -333,10 +360,10 @@ export default defineEventHandler(async (event) => {
       id: 'rag',
       kind: 'rag',
       status: answerSources.length ? 'done' : 'skipped',
-      label: answerSources.length ? 'Fontes do RAG encontradas' : 'RAG sem fonte suficiente',
+      label: answerSources.length ? 'Fontes encontradas' : 'Base sem contexto suficiente',
       detail: answerSources.length
-        ? `${answerSources.length} fonte(s) selecionada(s) do ${contextSource}.`
-        : 'A pergunta segue para a pesquisa web oficial quando está no escopo da UnB.',
+        ? `${answerSources.length} fonte(s) selecionada(s).`
+        : 'A pergunta segue para pesquisa web quando está no escopo da UnB.',
       sources: activitySources(answerSources)
     })
 
@@ -346,8 +373,8 @@ export default defineEventHandler(async (event) => {
       status: needsWebFallback ? 'active' : 'skipped',
       label: needsWebFallback ? 'Preparando pesquisa web oficial' : 'Pesquisa web disponível',
       detail: needsWebFallback
-        ? 'O RAG não trouxe contexto suficiente; vou checar fontes oficiais na internet.'
-        : 'O RAG trouxe contexto suficiente agora; se você avaliar negativamente, a web oficial pode complementar.',
+        ? 'Vou checar fontes oficiais e confiáveis na internet.'
+        : 'As fontes disponíveis trouxeram contexto suficiente agora; se você avaliar negativamente, a web pode complementar.',
       domains: webDomains
     })
 
@@ -357,11 +384,11 @@ export default defineEventHandler(async (event) => {
         id: 'web-search',
         kind: 'web',
         status: 'active',
-        label: 'Pesquisando sites oficiais',
-        detail: 'Consultando resultados restritos aos domínios configurados.',
+        label: 'Pesquisando fontes web',
+        detail: 'Consultando fontes oficiais e confiáveis.',
         domains: webDomains
       })
-      console.log('[chat.post] Contexto local insuficiente para pergunta UnB; pesquisando fontes oficiais com Firecrawl.')
+      console.log('[chat.post] Pergunta UnB requer pesquisa web; consultando Firecrawl.')
 
       try {
         const webSources = await searchFirecrawl(question)
@@ -380,7 +407,7 @@ export default defineEventHandler(async (event) => {
             kind: 'web',
             status: 'done',
             label: 'Fontes web selecionadas',
-            detail: `${answerSources.length} fonte(s) oficial(is) encontradas para responder.`,
+            detail: `${answerSources.length} fonte(s) confiável(is) encontradas para responder.`,
             sources: activitySources(answerSources),
             domains: webDomains
           })
@@ -395,7 +422,7 @@ export default defineEventHandler(async (event) => {
             kind: 'web',
             status: 'skipped',
             label: 'Pesquisa web sem nova fonte',
-            detail: 'Nenhuma fonte oficial nova foi selecionada; vou responder com a orientação mais segura.',
+            detail: 'Nenhuma fonte nova foi selecionada; vou responder com a orientação mais segura.',
             domains: webDomains
           })
         }

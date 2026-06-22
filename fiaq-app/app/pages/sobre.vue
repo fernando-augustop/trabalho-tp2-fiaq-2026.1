@@ -28,8 +28,8 @@
           <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
             As informações do CIC/UnB estão espalhadas por sites, PDFs e setores. O fIAq
             centraliza tudo numa interface acessível, com um FAQ navegável por tema e um
-            assistente virtual que responde em linguagem natural usando <strong class="text-[#1a2e5a]">RAG</strong>
-            (Retrieval-Augmented Generation) sobre o conteúdo institucional oficial — sempre
+            assistente virtual que responde em linguagem natural usando uma <strong class="text-[#1a2e5a]">base de conhecimento</strong>
+            com conteúdo institucional oficial — sempre
             citando as fontes consultadas.
           </p>
         </div>
@@ -151,7 +151,7 @@ const techStacks = [
     ]
   },
   {
-    title: 'Banco / RAG',
+    title: 'Banco / Conhecimento',
     description: 'PostgreSQL + pgvector (Supabase no deploy)',
     items: [
       { label: 'PostgreSQL', icon: 'i-lucide-database' },
