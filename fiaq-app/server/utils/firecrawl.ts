@@ -283,7 +283,8 @@ async function runFirecrawlSearch(
 function sourceScore(question: string, source: FirecrawlSource, index: number): number {
   const normalizedQuestion = normalizeSearchText(question)
   const normalizedTitle = normalizeSearchText(source.titulo)
-  const normalizedSource = normalizeSearchText(`${source.titulo} ${source.description || ''} ${source.markdown || ''}`)
+  const normalizedUrl = normalizeSearchText(source.url)
+  const normalizedSource = normalizeSearchText(`${source.titulo} ${source.url} ${source.description || ''} ${source.markdown || ''}`)
   const host = sourceHost(source.url)
   let score = 100 - index
 
@@ -292,6 +293,9 @@ function sourceScore(question: string, source: FirecrawlSource, index: number): 
   }
 
   if (normalizedQuestion.includes('2026') && normalizedSource.includes('2026')) score += 18
+  if (normalizedQuestion.includes('2026') && normalizedTitle.includes('2026')) score += 18
+  if (normalizedQuestion.includes('2026') && normalizedUrl.includes('2026')) score += 30
+  if (normalizedQuestion.includes('2026') && normalizedUrl.includes('2025')) score -= 14
   if (normalizedQuestion.includes('greve') && normalizedSource.includes('greve')) score += 14
   if (normalizedQuestion.includes('greve') && normalizedTitle.includes('greve')) score += 22
   if (normalizedQuestion.includes('paralisacao') && normalizedSource.includes('paralisacao')) score += 10
@@ -329,7 +333,14 @@ export async function searchFirecrawl(question: string, options: SearchFirecrawl
   const queries = buildSearchQueries(trimmed)
   const firstQuery = queries[0] ?? trimmed
   const restrictedQueries = fresh && strike ? [] : fresh ? [firstQuery] : queries
-  const broadQueries = fresh ? [strike ? 'greve UnB 2026 adunb sintfub reitoria' : queries[queries.length - 1] ?? firstQuery] : []
+  const broadQueries = fresh
+    ? strike
+      ? [
+          'greve UnB 2026 adunb sintfub reitoria',
+          'indicativo de greve UnB 2026 professores ADUnB'
+        ]
+      : [queries[queries.length - 1] ?? firstQuery]
+    : []
   const restrictedSearches = restrictedQueries.map(query =>
     runFirecrawlSearch(query, {
       signal: options.signal,
@@ -346,7 +357,8 @@ export async function searchFirecrawl(question: string, options: SearchFirecrawl
           signal: options.signal,
           broad: true,
           fresh,
-          limit: strike ? Math.min(6, FIRECRAWL_BROAD_SEARCH_LIMIT) : undefined
+          limit: strike ? Math.min(4, FIRECRAWL_BROAD_SEARCH_LIMIT) : undefined,
+          timeoutMs: strike ? Math.min(18000, FIRECRAWL_TIMEOUT_MS) : undefined
         })
           .then(sources => sources.filter(source => isTrustedSource(source.url)))
           .catch((error) => {
