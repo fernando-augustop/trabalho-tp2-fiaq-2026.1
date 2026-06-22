@@ -198,6 +198,15 @@ function buildSearchQueries(question: string): string[] {
   return [...new Set(queries.map(query => query.trim()).filter(Boolean))].slice(0, 3)
 }
 
+function buildYearFocusedStrikeQueries(years: string[]): string[] {
+  return years.flatMap(year => [
+    `greve UnB ${year} professores site:correiobraziliense.com.br`,
+    `indicativo greve UnB ${year} site:brasildefato.com.br`,
+    `indicativo greve UnB ${year} site:metropoles.com`,
+    `indicativo greve UnB ${year} site:adunb.org`
+  ])
+}
+
 function compactText(text: string | undefined | null, maxChars: number): string {
   const normalized = normalizeWhitespace(String(text || ''))
   if (normalized.length <= maxChars) return normalized
@@ -409,7 +418,29 @@ export async function searchFirecrawl(question: string, options: SearchFirecrawl
     : []
 
   const sourceGroups = await Promise.all([...restrictedSearches, ...broadSearches])
-  const rankedSources = mergeAndRankSources(trimmed, sourceGroups)
+  let rankedSources = mergeAndRankSources(trimmed, sourceGroups)
+  const years = requestedYears(trimmed)
+  const hasEnoughYearSources = rankedSources.filter(source => sourceHasRequestedYear(source, years)).length >= 2
+
+  if (fresh && strike && years.length && !hasEnoughYearSources) {
+    const focusedSearches = buildYearFocusedStrikeQueries(years).map(query =>
+      runFirecrawlSearch(query, {
+        signal: options.signal,
+        broad: true,
+        fresh,
+        limit: 3,
+        timeoutMs: Math.min(15000, FIRECRAWL_TIMEOUT_MS)
+      })
+        .then(sources => sources.filter(source => isTrustedSource(source.url)))
+        .catch((error) => {
+          console.warn('[firecrawl] Busca por ano/domínio falhou:', error)
+          return []
+        })
+    )
+    const focusedSourceGroups = await Promise.all(focusedSearches)
+    rankedSources = mergeAndRankSources(trimmed, [...sourceGroups, ...focusedSourceGroups])
+  }
+
   if (rankedSources.length || !fresh) return rankedSources
 
   const fallbackQuery = broadQueries[0] ?? queries[0] ?? trimmed
