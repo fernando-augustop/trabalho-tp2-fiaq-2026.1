@@ -17,6 +17,28 @@ const KIND_BOOST: Record<ChunkKind, number> = {
 }
 
 const store: EmbeddedChunk[] = []
+const LEXICAL_STOPWORDS = new Set([
+  'a', 'ao', 'aos', 'as', 'como', 'com', 'da', 'das', 'de', 'do', 'dos', 'e',
+  'em', 'eu', 'fazer', 'isso', 'me', 'na', 'no', 'o', 'os', 'ou', 'para',
+  'por', 'posso', 'quais', 'qual', 'quando', 'que', 'quero', 'sao', 'se',
+  'sobre', 'um', 'uma', 'unb'
+])
+
+function normalizeText(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function lexicalTerms(text: string): string[] {
+  return normalizeText(text)
+    .split(/\s+/)
+    .filter(term => term.length >= 3 && !LEXICAL_STOPWORDS.has(term))
+}
 
 export function addChunk(chunk: EmbeddedChunk): void {
   store.push(chunk)
@@ -53,4 +75,57 @@ export function topK(queryVector: number[], k = 4): SearchResult[] {
 
 export function topKFiltered(queryVector: number[], k = 4, minScore = 0.5): SearchResult[] {
   return topK(queryVector, k).filter(r => r.score >= minScore)
+}
+
+export function keywordTopK(query: string, k = 4): SearchResult[] {
+  if (store.length === 0) return []
+
+  const queryTerms = [...new Set(lexicalTerms(query))]
+  if (!queryTerms.length) return []
+
+  const queryPhrase = normalizeText(query)
+  const safeK = Math.min(Math.max(Math.trunc(k) || 4, 1), 20)
+
+  return store
+    .map((chunk) => {
+      const title = normalizeText(chunk.titulo)
+      const content = normalizeText(chunk.conteudo)
+      const titleTerms = new Set(lexicalTerms(chunk.titulo))
+      const contentTerms = new Set(lexicalTerms(chunk.conteudo).slice(0, 180))
+      let matched = 0
+      let score = KIND_BOOST[chunk.kind] ?? 0
+
+      for (const term of queryTerms) {
+        let termMatched = false
+
+        if (titleTerms.has(term)) {
+          score += 0.28
+          termMatched = true
+        }
+
+        if (contentTerms.has(term)) {
+          score += 0.09
+          termMatched = true
+        } else if (content.includes(term)) {
+          score += 0.035
+          termMatched = true
+        }
+
+        if (termMatched) matched++
+      }
+
+      if (title && (queryPhrase.includes(title) || title.includes(queryPhrase))) score += 0.36
+      score += (matched / queryTerms.length) * 0.32
+
+      return {
+        id: chunk.id,
+        titulo: chunk.titulo,
+        conteudo: chunk.conteudo,
+        url: chunk.url,
+        score
+      }
+    })
+    .filter(result => result.score > 0.1)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, safeK)
 }

@@ -1,67 +1,43 @@
 <template>
-  <div class="flex justify-start gap-3">
-    <div class="w-8 h-8 bg-[#1a2e5a] rounded-xl flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-      <svg
-        class="w-4 h-4 text-green-400"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.8"
-        viewBox="0 0 24 24"
+  <div
+    class="flex justify-start gap-3"
+    role="status"
+    aria-live="polite"
+  >
+    <div class="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <img
+        src="/sarue-avatar.png"
+        alt=""
+        class="h-12 w-12 object-contain"
       >
-        <rect
-          x="5"
-          y="7"
-          width="14"
-          height="10"
-          rx="2.5"
-          stroke="currentColor"
-        />
-        <circle
-          cx="9"
-          cy="11"
-          r="1.2"
-          fill="currentColor"
-          stroke="none"
-        />
-        <circle
-          cx="15"
-          cy="11"
-          r="1.2"
-          fill="currentColor"
-          stroke="none"
-        />
-        <path
-          d="M9 14.5h6"
-          stroke="currentColor"
-          stroke-linecap="round"
-        />
-        <path
-          d="M12 7V4"
-          stroke="currentColor"
-          stroke-linecap="round"
-        />
-        <circle
-          cx="12"
-          cy="3.5"
-          r="0.8"
-          fill="currentColor"
-          stroke="none"
-        />
-      </svg>
     </div>
-    <div class="bg-white border border-gray-200 rounded-2xl rounded-bl-sm px-5 py-4 shadow-sm flex items-center gap-1.5">
+    <div class="flex min-h-12 items-center gap-3 rounded-2xl rounded-bl-sm border border-gray-200 bg-white px-5 py-3 shadow-sm">
+      <span class="sr-only">
+        Saruê preparando resposta.
+      </span>
       <span
-        class="dot"
-        style="animation-delay: 0ms"
-      />
+        aria-hidden="true"
+        class="text-xs font-semibold text-slate-500"
+      >
+        Saruê pensando
+      </span>
       <span
-        class="dot"
-        style="animation-delay: 150ms"
-      />
-      <span
-        class="dot"
-        style="animation-delay: 300ms"
-      />
+        aria-hidden="true"
+        class="flex items-center gap-1.5"
+      >
+        <span
+          class="dot"
+          style="animation-delay: 0ms"
+        />
+        <span
+          class="dot"
+          style="animation-delay: 150ms"
+        />
+        <span
+          class="dot"
+          style="animation-delay: 300ms"
+        />
+      </span>
     </div>
   </div>
 </template>

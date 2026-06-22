@@ -13,15 +13,35 @@
         />
         Voltar para o início
       </NuxtLink>
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-white">
-        {{ category?.titulo ?? 'Categoria' }}
-      </h1>
-      <p
-        v-if="category"
-        class="text-blue-200 text-sm mt-2"
-      >
-        {{ category.count }} {{ category.count === 1 ? 'pergunta' : 'perguntas' }} frequentes
-      </p>
+
+      <div class="mx-auto max-w-3xl text-center">
+        <h1 class="text-3xl font-extrabold text-white sm:text-4xl">
+          {{ category?.titulo ?? 'Categoria' }}
+        </h1>
+        <p
+          v-if="category"
+          class="mt-2 text-sm text-blue-200"
+        >
+          {{ category.count }} {{ category.count === 1 ? 'pergunta' : 'perguntas' }} frequentes
+        </p>
+
+        <div
+          v-if="category"
+          class="relative mt-5"
+        >
+          <UIcon
+            name="i-lucide-search"
+            class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-300"
+          />
+          <input
+            v-model="searchQuery"
+            type="search"
+            aria-label="Buscar pergunta nesta categoria"
+            placeholder="Buscar pergunta..."
+            class="w-full rounded-lg border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-base text-white outline-none transition-colors placeholder:text-blue-300 focus:border-white/30 focus:bg-white/15"
+          >
+        </div>
+      </div>
     </div>
 
     <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
@@ -36,7 +56,22 @@
         <NuxtLink
           to="/"
           class="text-green-700 hover:underline text-sm mt-2 inline-block"
-        >Ver todas as categorias</NuxtLink>
+        >
+          Ver todas as categorias
+        </NuxtLink>
+      </div>
+
+      <!-- Nenhum resultado para a busca -->
+      <div
+        v-else-if="category && filteredItems.length === 0"
+        class="py-16 text-center"
+      >
+        <p class="text-lg font-bold text-[#1a2e5a]">
+          Nenhuma pergunta encontrada.
+        </p>
+        <p class="mt-1 text-sm text-gray-500">
+          Tente buscar por outro termo.
+        </p>
       </div>
 
       <!-- Lista de perguntas (acordeão) -->
@@ -45,7 +80,7 @@
         class="flex flex-col gap-3"
       >
         <div
-          v-for="item in category?.items ?? []"
+          v-for="item in filteredItems"
           :key="item.id"
           class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
         >
@@ -106,11 +141,35 @@ import type { FaqCategory } from '~~/server/api/faq.get'
 import { renderMarkdown } from '~/utils/markdown'
 
 const route = useRoute()
-const slug = computed(() => String(route.params.slug))
+const slug = computed(() => {
+  const param = route.params.slug
+  const value = Array.isArray(param) ? param[0] : param
+
+  return value ?? ''
+})
 
 const { data: categories, pending } = await useFetch<FaqCategory[]>('/api/faq')
 
 const category = computed(() => categories.value?.find(c => c.slug === slug.value) ?? null)
+const searchQuery = ref('')
+
+function normalizeSearchText(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
+const filteredItems = computed(() => {
+  const items = category.value?.items ?? []
+  const query = normalizeSearchText(searchQuery.value.trim())
+  if (!query) return items
+
+  return items.filter((item) => {
+    const searchable = normalizeSearchText(`${item.titulo} ${item.conteudo}`)
+    return searchable.includes(query)
+  })
+})
 
 useSeoMeta({
   title: () => `${category.value?.titulo ?? 'FAQ'} — fIAq`,
