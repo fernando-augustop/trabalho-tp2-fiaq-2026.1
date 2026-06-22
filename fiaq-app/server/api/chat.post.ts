@@ -1,7 +1,7 @@
 import { embedQuery } from '../utils/embeddings'
 import { chatStream, embedInfo } from '../utils/llmProvider'
 import { registrarPergunta } from '../repositorios/pergunta'
-import { buscarRagPorTexto, buscarRagPorTextoNoBanco, type SearchResult } from '../repositorios/rag'
+import { buscarRag, buscarRagPorTexto, buscarRagPorTextoNoBanco, type SearchResult } from '../repositorios/rag'
 import { buildFirecrawlContext, getFirecrawlIncludeDomains, searchFirecrawl } from '../utils/firecrawl'
 
 interface ChatMessage {
@@ -25,6 +25,7 @@ const RAG_RESULT_LIMIT = 3
 const MAX_CONTEXT_CHARS_PER_RESULT = 700
 const MAX_CONTEXT_CHARS_TOTAL = 2200
 const LOCAL_CONTEXT_MIN_SCORE = 0.52
+const CONTEXTUAL_SEARCH_MAX_CHARS = 700
 
 const SYSTEM_PROMPT = `Você é o assistente virtual do fIAq, portal acadêmico do CIC/UnB.
 
@@ -137,6 +138,16 @@ const UNB_SCOPE_TERMS = [
   'equivalencia',
   'formatura',
   'calendario academico',
+  'aula',
+  'aulas',
+  'professor',
+  'professores',
+  'docente',
+  'docentes',
+  'servidor',
+  'servidores',
+  'tecnico',
+  'tecnicos',
   'ouvidoria',
   'assedio',
   'discriminacao',
@@ -153,6 +164,16 @@ const FRESHNESS_SENSITIVE_TERMS = [
   'novidade',
   'noticia',
   'noticias',
+  'novo',
+  'nova',
+  'novos',
+  'novas',
+  'ultima',
+  'ultimo',
+  'ultimas',
+  'ultimos',
+  'atualizado',
+  'atualizada',
   'greve',
   'paralisacao',
   'paralisar',
@@ -189,6 +210,31 @@ function isFreshnessSensitiveQuestion(question: string): boolean {
   return FRESHNESS_SENSITIVE_TERMS.some(term => normalized.includes(normalizeText(term)))
 }
 
+function isLikelyFollowUp(question: string): boolean {
+  const normalized = normalizeText(question)
+  if (!normalized) return false
+
+  return /^(e|mas|agora|hoje|entao|entao e|nesse caso|nesse contexto|sobre isso|quanto a|quanto ao|quanto aos)\b/.test(normalized)
+    || /\b(isso|essa|esse|essas|esses|dessa|desse|dessas|desses|ainda|tambem|tambem|normal|novo|nova|ultim[ao]s?)\b/.test(normalized)
+}
+
+function buildSearchQuestion(messages: ChatMessage[], currentQuestion: string): string {
+  const previousUserQuestions = messages
+    .slice(0, -1)
+    .filter(message => message.role === 'user')
+    .slice(-2)
+    .map(message => compactText(message.content, 260))
+    .filter(Boolean)
+
+  if (!previousUserQuestions.length || !isLikelyFollowUp(currentQuestion)) {
+    return currentQuestion
+  }
+
+  return [...previousUserQuestions, currentQuestion]
+    .join('\n')
+    .slice(0, CONTEXTUAL_SEARCH_MAX_CHARS)
+}
+
 function hasEnoughLocalContext(question: string, results: SearchResult[]): boolean {
   const top = results[0]
   if (!top) return false
@@ -213,6 +259,17 @@ function hasEnoughLocalContext(question: string, results: SearchResult[]): boole
 function shouldUseWebFallback(question: string, results: SearchResult[]): boolean {
   return isUnbScopedQuestion(question)
     && (isFreshnessSensitiveQuestion(question) || !hasEnoughLocalContext(question, results))
+}
+
+function mergeSearchResults(groups: Array<SearchResult[] | null | undefined>): SearchResult[] {
+  const byId = new Map<string, SearchResult>()
+
+  for (const result of groups.flatMap(group => group ?? [])) {
+    const existing = byId.get(result.id)
+    if (!existing || result.score > existing.score) byId.set(result.id, result)
+  }
+
+  return [...byId.values()]
 }
 
 function rankContextResults(question: string, results: SearchResult[]): SearchResult[] {
@@ -303,6 +360,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const question = lastUserMessage.content
+  const searchQuestion = buildSearchQuestion(body.messages, question)
 
   setResponseHeaders(event, {
     'Content-Type': 'text/event-stream',
@@ -329,22 +387,37 @@ export default defineEventHandler(async (event) => {
       detail: 'Buscando documentos e respostas oficiais disponíveis.'
     })
 
-    let rawResults: SearchResult[] | null = null
-    let contextSource = 'banco'
+    let vectorResults: SearchResult[] | null = null
+    let textResults: SearchResult[] | null = null
+    let searchVector: number[] | null = null
+    const contextSources: string[] = []
 
     try {
-      rawResults = await buscarRagPorTextoNoBanco(question, RAG_RESULT_LIMIT)
+      searchVector = await embedQuery(searchQuestion)
+      const ragSearch = await buscarRag(searchVector, embedInfo.model, RAG_RESULT_LIMIT)
+      vectorResults = ragSearch.results
+      contextSources.push(ragSearch.source === 'database' ? 'banco vetorial' : 'índice local vetorial')
+    } catch (error) {
+      console.warn('[chat.post] Busca vetorial falhou antes do fallback textual:', error)
+    }
+
+    try {
+      textResults = await buscarRagPorTextoNoBanco(searchQuestion, RAG_RESULT_LIMIT)
+      if (textResults?.length) contextSources.push('banco textual')
     } catch (error) {
       console.warn('[chat.post] Busca textual no banco falhou antes do fallback local:', error)
     }
 
-    if (!rawResults?.length) {
-      rawResults = buscarRagPorTexto(question, RAG_RESULT_LIMIT)
-      contextSource = 'índice local'
+    if (!textResults?.length) {
+      textResults = buscarRagPorTexto(searchQuestion, RAG_RESULT_LIMIT)
+      if (textResults.length) contextSources.push('índice local textual')
     }
 
-    const results = rankContextResults(question, rawResults)
-    console.log(`[chat.post] Contexto RAG carregado do ${contextSource} por texto.`)
+    const rawResults = mergeSearchResults([vectorResults, textResults])
+    const results = rankContextResults(searchQuestion, rawResults).slice(0, RAG_RESULT_LIMIT)
+    const localContextEnough = hasEnoughLocalContext(searchQuestion, results)
+    const scopedToUnb = isUnbScopedQuestion(searchQuestion)
+    const freshnessSensitive = isFreshnessSensitiveQuestion(searchQuestion)
 
     let context = buildCompactContext(results)
     let answerSources: ResponseSource[] = results.map(r => ({
@@ -354,17 +427,34 @@ export default defineEventHandler(async (event) => {
       kind: 'rag'
     }))
     const webDomains = getFirecrawlIncludeDomains()
-    const needsWebFallback = shouldUseWebFallback(question, results)
+    const needsWebFallback = shouldUseWebFallback(searchQuestion, results)
+
+    console.log(JSON.stringify({
+      level: 'info',
+      msg: 'chat_research_decision',
+      route: '/api/chat',
+      requestId: getHeader(event, 'x-vercel-id'),
+      contextualSearch: searchQuestion !== question,
+      sources: contextSources,
+      localResults: results.length,
+      localContextEnough,
+      scopedToUnb,
+      freshnessSensitive,
+      needsWebFallback,
+      topResult: results[0]
+        ? { id: results[0].id, score: Number(results[0].score.toFixed(3)) }
+        : null
+    }))
 
     sendActivity(res, {
       id: 'rag',
       kind: 'rag',
-      status: answerSources.length ? 'done' : 'skipped',
-      label: answerSources.length ? 'Fontes encontradas' : 'Base sem contexto suficiente',
-      detail: answerSources.length
+      status: answerSources.length && !needsWebFallback ? 'done' : 'skipped',
+      label: answerSources.length && !needsWebFallback ? 'Fontes encontradas' : 'Base sem contexto suficiente',
+      detail: answerSources.length && !needsWebFallback
         ? `${answerSources.length} fonte(s) selecionada(s).`
-        : 'A pergunta segue para pesquisa web quando está no escopo da UnB.',
-      sources: activitySources(answerSources)
+        : 'A pergunta segue para pesquisa web quando está no escopo da UnB ou precisa de informação atual.',
+      sources: answerSources.length && !needsWebFallback ? activitySources(answerSources) : undefined
     })
 
     sendActivity(res, {
@@ -391,7 +481,7 @@ export default defineEventHandler(async (event) => {
       console.log('[chat.post] Pergunta UnB requer pesquisa web; consultando Firecrawl.')
 
       try {
-        const webSources = await searchFirecrawl(question)
+        const webSources = await searchFirecrawl(searchQuestion)
 
         if (webSources.length) {
           context = buildFirecrawlContext(webSources)
@@ -485,7 +575,11 @@ export default defineEventHandler(async (event) => {
     sendEvent(res, { type: 'done' })
     closeResponse()
 
-    runAfterResponse(event, embedQuery(question)
+    const questionVectorPromise = searchQuestion === question && searchVector
+      ? Promise.resolve(searchVector)
+      : embedQuery(question)
+
+    runAfterResponse(event, questionVectorPromise
       .then(queryVector => registrarPergunta(
         question,
         queryVector,
