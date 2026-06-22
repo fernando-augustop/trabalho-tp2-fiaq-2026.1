@@ -22,6 +22,7 @@ interface ResponseSource {
 }
 
 const RAG_RESULT_LIMIT = 3
+const RAG_CANDIDATE_LIMIT = 8
 const MAX_CONTEXT_CHARS_PER_RESULT = 700
 const MAX_CONTEXT_CHARS_TOTAL = 2200
 const LOCAL_CONTEXT_MIN_SCORE = 0.52
@@ -106,8 +107,15 @@ const GENERIC_CONTEXT_TERMS = new Set([
   'informacao',
   'instituto',
   'orientacao',
+  'pedir',
+  'pedido',
+  'processo',
+  'requerer',
+  'requerimento',
   'secretaria',
   'setor',
+  'solicitacao',
+  'solicitar',
   'sofri'
 ])
 
@@ -136,6 +144,7 @@ const UNB_SCOPE_TERMS = [
   'trancamento',
   'aproveitamento',
   'equivalencia',
+  'aproveitamento de estudos',
   'formatura',
   'calendario academico',
   'aula',
@@ -249,11 +258,11 @@ function hasEnoughLocalContext(question: string, results: SearchResult[]): boole
   const titleOverlap = [...queryTerms].filter(term => titleTerms.has(term)).length
   const coverage = overlap / queryTerms.size
 
-  if (top.score >= 0.9 && overlap > 0) return true
+  if (top.score >= 0.9 && coverage >= 0.5) return true
   if (top.score >= LOCAL_CONTEXT_MIN_SCORE && coverage >= 0.5) return true
-  if (top.score >= 0.45 && titleOverlap > 0 && overlap >= 1) return true
+  if (top.score >= 0.45 && titleOverlap > 0 && coverage >= 0.4) return true
 
-  return top.score >= 0.38 && overlap >= Math.min(2, queryTerms.size)
+  return top.score >= 0.38 && coverage >= 0.67
 }
 
 function shouldUseWebFallback(question: string, results: SearchResult[]): boolean {
@@ -273,24 +282,38 @@ function mergeSearchResults(groups: Array<SearchResult[] | null | undefined>): S
 }
 
 function rankContextResults(question: string, results: SearchResult[]): SearchResult[] {
-  const queryTerms = new Set(terms(question))
+  const distinctiveTerms = terms(question).filter(term => !GENERIC_CONTEXT_TERMS.has(term))
+  const queryTerms = new Set(distinctiveTerms.length ? distinctiveTerms : terms(question))
   if (!queryTerms.size) return results
 
   return [...results]
     .map((result, index) => {
+      const title = normalizeText(result.titulo)
+      const content = normalizeText(result.conteudo)
       const titleTerms = terms(result.titulo)
       const contentTerms = new Set(terms(result.conteudo).slice(0, 120))
       const titleOverlap = titleTerms.filter(term => queryTerms.has(term)).length
-      const contentOverlap = [...queryTerms].filter(term => contentTerms.has(term)).length
+      const contentOverlap = [...queryTerms]
+        .filter(term => contentTerms.has(term) || content.includes(term))
+        .length
       const missingTitleTerms = titleTerms.filter(term => !queryTerms.has(term)).length
+      const totalOverlap = [...queryTerms]
+        .filter(term => titleTerms.includes(term) || contentTerms.has(term) || content.includes(term))
+        .length
+      const coverage = totalOverlap / queryTerms.size
+      const titleCoverage = titleOverlap / queryTerms.size
       const exactShortTitle = titleTerms.length > 0
         && titleTerms.length <= 3
         && titleTerms.every(term => queryTerms.has(term))
+      const exactQuestionTitle = title.length > 0
+        && (normalizeText(question).includes(title) || title.includes(normalizeText(question)))
 
-      const rank = result.score
-        + titleOverlap * 0.09
-        + contentOverlap * 0.015
-        + (exactShortTitle ? 0.12 : 0)
+      const rank = Math.min(result.score, 1) * 0.32
+        + coverage * 1.15
+        + titleCoverage * 0.35
+        + contentOverlap * 0.025
+        + (exactShortTitle ? 0.18 : 0)
+        + (exactQuestionTitle ? 0.3 : 0)
         - Math.min(missingTitleTerms, 4) * 0.035
         - index * 0.001
 
@@ -394,7 +417,7 @@ export default defineEventHandler(async (event) => {
 
     try {
       searchVector = await embedQuery(searchQuestion)
-      const ragSearch = await buscarRag(searchVector, embedInfo.model, RAG_RESULT_LIMIT)
+      const ragSearch = await buscarRag(searchVector, embedInfo.model, RAG_CANDIDATE_LIMIT)
       vectorResults = ragSearch.results
       contextSources.push(ragSearch.source === 'database' ? 'banco vetorial' : 'índice local vetorial')
     } catch (error) {
@@ -402,14 +425,14 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      textResults = await buscarRagPorTextoNoBanco(searchQuestion, RAG_RESULT_LIMIT)
+      textResults = await buscarRagPorTextoNoBanco(searchQuestion, RAG_CANDIDATE_LIMIT)
       if (textResults?.length) contextSources.push('banco textual')
     } catch (error) {
       console.warn('[chat.post] Busca textual no banco falhou antes do fallback local:', error)
     }
 
     if (!textResults?.length) {
-      textResults = buscarRagPorTexto(searchQuestion, RAG_RESULT_LIMIT)
+      textResults = buscarRagPorTexto(searchQuestion, RAG_CANDIDATE_LIMIT)
       if (textResults.length) contextSources.push('índice local textual')
     }
 
