@@ -176,7 +176,12 @@ export function useFiaqChat() {
           }
 
           if (event.type === 'done') {
-            updateAssistantMessage(assistantId, { streaming: false })
+            updateAssistantMessage(assistantId, {
+              content: accumulatedContent.trim()
+                ? accumulatedContent
+                : 'A resposta não foi concluída. Tente reenviar a pergunta em instantes.',
+              streaming: false
+            })
             loading.value = false
           }
 
