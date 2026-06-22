@@ -38,7 +38,7 @@
 
       <section
         v-else-if="inviteSession"
-        class="max-w-xl rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+        class="mx-auto w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
       >
         <h2 class="mb-4 text-lg font-black">
           Definir senha
@@ -47,14 +47,27 @@
           class="flex flex-col gap-3"
           @submit.prevent="completeInvite"
         >
-          <input
-            v-model="newPassword"
-            type="password"
-            minlength="8"
-            required
-            placeholder="Nova senha"
-            class="h-12 rounded-lg border border-slate-200 bg-white px-4 text-base outline-none transition focus:border-[#00a155] focus:ring-2 focus:ring-emerald-100"
-          >
+          <div class="relative">
+            <input
+              v-model="newPassword"
+              :type="showNewPassword ? 'text' : 'password'"
+              minlength="8"
+              required
+              placeholder="Nova senha"
+              class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 pr-12 text-base outline-none transition focus:border-[#00a155] focus:ring-2 focus:ring-emerald-100"
+            >
+            <button
+              type="button"
+              :aria-label="showNewPassword ? 'Ocultar senha' : 'Mostrar senha'"
+              class="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-[#1a2e5a] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+              @click="showNewPassword = !showNewPassword"
+            >
+              <UIcon
+                :name="showNewPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                class="h-4 w-4"
+              />
+            </button>
+          </div>
           <button
             type="submit"
             :disabled="busy"
@@ -71,7 +84,7 @@
 
       <section
         v-else-if="!session"
-        class="grid gap-5 lg:grid-cols-[minmax(0,28rem)_1fr]"
+        class="mx-auto w-full max-w-md"
       >
         <form
           class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
@@ -89,14 +102,27 @@
               placeholder="email@unb.br"
               class="h-12 rounded-lg border border-slate-200 bg-white px-4 text-base outline-none transition focus:border-[#00a155] focus:ring-2 focus:ring-emerald-100"
             >
-            <input
-              v-model="password"
-              type="password"
-              required
-              autocomplete="current-password"
-              placeholder="Senha"
-              class="h-12 rounded-lg border border-slate-200 bg-white px-4 text-base outline-none transition focus:border-[#00a155] focus:ring-2 focus:ring-emerald-100"
-            >
+            <div class="relative">
+              <input
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                required
+                autocomplete="current-password"
+                placeholder="Senha"
+                class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 pr-12 text-base outline-none transition focus:border-[#00a155] focus:ring-2 focus:ring-emerald-100"
+              >
+              <button
+                type="button"
+                :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
+                class="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-[#1a2e5a] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                @click="showPassword = !showPassword"
+              >
+                <UIcon
+                  :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                  class="h-4 w-4"
+                />
+              </button>
+            </div>
             <button
               type="submit"
               :disabled="busy"
@@ -110,12 +136,6 @@
             </button>
           </div>
         </form>
-
-        <div class="rounded-lg border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600 shadow-sm">
-          <p class="font-semibold">
-            O acesso é liberado por convite do Supabase Auth e pela lista `admin_usuario`.
-          </p>
-        </div>
       </section>
 
       <section
@@ -342,6 +362,8 @@ const notice = ref('')
 const email = ref('')
 const password = ref('')
 const newPassword = ref('')
+const showPassword = ref(false)
+const showNewPassword = ref(false)
 const inviteEmail = ref('')
 const status = ref<CandidateFilter>('pendente')
 const candidates = ref<Candidate[]>([])
