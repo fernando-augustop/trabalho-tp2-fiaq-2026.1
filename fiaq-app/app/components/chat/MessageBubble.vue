@@ -33,19 +33,6 @@
           compact
         />
         <div
-          v-if="message.webEnhanced"
-          class="mb-3 inline-flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-2.5 py-1.5 text-xs font-bold text-emerald-700"
-        >
-          <UIcon
-            name="i-lucide-globe-2"
-            class="h-3.5 w-3.5"
-          />
-          <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-700">
-            web
-          </span>
-          <span>Pesquisa web</span>
-        </div>
-        <div
           class="fiaq-prose"
           v-html="renderedContent"
         />
@@ -58,14 +45,14 @@
       <!-- Sources -->
       <div
         v-if="message.sources && message.sources.length > 0"
-        class="grid gap-2 px-1"
+        class="grid gap-1.5 px-1"
       >
-        <p class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">
+        <p class="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide text-slate-500">
           <UIcon
-            :name="hasWebSources ? 'i-lucide-globe-2' : 'i-lucide-book-open'"
+            name="i-lucide-list-checks"
             class="h-3.5 w-3.5 text-green-600"
           />
-          {{ hasWebSources ? 'Fontes web consultadas' : 'Fontes consultadas' }}
+          Fontes verificadas
         </p>
         <ChatSourceChip
           v-for="source in message.sources"

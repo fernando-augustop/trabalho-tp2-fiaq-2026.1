@@ -1,127 +1,60 @@
 <template>
   <div :class="wrapperClass">
-    <div class="flex items-start gap-3">
-      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-[#00a155] ring-1 ring-emerald-100">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <p class="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-wide text-slate-500">
         <UIcon
-          name="i-lucide-search-check"
-          class="h-4 w-4"
+          name="i-lucide-list-checks"
+          class="h-3.5 w-3.5 text-[#00a155]"
         />
+        Fontes verificadas
+      </p>
+      <span
+        v-if="activeActivity"
+        class="inline-flex items-center gap-1.5 rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-100"
+      >
+        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 motion-safe:animate-pulse" />
+        {{ activeActivity.label }}
       </span>
-      <div class="min-w-0 flex-1">
-        <div class="flex flex-wrap items-center gap-2">
-          <p class="text-sm font-extrabold text-[#1a2e5a]">
-            Saruê está verificando fontes
-          </p>
-          <span
-            v-if="activeActivity"
-            class="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-100"
-          >
-            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 motion-safe:animate-pulse" />
-            {{ activeActivity.label }}
-          </span>
-        </div>
-        <p
-          v-if="activeActivity?.detail && !compact"
-          class="mt-1 text-xs font-medium leading-5 text-slate-500"
-        >
-          {{ activeActivity.detail }}
-        </p>
-      </div>
     </div>
 
     <div
-      class="mt-3 grid gap-2"
+      class="mt-2 grid gap-1.5"
       :class="compact ? 'text-xs' : 'text-sm'"
     >
       <div
-        v-for="activity in visibleActivities"
-        :key="activity.id"
-        class="rounded-xl border px-3 py-2.5"
-        :class="activityRowClass(activity)"
+        v-for="line in sourceLines"
+        :key="line.id"
+        class="flex min-h-9 min-w-0 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-left shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
       >
-        <div class="flex min-w-0 items-start gap-2.5">
-          <span
-            class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg"
-            :class="activityIconClass(activity)"
-          >
-            <UIcon
-              :name="activityIcon(activity)"
-              class="h-3.5 w-3.5"
-            />
-          </span>
-          <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <p class="font-bold leading-5 text-[#1a2e5a]">
-                {{ activity.label }}
-              </p>
-              <span
-                v-if="activity.status === 'active'"
-                class="inline-flex items-center gap-1 text-[11px] font-bold uppercase text-emerald-700"
-              >
-                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 motion-safe:animate-pulse" />
-                em andamento
-              </span>
-            </div>
-            <p
-              v-if="activity.detail"
-              class="mt-0.5 leading-5 text-slate-500"
-            >
-              {{ activity.detail }}
-            </p>
-
-            <div
-              v-if="activity.sources?.length"
-              class="mt-2 flex flex-wrap gap-1.5"
-            >
-              <span
-                v-for="source in activity.sources"
-                :key="source.id"
-                class="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 shadow-sm"
-              >
-                <UIcon
-                  :name="source.kind === 'web' ? 'i-lucide-globe-2' : 'i-lucide-book-open'"
-                  class="h-3.5 w-3.5 shrink-0 text-[#00a155]"
-                />
-                <span
-                  v-if="source.kind === 'web'"
-                  class="shrink-0 rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-700"
-                >
-                  web
-                </span>
-                <span
-                  v-else
-                  class="shrink-0 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-[#1a2e5a]"
-                >
-                  RAG
-                </span>
-                <span class="truncate">{{ sourceTitle(source) }}</span>
-                <span
-                  v-if="sourceHost(source.url)"
-                  class="hidden shrink-0 text-slate-400 sm:inline"
-                >
-                  {{ sourceHost(source.url) }}
-                </span>
-              </span>
-            </div>
-
-            <div
-              v-else-if="activity.domains?.length"
-              class="mt-2 flex flex-wrap gap-1.5"
-            >
-              <span
-                v-for="domain in activity.domains"
-                :key="domain"
-                class="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-100"
-              >
-                <UIcon
-                  name="i-lucide-globe-2"
-                  class="h-3 w-3"
-                />
-                {{ domain }}
-              </span>
-            </div>
-          </div>
-        </div>
+        <span
+          class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md"
+          :class="lineIconClass(line)"
+        >
+          <UIcon
+            :name="lineIcon(line)"
+            class="h-3.5 w-3.5"
+          />
+        </span>
+        <span
+          class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-black uppercase"
+          :class="lineBadgeClass(line)"
+        >
+          {{ line.kind === 'web' ? 'web' : 'rag' }}
+        </span>
+        <span class="min-w-0 flex-1 truncate font-semibold text-[#1a2e5a]">
+          {{ line.title }}
+        </span>
+        <span
+          v-if="line.host"
+          class="hidden shrink-0 truncate text-[11px] font-medium text-slate-400 sm:max-w-40 sm:inline"
+        >
+          {{ line.host }}
+        </span>
+        <span
+          v-if="line.status === 'active'"
+          class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 motion-safe:animate-pulse"
+          aria-label="Em verificação"
+        />
       </div>
     </div>
   </div>
@@ -130,6 +63,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { SearchActivity, Source } from '~/composables/useFiaqChat'
+
+interface SourceLine {
+  id: string
+  kind: 'rag' | 'web'
+  status: SearchActivity['status']
+  title: string
+  host: string
+}
 
 const props = withDefaults(defineProps<{
   activities?: SearchActivity[]
@@ -157,33 +98,58 @@ const activeActivity = computed(() => {
 })
 
 const wrapperClass = computed(() => [
-  'border border-slate-200 text-left leading-normal shadow-sm',
+  'text-left leading-normal',
   props.compact
-    ? 'mb-4 rounded-2xl bg-emerald-50/40 p-3'
-    : 'w-full max-w-[min(56rem,92vw)] rounded-2xl rounded-bl-sm bg-white px-4 py-4'
+    ? 'mb-4 rounded-xl border border-slate-200 bg-slate-50/70 p-2.5'
+    : 'w-full max-w-[min(56rem,92vw)] rounded-xl border border-slate-200 bg-white px-3 py-3 shadow-sm'
 ])
 
-function activityIcon(activity: SearchActivity): string {
-  if (activity.status === 'done') return 'i-lucide-check'
-  if (activity.status === 'skipped') return 'i-lucide-circle-minus'
-  if (activity.status === 'error') return 'i-lucide-circle-alert'
-  if (activity.kind === 'web') return 'i-lucide-globe-2'
-  if (activity.kind === 'rag') return 'i-lucide-database'
-  return 'i-lucide-sparkles'
+const sourceLines = computed<SourceLine[]>(() => {
+  const lines: SourceLine[] = []
+
+  for (const activity of visibleActivities.value) {
+    for (const source of activity.sources ?? []) {
+      lines.push({
+        id: `${activity.id}:${source.id}`,
+        kind: source.kind === 'web' ? 'web' : 'rag',
+        status: activity.status,
+        title: sourceTitle(source),
+        host: sourceHost(source.url) || (source.kind === 'web' ? '' : 'base fIAq')
+      })
+    }
+  }
+
+  if (lines.length) return lines.slice(0, 6)
+
+  const activity = activeActivity.value ?? visibleActivities.value.find(item => item.status !== 'skipped') ?? visibleActivities.value[0]
+  if (!activity) return []
+
+  return [{
+    id: activity.id,
+    kind: activity.kind === 'web' ? 'web' : 'rag',
+    status: activity.status,
+    title: activity.label,
+    host: activity.kind === 'web' ? 'fontes oficiais' : 'base fIAq'
+  }]
+})
+
+function lineIcon(line: SourceLine): string {
+  if (line.status === 'done') return 'i-lucide-check'
+  if (line.status === 'error') return 'i-lucide-circle-alert'
+  if (line.kind === 'web') return 'i-lucide-globe-2'
+  return 'i-lucide-database'
 }
 
-function activityRowClass(activity: SearchActivity): string {
-  if (activity.status === 'active') return 'border-emerald-200 bg-emerald-50/60'
-  if (activity.status === 'done') return 'border-slate-200 bg-white'
-  if (activity.status === 'error') return 'border-amber-200 bg-amber-50/70'
-  return 'border-slate-200 bg-slate-50/70'
+function lineIconClass(line: SourceLine): string {
+  if (line.status === 'error') return 'bg-amber-50 text-amber-700'
+  if (line.status === 'done') return 'bg-emerald-50 text-emerald-700'
+  if (line.kind === 'web') return 'bg-emerald-50 text-emerald-700'
+  return 'bg-slate-100 text-[#1a2e5a]'
 }
 
-function activityIconClass(activity: SearchActivity): string {
-  if (activity.status === 'active') return 'bg-emerald-100 text-emerald-700'
-  if (activity.status === 'done') return 'bg-emerald-50 text-emerald-700'
-  if (activity.status === 'error') return 'bg-amber-100 text-amber-700'
-  return 'bg-slate-100 text-slate-500'
+function lineBadgeClass(line: SourceLine): string {
+  if (line.kind === 'web') return 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
+  return 'bg-blue-50 text-[#1a2e5a] ring-1 ring-blue-100'
 }
 
 function sourceTitle(source: Source): string {
