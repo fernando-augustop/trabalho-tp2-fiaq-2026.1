@@ -575,7 +575,7 @@ export default defineEventHandler(async (event) => {
     sendEvent(res, { type: 'done' })
     closeResponse()
 
-    const questionVectorPromise = searchQuestion === question && searchVector
+    const questionVectorPromise = searchVector
       ? Promise.resolve(searchVector)
       : embedQuery(question)
 
