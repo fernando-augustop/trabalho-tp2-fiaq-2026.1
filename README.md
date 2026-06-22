@@ -1,4 +1,4 @@
-# fIAq — Assistente do CIC/UnB
+# fIAq: Assistente do CIC/UnB
 
 Portal de **perguntas frequentes** e **assistente virtual com IA** do Departamento de
 Ciência da Computação da Universidade de Brasília. As informações do CIC/UnB estão
@@ -122,12 +122,9 @@ Projeto desenvolvido por alunos da disciplina de Técnicas de Programação 2 �
 | Fernando Augusto | [@fernando-augustop](https://github.com/fernando-augustop) |
 | Gustavo Nascimento | [@PavanelliGustavo](https://github.com/PavanelliGustavo) |
 | Eduardo Rocha | [@eduardofgc](https://github.com/eduardofgc) |
-| Lucas Pereira | [@lucsap](https://github.com/lucsap) |
 | Samara Gomes | [@samaragomess](https://github.com/samaragomess) |
 | Augusto Faller | [@tosgual](https://github.com/tosgual) |
 | Lucas Centurion Netto | [@LucasCenturionNetto](https://github.com/LucasCenturionNetto) |
-| Ricardo Rian | [@RianRSM](https://github.com/RianRSM) |
-| Érica Feitosa | [@ericafeitosa](https://github.com/ericafeitosa) |
 
 ## Licença
 
