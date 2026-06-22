@@ -25,6 +25,7 @@ export type MessageDraft = Omit<Message, 'id'> & { id?: number }
 
 let msgId = 0
 const STORAGE_KEY = 'fiaq:temporary-conversation:v1'
+const EMPTY_RESPONSE_MESSAGE = 'A resposta não foi concluída. Tente reenviar a pergunta em instantes.'
 
 function normalizeMessages(nextMessages: MessageDraft[]): Message[] {
   return nextMessages
@@ -119,6 +120,14 @@ export function useFiaqChat() {
     }
   }
 
+  function finalizeAssistantMessage(messageId: number, content: string) {
+    updateAssistantMessage(messageId, {
+      content: content.trim() ? content : EMPTY_RESPONSE_MESSAGE,
+      streaming: false
+    })
+    loading.value = false
+  }
+
   async function streamAssistant(endpoint: string, payload: object, assistantId: number) {
     const res = await fetch(endpoint, {
       method: 'POST',
@@ -132,6 +141,55 @@ export function useFiaqChat() {
     const decoder = new TextDecoder()
     let buffer = ''
     let accumulatedContent = ''
+    let receivedTerminalEvent = false
+
+    function processLine(line: string) {
+      if (!line.startsWith('data: ')) return
+
+      try {
+        const event = JSON.parse(line.slice(6))
+
+        if (event.type === 'token') {
+          accumulatedContent += event.content
+          updateAssistantMessage(assistantId, { content: accumulatedContent })
+        }
+
+        if (event.type === 'sources') {
+          const sources = (Array.isArray(event.items) ? event.items : []) as Source[]
+          const currentReason = messages.value.find(message => message.id === assistantId)?.webSearchReason
+          updateAssistantMessage(assistantId, {
+            sources,
+            ...(sources.some(source => source?.kind === 'web')
+              ? {
+                  webEnhanced: true,
+                  webSearchReason: currentReason === 'feedback_negativo'
+                    ? 'feedback_negativo' as const
+                    : 'fallback_automatico' as const
+                }
+              : {})
+          })
+        }
+
+        if (event.type === 'mode' && event.webEnhanced) {
+          updateAssistantMessage(assistantId, {
+            webEnhanced: true,
+            webSearchReason: event.reason === 'feedback_negativo' ? 'feedback_negativo' : 'fallback_automatico'
+          })
+        }
+
+        if (event.type === 'done') {
+          receivedTerminalEvent = true
+          finalizeAssistantMessage(assistantId, accumulatedContent)
+        }
+
+        if (event.type === 'error') {
+          receivedTerminalEvent = true
+          finalizeAssistantMessage(assistantId, accumulatedContent || 'Ocorreu um erro ao processar sua mensagem. Tente novamente.')
+        }
+      } catch {
+        // evento SSE parcial/malformado — ignora esta linha
+      }
+    }
 
     while (true) {
       const { done, value } = await reader.read()
@@ -142,60 +200,18 @@ export function useFiaqChat() {
       buffer = lines.pop() ?? ''
 
       for (const line of lines) {
-        if (!line.startsWith('data: ')) continue
-
-        try {
-          const event = JSON.parse(line.slice(6))
-
-          if (event.type === 'token') {
-            accumulatedContent += event.content
-            updateAssistantMessage(assistantId, { content: accumulatedContent })
-          }
-
-          if (event.type === 'sources') {
-            const sources = (Array.isArray(event.items) ? event.items : []) as Source[]
-            const currentReason = messages.value.find(message => message.id === assistantId)?.webSearchReason
-            updateAssistantMessage(assistantId, {
-              sources,
-              ...(sources.some(source => source?.kind === 'web')
-                ? {
-                    webEnhanced: true,
-                    webSearchReason: currentReason === 'feedback_negativo'
-                      ? 'feedback_negativo' as const
-                      : 'fallback_automatico' as const
-                  }
-                : {})
-            })
-          }
-
-          if (event.type === 'mode' && event.webEnhanced) {
-            updateAssistantMessage(assistantId, {
-              webEnhanced: true,
-              webSearchReason: event.reason === 'feedback_negativo' ? 'feedback_negativo' : 'fallback_automatico'
-            })
-          }
-
-          if (event.type === 'done') {
-            updateAssistantMessage(assistantId, {
-              content: accumulatedContent.trim()
-                ? accumulatedContent
-                : 'A resposta não foi concluída. Tente reenviar a pergunta em instantes.',
-              streaming: false
-            })
-            loading.value = false
-          }
-
-          if (event.type === 'error') {
-            updateAssistantMessage(assistantId, {
-              content: accumulatedContent || 'Ocorreu um erro ao processar sua mensagem. Tente novamente.',
-              streaming: false
-            })
-            loading.value = false
-          }
-        } catch {
-          // evento SSE parcial/malformado — ignora esta linha
-        }
+        processLine(line)
       }
+    }
+
+    buffer += decoder.decode()
+    for (const line of buffer.split('\n')) {
+      processLine(line)
+    }
+
+    const current = messages.value.find(message => message.id === assistantId)
+    if (!receivedTerminalEvent || !current?.content.trim()) {
+      finalizeAssistantMessage(assistantId, accumulatedContent)
     }
   }
 

@@ -67,7 +67,7 @@
       </div>
 
       <div
-        v-if="!message.streaming"
+        v-if="!message.streaming && hasRenderableContent"
         ref="actionsEl"
         class="flex flex-wrap items-center gap-2 px-1 pt-1.5"
       >
@@ -230,13 +230,16 @@ const showFeedbackMenu = ref(false)
 const actionsEl = ref<HTMLElement | null>(null)
 let copyResetTimeout: number | null = null
 
-// Só mostra a bolha do assistente quando há texto (ou quando o stream terminou).
-const showBody = computed(() => (props.message.content?.trim().length ?? 0) > 0 || !props.message.streaming)
+const cleanContent = computed(() => cleanAssistantText(props.message.content ?? ''))
+const hasRenderableContent = computed(() => cleanContent.value.length > 0)
+
+// Só mostra a bolha do assistente quando há texto renderizável; enquanto vazio,
+// o TypingIndicator cobre a espera sem revelar uma bolha final sem conteúdo.
+const showBody = computed(() => hasRenderableContent.value)
 
 // Renderiza o Markdown da resposta do assistente em HTML, mantendo links só nos chips de fonte.
 const renderedContent = computed(() => {
-  const clean = cleanAssistantText(props.message.content ?? '')
-  return renderMarkdown(clean)
+  return renderMarkdown(cleanContent.value)
 })
 
 const hasWebSources = computed(() => props.message.sources?.some(source => source.kind === 'web') ?? false)
@@ -392,7 +395,7 @@ function handleDocumentClick(event: MouseEvent) {
   showFeedbackMenu.value = false
 }
 
-const plainCopy = computed(() => cleanAssistantText(props.message.content ?? ''))
+const plainCopy = computed(() => cleanContent.value)
 const exportMessages = computed<Message[]>(() => {
   const currentIndex = props.allMessages.findIndex(message => message.id === props.message.id)
   if (currentIndex < 0) return [props.message]
