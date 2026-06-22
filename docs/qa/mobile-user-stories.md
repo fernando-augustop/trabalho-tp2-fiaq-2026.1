@@ -3,7 +3,7 @@
 > Fonte única de verdade para o trabalho de "tornar o fIAq viável, bonito,
 > consistente e utilizável em celulares". Inventário derivado do código atual
 > (`fiaq-app/`). Status de teste obtido por revisão de código + build +
-> validação responsiva (viewport mobile 360–414px).
+> validação responsiva (viewports mobile 360px e 390px).
 >
 > Legenda de status: ✅ aprovado · 🟡 ajustado · 🔴 quebrado · ⏳ pendente
 
