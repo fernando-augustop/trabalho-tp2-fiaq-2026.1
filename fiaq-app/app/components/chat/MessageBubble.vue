@@ -281,7 +281,7 @@ const copyIcon = computed(() => {
 const copyLabel = computed(() => {
   if (copyStatus.value === 'copied') return 'Copiado'
   if (copyStatus.value === 'error') return 'Erro'
-  return 'Copiar mensagem'
+  return 'Copiar'
 })
 
 const exportOptions: Array<{

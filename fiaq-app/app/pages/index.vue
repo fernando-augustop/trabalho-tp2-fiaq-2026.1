@@ -31,13 +31,14 @@
           >
           <button
             type="submit"
-            class="fiaq-search-button flex shrink-0 items-center gap-2 border-l border-emerald-800/25 bg-[#00a155] px-6 py-4 text-base font-bold text-[#0a2e1a] transition-colors hover:bg-[#17b86a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a2e5a]"
+            aria-label="Perguntar ao assistente"
+            class="fiaq-search-button flex shrink-0 items-center gap-2 border-l border-emerald-800/25 bg-[#00a155] px-4 py-4 text-base font-bold text-[#0a2e1a] transition-colors hover:bg-[#17b86a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a2e5a] sm:px-6"
           >
             <UIcon
               name="i-lucide-send"
-              class="w-4 h-4"
+              class="w-5 h-5 sm:w-4 sm:h-4"
             />
-            Perguntar
+            <span class="hidden sm:inline">Perguntar</span>
           </button>
         </div>
       </form>

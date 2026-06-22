@@ -3,6 +3,16 @@
 
 :root {
   --nav-height: 68px;
+
+  /* Tokens de marca fIAq — fonte única de verdade para navy/verde.
+     Mantenha estes valores sincronizados com a CSS crítica em app.vue. */
+  --fiaq-navy: #1a2e5a;
+  --fiaq-navy-700: #243d75;
+  --fiaq-navy-deep: #142854;
+  --fiaq-green: #00a155;
+  --fiaq-green-600: #079052;
+  --fiaq-green-bright: #00dc82;
+  --fiaq-surface: #f4f4f4;
 }
 
 @theme static {

@@ -8,11 +8,11 @@
         v-if="messages.length === 0"
         class="flex h-full flex-col items-center justify-center gap-4 py-12 text-center"
       >
-        <div class="items-center justify-center">
+        <div class="flex items-center justify-center">
           <img
             src="/sarueBot.png"
-            alt="Assistente"
-            class="h-12 w-16"
+            alt="Saruê, assistente virtual do fIAq"
+            class="h-20 w-20 object-contain"
           >
         </div>
         <div>
@@ -61,7 +61,7 @@
       v-if="showJumpToBottom"
       type="button"
       title="Ir para o fim da conversa"
-      class="fixed bottom-40 left-1/2 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#1a2e5a] px-4 py-2 text-sm font-bold text-white shadow-lg ring-1 ring-white/20 transition-all hover:-translate-y-0.5 hover:bg-[#243d75] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 sm:bottom-36"
+      class="fixed bottom-28 left-1/2 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#1a2e5a] px-4 py-2 text-sm font-bold text-white shadow-lg ring-1 ring-white/20 transition-all hover:-translate-y-0.5 hover:bg-[#243d75] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 sm:bottom-32"
       @click="scrollToBottom('smooth')"
     >
       <UIcon

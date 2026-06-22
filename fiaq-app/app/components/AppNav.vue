@@ -1,20 +1,18 @@
 <template>
-  <nav class="fiaq-nav sticky top-0 z-50 bg-[#1a2e5a] px-6 sm:px-10 py-4 flex items-center justify-between shrink-0">
-    <NuxtLink
-      to="/"
-      class="fiaq-logo text-white text-4xl sm:text-5xl font-black"
-    >
-      <span class="text-white">f</span><span class="fiaq-logo-accent text-green-700">IA</span><span class="text-white">q</span>
-    </NuxtLink>
-    <div class="fiaq-nav-links flex gap-6 sm:gap-8 text-white text-sm font-medium">
+  <nav class="fiaq-nav sticky top-0 z-50 flex items-center justify-between gap-2 bg-[#1a2e5a] px-3 py-3 shrink-0 sm:gap-3 sm:px-10 sm:py-4">
+    <FiaqBrand class="shrink-0" />
+
+    <div class="fiaq-nav-links flex shrink-0 items-center gap-3 text-[13px] font-medium text-white sm:gap-8 sm:text-sm">
       <NuxtLink
         to="/"
-        class="hover:text-green-400 transition-colors"
-      >Início</NuxtLink>
+        class="rounded-md px-1 py-1 transition-colors hover:text-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+      >
+        Início
+      </NuxtLink>
 
       <button
         type="button"
-        class="bg-transparent border-0 p-0 m-0 cursor-pointer font-medium hover:text-green-400 transition-colors"
+        class="m-0 cursor-pointer rounded-md border-0 bg-transparent px-1 py-1 font-medium text-white transition-colors hover:text-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
         @click="open"
       >
         Contatos
@@ -22,8 +20,10 @@
 
       <NuxtLink
         to="/sobre"
-        class="hover:text-green-400 transition-colors"
-      >Sobre</NuxtLink>
+        class="rounded-md px-1 py-1 transition-colors hover:text-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+      >
+        Sobre
+      </NuxtLink>
     </div>
   </nav>
 </template>

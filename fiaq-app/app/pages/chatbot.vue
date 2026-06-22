@@ -5,16 +5,16 @@
   >
     <div class="flex min-h-full w-full flex-col">
       <!-- Header -->
-      <div class="bg-[#1a2e5a] px-5 py-5 sm:px-10">
+      <div class="bg-[#1a2e5a] px-4 py-4 sm:px-10 sm:py-5">
         <div class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4">
           <div class="flex min-w-0 items-center gap-3">
             <img
               src="/sarueBot.png"
-              alt="Assistente"
-              class="h-18 w-18 shrink-0 object-contain"
+              alt="Saruê, assistente virtual do fIAq"
+              class="h-12 w-12 shrink-0 object-contain sm:h-16 sm:w-16"
             >
             <div class="min-w-0">
-              <h1 class="truncate text-2xl font-extrabold text-white sm:text-3xl">
+              <h1 class="truncate text-xl font-extrabold text-white sm:text-3xl">
                 Assistente Virtual
               </h1>
               <p class="mt-0.5 text-xs font-medium text-blue-100/80">
