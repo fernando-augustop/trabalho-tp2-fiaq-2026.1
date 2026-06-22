@@ -48,9 +48,11 @@ useHead({
     }
   ],
   link: [
-    { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-    { rel: 'alternate icon', type: 'image/x-icon', href: '/favicon.ico' },
-    { rel: 'apple-touch-icon', sizes: '180x180', href: '/1.png' }
+    { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png?v=sarue' },
+    { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png?v=sarue' },
+    { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg?v=sarue' },
+    { rel: 'shortcut icon', type: 'image/x-icon', href: '/favicon.ico?v=sarue' },
+    { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png?v=sarue' }
   ],
   htmlAttrs: {
     lang: 'pt-BR'
