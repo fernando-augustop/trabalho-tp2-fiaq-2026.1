@@ -10,6 +10,8 @@ interface SupabaseAuthUser {
   email?: string
 }
 
+const AUTH_REQUEST_TIMEOUT_MS = 10_000
+
 function supabaseUrl(): string {
   return String(process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').replace(/\/+$/, '')
 }
@@ -45,12 +47,19 @@ async function getAuthenticatedUser(token: string): Promise<AdminUser | null> {
   const { url, anonKey } = getSupabaseAuthConfig()
   if (!url || !anonKey || !token) return null
 
-  const response = await fetch(`${url}/auth/v1/user`, {
-    headers: {
-      apikey: anonKey,
-      Authorization: `Bearer ${token}`
-    }
-  })
+  let response: Response
+  try {
+    response = await fetch(`${url}/auth/v1/user`, {
+      signal: AbortSignal.timeout(AUTH_REQUEST_TIMEOUT_MS),
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${token}`
+      }
+    })
+  } catch (error) {
+    console.warn('[admin] Falha ao validar usuário no Supabase Auth:', error instanceof Error ? error.message : 'Request failed')
+    return null
+  }
 
   if (!response.ok) return null
 

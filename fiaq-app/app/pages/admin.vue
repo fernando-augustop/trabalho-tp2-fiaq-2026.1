@@ -433,11 +433,15 @@ async function completeInvite() {
 }
 
 async function logout() {
-  await signOutAdmin(session.value)
-  session.value = null
-  inviteSession.value = null
-  authorized.value = false
-  candidates.value = []
+  try {
+    await signOutAdmin(session.value)
+  } finally {
+    clearAdminSession()
+    session.value = null
+    inviteSession.value = null
+    authorized.value = false
+    candidates.value = []
+  }
 }
 
 async function fetchCandidates() {
@@ -507,7 +511,15 @@ function sourceTitle(source: unknown): string {
 
 function sourceUrl(source: unknown): string {
   if (!source || typeof source !== 'object') return '#'
-  return String((source as Record<string, unknown>).url || '#')
+  const raw = String((source as Record<string, unknown>).url || '').trim()
+  if (!raw) return '#'
+
+  try {
+    const parsed = new URL(raw)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : '#'
+  } catch {
+    return '#'
+  }
 }
 
 function sourceKey(source: unknown): string {

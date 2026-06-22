@@ -76,8 +76,7 @@ export function temFonteWeb(fontesUsadas: unknown[]): boolean {
   return fontesUsadas.some((source) => {
     if (!source || typeof source !== 'object') return false
     const kind = 'kind' in source ? String(source.kind || '') : ''
-    const url = 'url' in source ? String(source.url || '') : ''
-    return kind === 'web' || /^https?:\/\//i.test(url)
+    return kind === 'web'
   })
 }
 
@@ -284,11 +283,12 @@ export async function aprovarCandidata(id: number, adminEmail: string, observaca
           chunk_uid_rag = ${chunkUid},
           dthr_atualizacao = CURRENT_TIMESTAMP
       WHERE id = ${id}
+        AND status = 'pendente'
       RETURNING *
     `
 
     if (!row) {
-      throw new Error('CANDIDATE_NOT_UPDATED')
+      throw createError({ statusCode: 409, message: 'CANDIDATE_ALREADY_REVIEWED' })
     }
 
     return normalizeRow(row)

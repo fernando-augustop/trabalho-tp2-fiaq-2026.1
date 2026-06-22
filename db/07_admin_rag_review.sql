@@ -25,13 +25,16 @@ CREATE TABLE IF NOT EXISTS web_resposta_candidata (
     rejeitado_em        TIMESTAMP,
     observacao_admin    TEXT,
     id_rag_documento    INT REFERENCES rag_documento(id) ON DELETE SET NULL,
-    chunk_uid_rag       TEXT,
+    chunk_uid_rag       VARCHAR(320) REFERENCES rag_chunk(chunk_uid) ON DELETE SET NULL,
     dthr_criacao        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     dthr_atualizacao    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_admin_usuario_email_ativo
   ON admin_usuario (lower(email), ativo);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_usuario_email_lower
+  ON admin_usuario (lower(email));
 
 CREATE INDEX IF NOT EXISTS idx_web_resposta_candidata_status
   ON web_resposta_candidata (status, dthr_criacao DESC);
@@ -52,6 +55,25 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO fiaq_app;
 
 ALTER TABLE admin_usuario ENABLE ROW LEVEL SECURITY;
 ALTER TABLE web_resposta_candidata ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  ALTER TABLE web_resposta_candidata
+    ALTER COLUMN chunk_uid_rag TYPE VARCHAR(320);
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'web_resposta_candidata_chunk_uid_rag_fkey'
+      AND conrelid = 'web_resposta_candidata'::regclass
+  ) THEN
+    ALTER TABLE web_resposta_candidata
+      ADD CONSTRAINT web_resposta_candidata_chunk_uid_rag_fkey
+      FOREIGN KEY (chunk_uid_rag)
+      REFERENCES rag_chunk(chunk_uid)
+      ON DELETE SET NULL;
+  END IF;
+END
+$$;
 
 DO $$
 BEGIN

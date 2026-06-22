@@ -191,29 +191,34 @@ function rankTextRows(query: string, rows: RagTextRow[], k: number): SearchResul
 export async function buscarRagPorTextoNoBanco(query: string, k = 5): Promise<SearchResult[] | null> {
   if (!isDatabaseConfigured()) return null
 
-  const sql = getSql()
-  const rows = await sql<RagTextRow[]>`
-    SELECT
-      rc.chunk_uid AS id,
-      rc.titulo,
-      rc.conteudo,
-      COALESCE(rc.url_fonte, rd.url_fonte, '') AS url,
-      rc.origem
-    FROM rag_chunk rc
-    JOIN rag_documento rd ON rd.id = rc.id_documento
-    WHERE rc.ativo = TRUE
-      AND rd.ativo = TRUE
-    ORDER BY
-      CASE rc.origem
-        WHEN 'faq' THEN 1
-        WHEN 'pdf' THEN 2
-        ELSE 3
-      END,
-      rc.dthr_atualizacao DESC
-    LIMIT 800
-  `
+  try {
+    const sql = getSql()
+    const rows = await sql<RagTextRow[]>`
+      SELECT
+        rc.chunk_uid AS id,
+        rc.titulo,
+        rc.conteudo,
+        COALESCE(rc.url_fonte, rd.url_fonte, '') AS url,
+        rc.origem
+      FROM rag_chunk rc
+      JOIN rag_documento rd ON rd.id = rc.id_documento
+      WHERE rc.ativo = TRUE
+        AND rd.ativo = TRUE
+      ORDER BY
+        CASE rc.origem
+          WHEN 'faq' THEN 1
+          WHEN 'pdf' THEN 2
+          ELSE 3
+        END,
+        rc.dthr_atualizacao DESC
+      LIMIT 800
+    `
 
-  return rankTextRows(query, rows, k)
+    return rankTextRows(query, rows, k)
+  } catch (error) {
+    console.warn('[RAG] Falha na busca textual do banco; usando fallback JSON:', error)
+    return null
+  }
 }
 
 export function buscarRagPorTexto(query: string, k = 5): SearchResult[] {

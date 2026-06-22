@@ -5,6 +5,8 @@ interface RequestBody {
   email?: string
 }
 
+const INVITE_REQUEST_TIMEOUT_MS = 10_000
+
 function normalizeEmail(value: unknown): string {
   return String(value || '').trim().toLowerCase()
 }
@@ -36,19 +38,27 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 503, message: 'INVITES_NOT_CONFIGURED' })
   }
 
-  const redirectTo = `${canonicalBaseUrl()}/admin`
-  const response = await fetch(`${url}/auth/v1/invite?redirect_to=${encodeURIComponent(redirectTo)}`, {
-    method: 'POST',
-    headers: {
-      'apikey': serviceRoleKey,
-      'Authorization': `Bearer ${serviceRoleKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      email,
-      data: { invited_as: 'fiaq_admin' }
+  let response: Response
+
+  try {
+    const redirectTo = `${canonicalBaseUrl()}/admin`
+    response = await fetch(`${url}/auth/v1/invite?redirect_to=${encodeURIComponent(redirectTo)}`, {
+      method: 'POST',
+      signal: AbortSignal.timeout(INVITE_REQUEST_TIMEOUT_MS),
+      headers: {
+        'apikey': serviceRoleKey,
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        data: { invited_as: 'fiaq_admin' }
+      })
     })
-  })
+  } catch (error) {
+    console.warn('[admin] Falha ao enviar invite via Supabase:', error instanceof Error ? error.message : 'Request failed')
+    throw createError({ statusCode: 502, message: 'INVITE_REQUEST_FAILED' })
+  }
 
   const payload = await response.json().catch(() => ({}))
   if (!response.ok) {

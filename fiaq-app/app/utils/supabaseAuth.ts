@@ -156,7 +156,9 @@ function decodeJwtPayload(token: string): Record<string, unknown> {
   try {
     const payload = token.split('.')[1]
     if (!payload) return {}
-    return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const padding = (4 - normalized.length % 4) % 4
+    return JSON.parse(atob(normalized.padEnd(normalized.length + padding, '=')))
   } catch {
     return {}
   }
