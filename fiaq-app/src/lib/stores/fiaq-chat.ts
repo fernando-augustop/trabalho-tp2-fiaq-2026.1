@@ -40,6 +40,7 @@ export type MessageDraft = Omit<Message, 'id'> & { id?: number }
 let msgId = 0
 let initialized = false
 let unsubscribePersistence: (() => void) | null = null
+let activeAbortController: AbortController | null = null
 
 const STORAGE_KEY = 'fiaq:temporary-conversation:v1'
 const EMPTY_RESPONSE_MESSAGE = 'A resposta não foi concluída. Tente reenviar a pergunta em instantes.'
@@ -181,6 +182,9 @@ export function initChatStore() {
 }
 
 export function destroyChatStore() {
+  activeAbortController?.abort()
+  activeAbortController = null
+  loading.set(false)
   unsubscribePersistence?.()
   unsubscribePersistence = null
   initialized = false
@@ -244,9 +248,14 @@ function finalizeAssistantMessage(messageId: number, content: string) {
 }
 
 async function streamAssistant(endpoint: string, payload: object, assistantId: number) {
+  activeAbortController?.abort()
+  const abort = new AbortController()
+  activeAbortController = abort
+
   const res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    signal: abort.signal,
     body: JSON.stringify(payload)
   })
 
@@ -388,6 +397,8 @@ async function streamAssistant(endpoint: string, payload: object, assistantId: n
   if (!receivedTerminalEvent || !current?.content.trim()) {
     finalizeAssistantMessage(assistantId, accumulatedContent)
   }
+
+  if (activeAbortController === abort) activeAbortController = null
 }
 
 export async function sendMessage(text: string) {
@@ -407,8 +418,12 @@ export async function sendMessage(text: string) {
   try {
     await streamAssistant('/api/chat', { messages: history }, assistantId)
   } catch {
+    activeAbortController = null
+    const current = get(messages).find(message => message.id === assistantId)
     updateAssistantMessage(assistantId, {
-      content: 'Não consegui conectar com o servidor do fIAq agora. Verifique sua conexão e tente enviar novamente.',
+      content: current?.content.trim()
+        ? current.content
+        : 'Não consegui conectar com o servidor do fIAq agora. Verifique sua conexão e tente enviar novamente.',
       streaming: false
     })
   } finally {
@@ -491,8 +506,12 @@ async function requestWebAnswer(question: Message, previousAnswer: Message) {
       messages: history
     }, assistantId)
   } catch {
+    activeAbortController = null
+    const current = get(messages).find(message => message.id === assistantId)
     updateAssistantMessage(assistantId, {
-      content: 'Não consegui buscar fontes adicionais agora. Tente novamente em alguns instantes.',
+      content: current?.content.trim()
+        ? current.content
+        : 'Não consegui buscar fontes adicionais agora. Tente novamente em alguns instantes.',
       streaming: false
     })
   } finally {

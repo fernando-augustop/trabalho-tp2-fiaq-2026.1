@@ -8,7 +8,15 @@
 
   let { source }: Props = $props()
 
-  const hasUrl = $derived(/^https?:\/\//i.test(source.url ?? ''))
+  const safeUrl = $derived.by(() => {
+    try {
+      const parsed = new URL(source.url ?? '')
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : ''
+    } catch {
+      return ''
+    }
+  })
+  const hasUrl = $derived(Boolean(safeUrl))
   const cleanTitle = $derived.by(() => {
     const title = decodeEntities(source.titulo || 'Fonte oficial')
       .replace(/\s+/g, ' ')
@@ -38,7 +46,7 @@
 
 {#if hasUrl}
   <a
-    href={source.url}
+    href={safeUrl}
     target="_blank"
     rel="noopener noreferrer"
     title={`Abrir fonte oficial: ${cleanTitle}`}

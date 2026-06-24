@@ -54,7 +54,7 @@
 
 <div class="flex bg-slate-50" style={`min-height: calc(100dvh - var(--nav-height, 80px)); --chat-composer-height: ${composerHeight}px`}>
   <div class="flex min-h-full w-full flex-col">
-    <main
+    <section
       class="flex min-h-0 flex-1 flex-col bg-slate-50"
       data-composer-focus={composerFocused ? 'true' : undefined}
     >
@@ -91,6 +91,6 @@
           />
         </div>
       </div>
-    </main>
+    </section>
   </div>
 </div>

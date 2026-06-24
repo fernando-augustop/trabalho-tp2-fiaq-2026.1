@@ -64,7 +64,7 @@
     </p>
   </section>
 
-  <main class="mx-auto flex max-w-5xl flex-col gap-14 px-6 py-12 sm:px-10">
+  <section class="mx-auto flex max-w-5xl flex-col gap-14 px-6 py-12 sm:px-10">
     <section class="flex items-start gap-4 sm:gap-5">
       <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#1a2e5a] sm:h-14 sm:w-14">
         <FiaqIcon name="i-lucide-target" class="h-6 w-6 sm:h-7 sm:w-7" />
@@ -137,5 +137,5 @@
         {/each}
       </div>
     </section>
-  </main>
+  </section>
 </div>

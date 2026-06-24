@@ -16,7 +16,34 @@
   })
 
   function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape') closeDepartmentsSidebar()
+    if (event.key === 'Escape') {
+      closeDepartmentsSidebar()
+      return
+    }
+
+    if (event.key !== 'Tab' || !panelEl) return
+
+    const focusable = Array.from(panelEl.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1)
+
+    if (!focusable.length) {
+      event.preventDefault()
+      panelEl.focus()
+      return
+    }
+
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    const active = document.activeElement
+
+    if (event.shiftKey && active === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault()
+      first.focus()
+    }
   }
 
   $effect(() => {

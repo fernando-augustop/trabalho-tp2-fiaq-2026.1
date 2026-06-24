@@ -1,5 +1,6 @@
 import { readFile, readdir, writeFile } from 'fs/promises'
 import { join } from 'path'
+import { read } from '$app/server'
 import { embedChunk } from '../utils/embeddings'
 import type { EmbeddedChunk } from '../utils/embeddings'
 import { addChunk, loadChunks, getAllChunks, getStoreSize } from '../utils/vectorStore'
@@ -7,6 +8,7 @@ import { embedInfo } from '../utils/llmProvider'
 import { extractPdfChunks } from '../utils/pdfLoader'
 import { extractCrawlChunks } from '../utils/crawlLoader'
 import { listarFaq } from '../repositorios/faq'
+import ragIndexAsset from '../assets/rag-index.json?url'
 
 interface RagIndexFile {
   meta: { provider?: string, model?: string, dim?: number, count?: number, builtAt?: string }
@@ -17,6 +19,15 @@ interface RagIndexFile {
 const INDEX_PATH = join(process.cwd(), 'server', 'assets', 'rag-index.json')
 
 async function loadCachedIndex(): Promise<RagIndexFile | null> {
+  try {
+    const response = read(ragIndexAsset)
+    return await response.json() as RagIndexFile
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[RAG] Fallback JSON empacotado não foi carregado:', error instanceof Error ? error.message : error)
+    }
+  }
+
   try {
     const data = await readFile(INDEX_PATH, 'utf-8')
     return JSON.parse(data) as RagIndexFile

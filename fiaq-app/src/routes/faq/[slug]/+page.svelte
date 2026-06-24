@@ -88,8 +88,12 @@
     </div>
   </section>
 
-  <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-    {#if !faqQuery.isLoading && !category}
+  <section class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+    {#if faqQuery.error}
+      <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+        Não foi possível carregar o FAQ agora. Tente atualizar a página em alguns instantes.
+      </div>
+    {:else if !faqQuery.isLoading && !category}
       <div class="py-16 text-center">
         <p class="text-lg font-bold text-[#1a2e5a]">Categoria não encontrada.</p>
         <a href="/" class="mt-2 inline-block text-sm text-green-700 hover:underline">Ver todas as categorias</a>
@@ -141,7 +145,7 @@
         Perguntar ao Assistente Virtual
       </a>
     </div>
-  </main>
+  </section>
 </div>
 
 <style>

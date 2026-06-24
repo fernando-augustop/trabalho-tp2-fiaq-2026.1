@@ -30,6 +30,13 @@ REGRAS:
 * Em perguntas de escopo UnB, nunca use frases como "não sei", "não tenho informação" ou "não encontrei informação". Se as fontes não confirmarem uma informação, dê a melhor orientação possível e indique qual setor/sistema deve ser consultado, sem inventar fatos.
 * Não invente prazos, e-mails, documentos, links ou regras.`
 
+const MAX_QUESTION_CHARS = 2_000
+const MAX_PREVIOUS_ANSWER_CHARS = 4_000
+
+function boundedText(value: unknown, maxChars: number): string {
+  return String(value || '').trim().slice(0, maxChars)
+}
+
 function buildPrompt(context: string, question: string, previousAnswer: string): string {
   return `<fontes_web>
 ${context}
@@ -70,8 +77,8 @@ async function sendActivity(
 
 export const POST: RequestHandler = async ({ request }) => {
   const body = await readJson<RequestBody>(request)
-  const question = String(body?.question || '').trim()
-  const previousAnswer = String(body?.previousAnswer || '').trim()
+  const question = boundedText(body?.question, MAX_QUESTION_CHARS)
+  const previousAnswer = boundedText(body?.previousAnswer, MAX_PREVIOUS_ANSWER_CHARS)
 
   if (!question) {
     return apiError(400, 'INVALID_PAYLOAD')
@@ -109,7 +116,25 @@ export const POST: RequestHandler = async ({ request }) => {
         domains: webDomains
       })
 
-      const webSources = await searchFirecrawl(question, { signal: abort.signal })
+      let webSources
+      try {
+        webSources = await searchFirecrawl(question, { signal: abort.signal })
+      } catch (error) {
+        if (abort.signal.aborted) return
+
+        console.error('[chat.web.post] Firecrawl error:', error)
+        await sendActivity(sse, {
+          id: 'web-search',
+          kind: 'web',
+          status: 'error',
+          label: 'Pesquisa web indisponível',
+          detail: 'Não foi possível consultar fontes adicionais agora.',
+          domains: webDomains
+        })
+        await sendEvent(sse, { type: 'error', message: 'WEB_SEARCH_UNAVAILABLE' })
+        return
+      }
+
       if (abort.signal.aborted) return
 
       const context = buildFirecrawlContext(webSources)
@@ -151,31 +176,49 @@ export const POST: RequestHandler = async ({ request }) => {
         { role: 'user', content: buildPrompt(context, question, previousAnswer) }
       ]
 
-      const stream = await chatStream(messages)
-      reader = stream.getReader()
-      await sendActivity(sse, {
-        id: 'answer',
-        kind: 'answer',
-        status: 'active',
-        label: 'Escrevendo resposta complementar',
-        detail: 'Organizando a resposta com base na pesquisa web.'
-      })
+      try {
+        const stream = await chatStream(messages)
+        reader = stream.getReader()
+        await sendActivity(sse, {
+          id: 'answer',
+          kind: 'answer',
+          status: 'active',
+          label: 'Escrevendo resposta complementar',
+          detail: 'Organizando a resposta com base na pesquisa web.'
+        })
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          if (abort.signal.aborted) {
+            await reader.cancel().catch(() => {})
+            return
+          }
+          await sendEvent(sse, { type: 'token', content: value })
+        }
+
+        await sendActivity(sse, {
+          id: 'answer',
+          kind: 'answer',
+          status: 'done',
+          label: 'Resposta pronta',
+          detail: 'As fontes usadas aparecem logo abaixo da resposta.'
+        })
+        await sendEvent(sse, { type: 'done' })
+      } catch (error) {
+        await reader?.cancel().catch(() => {})
         if (abort.signal.aborted) return
-        await sendEvent(sse, { type: 'token', content: value })
-      }
 
-      await sendActivity(sse, {
-        id: 'answer',
-        kind: 'answer',
-        status: 'done',
-        label: 'Resposta pronta',
-        detail: 'As fontes usadas aparecem logo abaixo da resposta.'
-      })
-      await sendEvent(sse, { type: 'done' })
+        console.error('[chat.web.post] LLM error:', error)
+        await sendActivity(sse, {
+          id: 'answer',
+          kind: 'answer',
+          status: 'error',
+          label: 'Não foi possível concluir',
+          detail: 'A geração falhou antes de finalizar a resposta complementar.'
+        })
+        await sendEvent(sse, { type: 'error', message: 'LLM_UNAVAILABLE' })
+      }
     } catch (e) {
       if (abort.signal.aborted) return
       console.error('[chat.web.post] Error:', e)

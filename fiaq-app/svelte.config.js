@@ -6,7 +6,8 @@ const config = {
   preprocess: vitePreprocess(),
   kit: {
     adapter: adapter({
-      runtime: 'nodejs22.x'
+      runtime: 'nodejs22.x',
+      maxDuration: 60
     }),
     files: {
       assets: 'public'

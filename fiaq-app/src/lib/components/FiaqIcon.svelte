@@ -58,7 +58,8 @@
     Trash2,
     Upload,
     Users,
-    X
+    X,
+    Zap
   } from '@lucide/svelte'
   import type { Component } from 'svelte'
 
@@ -130,7 +131,8 @@
     'i-lucide-trash-2': Trash2,
     'i-lucide-upload': Upload,
     'i-lucide-users': Users,
-    'i-lucide-x': X
+    'i-lucide-x': X,
+    'i-lucide-zap': Zap
   }
 
   const Icon = $derived(iconMap[name] ?? CircleHelp)

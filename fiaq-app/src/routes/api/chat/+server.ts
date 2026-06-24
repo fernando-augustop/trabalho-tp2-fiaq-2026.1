@@ -2,18 +2,18 @@ import type { RequestHandler } from './$types'
 import { apiError, readJson } from '$lib/server/http'
 import { eventStream, type SseWriter } from '$lib/server/sse'
 import { embedQuery } from '../../../../server/utils/embeddings'
-import { chatStream, embedInfo } from '../../../../server/utils/llmProvider'
+import { chatStream, embedInfo, type ChatMessage as LlmChatMessage } from '../../../../server/utils/llmProvider'
 import { registrarPergunta } from '../../../../server/repositorios/pergunta'
 import { buscarRag, buscarRagPorTexto, buscarRagPorTextoNoBanco, type SearchResult } from '../../../../server/repositorios/rag'
 import { buildFirecrawlContext, getFirecrawlIncludeDomains, searchFirecrawl } from '../../../../server/utils/firecrawl'
 
 interface ChatMessage {
-  role: 'user' | 'assistant' | 'system'
+  role: 'user' | 'assistant'
   content: string
 }
 
 interface RequestBody {
-  messages: ChatMessage[]
+  messages?: unknown
 }
 
 interface ResponseSource {
@@ -37,6 +37,8 @@ const MAX_CONTEXT_CHARS_PER_RESULT = 700
 const MAX_CONTEXT_CHARS_TOTAL = 2200
 const LOCAL_CONTEXT_MIN_SCORE = 0.52
 const CONTEXTUAL_SEARCH_MAX_CHARS = 700
+const MAX_HISTORY_MESSAGES = 12
+const MAX_CLIENT_MESSAGE_CHARS = 2_000
 
 const SYSTEM_PROMPT = `Você é o assistente virtual do fIAq, portal acadêmico do CIC/UnB.
 
@@ -79,6 +81,27 @@ function compactText(text: string, maxChars: number): string {
 
   const sliced = normalized.slice(0, maxChars).replace(/\s+\S*$/, '').trim()
   return `${sliced}...`
+}
+
+function normalizeClientMessages(value: unknown): ChatMessage[] {
+  if (!Array.isArray(value)) return []
+
+  return value
+    .map((message): ChatMessage | null => {
+      if (!message || typeof message !== 'object') return null
+      const raw = message as Record<string, unknown>
+      const role = raw.role === 'user' || raw.role === 'assistant' ? raw.role : null
+      const content = String(raw.content || '').trim()
+
+      if (!role || !content) return null
+
+      return {
+        role,
+        content: content.slice(0, MAX_CLIENT_MESSAGE_CHARS)
+      }
+    })
+    .filter((message): message is ChatMessage => Boolean(message))
+    .slice(-MAX_HISTORY_MESSAGES)
 }
 
 function buildCompactContext(results: SearchResult[]): string {
@@ -378,12 +401,13 @@ function runAfterResponse(event: Parameters<RequestHandler>[0], promise: Promise
 
 export const POST: RequestHandler = async (event) => {
   const body = await readJson<RequestBody>(event.request)
+  const clientMessages = normalizeClientMessages(body?.messages)
 
-  if (!body?.messages || !Array.isArray(body.messages) || body.messages.length === 0) {
+  if (clientMessages.length === 0) {
     return apiError(400, 'INVALID_PAYLOAD')
   }
 
-  const lastUserMessage = [...body.messages]
+  const lastUserMessage = [...clientMessages]
     .reverse()
     .find(m => m.role === 'user')
 
@@ -392,10 +416,12 @@ export const POST: RequestHandler = async (event) => {
   }
 
   const question = lastUserMessage.content
-  const searchQuestion = buildSearchQuestion(body.messages, question)
+  const searchQuestion = buildSearchQuestion(clientMessages, question)
 
   return eventStream(async (sse) => {
-  try {
+    let reader: ReadableStreamDefaultReader<string> | null = null
+
+    try {
     await sendEvent(sse, { type: 'status', stage: 'searching' })
     await sendActivity(sse, {
       id: 'rag',
@@ -499,7 +525,7 @@ export const POST: RequestHandler = async (event) => {
       console.log('[chat.post] Pergunta UnB requer pesquisa web; consultando Firecrawl.')
 
       try {
-        const webSources = await searchFirecrawl(searchQuestion)
+        const webSources = await searchFirecrawl(searchQuestion, { signal: sse.signal })
 
         if (webSources.length) {
           context = buildFirecrawlContext(webSources)
@@ -547,11 +573,11 @@ export const POST: RequestHandler = async (event) => {
       }
     }
 
-    const history = body.messages
+    const history = clientMessages
       .slice(0, -1)
       .map(m => ({ role: m.role, content: m.content }))
 
-    const messages: ChatMessage[] = [
+    const messages: LlmChatMessage[] = [
       { role: 'system', content: SYSTEM_PROMPT },
       ...history,
       { role: 'user', content: buildPrompt(context, question) }
@@ -573,13 +599,16 @@ export const POST: RequestHandler = async (event) => {
     })
 
     const stream = await chatStream(messages)
-    const reader = stream.getReader()
+    reader = stream.getReader()
     let respostaCompleta = ''
 
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
-      if (sse.signal.aborted) return
+      if (sse.signal.aborted) {
+        await reader.cancel().catch(() => {})
+        return
+      }
       respostaCompleta += value
       await sendEvent(sse, { type: 'token', content: value })
     }
@@ -608,16 +637,18 @@ export const POST: RequestHandler = async (event) => {
       .catch((e) => {
         console.error('[chat.post] Falha ao registrar pergunta:', e)
       }))
-  } catch (e) {
-    console.error('[chat.post] Error:', e)
-    await sendActivity(sse, {
-      id: 'answer',
-      kind: 'answer',
-      status: 'error',
-      label: 'Não foi possível concluir',
-      detail: 'A geração falhou antes de finalizar a resposta.'
-    })
-    await sendEvent(sse, { type: 'error', message: 'LLM_UNAVAILABLE' })
-  }
+    } catch (e) {
+      await reader?.cancel().catch(() => {})
+      if (sse.signal.aborted) return
+      console.error('[chat.post] Error:', e)
+      await sendActivity(sse, {
+        id: 'answer',
+        kind: 'answer',
+        status: 'error',
+        label: 'Não foi possível concluir',
+        detail: 'A geração falhou antes de finalizar a resposta.'
+      })
+      await sendEvent(sse, { type: 'error', message: 'LLM_UNAVAILABLE' })
+    }
   })
 }

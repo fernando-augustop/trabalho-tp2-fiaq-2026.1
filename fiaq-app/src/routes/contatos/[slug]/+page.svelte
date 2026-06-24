@@ -35,7 +35,7 @@
     </div>
   </section>
 
-  <main class="mx-auto max-w-3xl px-5 py-8 sm:px-6">
+  <section class="mx-auto max-w-3xl px-5 py-8 sm:px-6">
     {#if !departamento}
       <div class="py-16 text-center">
         <p class="text-lg font-bold text-[#1a2e5a]">Departamento não encontrado.</p>
@@ -107,5 +107,5 @@
         {/each}
       </div>
     {/if}
-  </main>
+  </section>
 </div>

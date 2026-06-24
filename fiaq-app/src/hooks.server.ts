@@ -8,6 +8,7 @@ function ensureRagBootstrap() {
   bootstrapPromise ??= bootstrapRag().catch((error) => {
     bootstrapPromise = null
     console.error('[RAG] Bootstrap falhou:', error)
+    throw error
   })
 
   return bootstrapPromise
@@ -16,7 +17,7 @@ function ensureRagBootstrap() {
 export const handle: Handle = async ({ event, resolve }) => {
   loadServerEnv()
 
-  if (event.url.pathname.startsWith('/api/')) {
+  if (event.url.pathname === '/api/chat' || event.url.pathname === '/api/chat/web') {
     await ensureRagBootstrap()
   }
 
