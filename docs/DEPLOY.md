@@ -8,7 +8,7 @@
 | Projeto Vercel | `fernandos-projects-8b069a52/fiaq-app` |
 | Root Directory | `fiaq-app` |
 | Build Command | `pnpm build` |
-| Output Directory | vazio / automático pelo Nitro |
+| Output Directory | gerenciado pelo adapter SvelteKit |
 | Supabase Project Ref | `dwjzjuqtsgrvbiwjvemu` |
 | Role do app | `fiaq_app` |
 | Pooler | `aws-1-us-west-1.pooler.supabase.com:6543` |
@@ -22,11 +22,11 @@ O caminho gratuito recomendado para demonstração acadêmica é:
 
 | Camada | Serviço | Motivo |
 |---|---|---|
-| App Nuxt/Nitro | Vercel Hobby | Deploy simples via GitHub, HTTPS automático e suporte a Functions/SSE |
+| App SvelteKit + Vite | Vercel Hobby | Deploy simples via GitHub, HTTPS automático e suporte a Functions/SSE |
 | Postgres | Supabase Free | FAQ, RAG com pgvector e métricas anônimas |
 | IA | OpenRouter | Já é o provider usado pelo RAG; o modelo `:free` serve para demonstração |
 
-O fIAq é um app **Nuxt 4** (em `fiaq-app/`) com RAG via **OpenRouter**. O
+O fIAq é um app **SvelteKit + Vite** (em `fiaq-app/`) com APIs server do **SvelteKit** e RAG via **OpenRouter**. O
 conhecimento principal fica no **Supabase Postgres com pgvector**: FAQ, PDFs e
 páginas crawleadas são armazenados em `rag_documento`/`rag_chunk`. O arquivo
 `rag-index.json` continua versionado apenas como fallback de compatibilidade.
@@ -98,10 +98,10 @@ Ao importar o repositório na Vercel:
 | Campo | Valor |
 |---|---|
 | **Root Directory** | `fiaq-app` |
-| **Framework Preset** | Nuxt (detectado automaticamente) |
+| **Framework Preset** | SvelteKit |
 | **Install Command** | `pnpm install` |
 | **Build Command** | `pnpm build` |
-| **Output Directory** | vazio / automático pelo Nitro |
+| **Output Directory** | gerenciado pelo adapter SvelteKit |
 
 > ⚠️ O **Root Directory `fiaq-app`** é obrigatório — o app não está na raiz do repo.
 
@@ -120,8 +120,10 @@ DATABASE_URL            = postgresql://...supabase...:6543/postgres?sslmode=requ
 FIRECRAWL_API_URL       = URL do serviço Firecrawl usado no complemento e no fallback web
 FIRECRAWL_API_KEY       = opcional, se o serviço Firecrawl exigir Bearer token
 FIRECRAWL_INCLUDE_DOMAINS = cic.unb.br,www.cic.unb.br,unb.br,www.unb.br,saa.unb.br,sigaa.unb.br
-NUXT_PUBLIC_SUPABASE_URL = https://PROJECT_REF.supabase.co
-NUXT_PUBLIC_SUPABASE_ANON_KEY = anon key do projeto Supabase
+VITE_SUPABASE_URL = https://PROJECT_REF.supabase.co
+VITE_SUPABASE_ANON_KEY = anon key pública do projeto Supabase
+SUPABASE_URL = opcional no servidor; se ausente, usa VITE_SUPABASE_URL
+SUPABASE_ANON_KEY = opcional no servidor; se ausente, usa VITE_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY = service_role key do projeto Supabase (somente server-side)
 ADMIN_BOOTSTRAP_EMAILS = primeiro(s) admin(s), separados por vírgula, para acessar /admin antes dos convites
 ADMIN_BASE_URL = opcional; URL canônica para redirect dos convites, se quiser fixar domínio
@@ -214,8 +216,8 @@ Para atualizar o crawl institucional antes: `pnpm fetch:links` (re-busca as pág
 - O modelo gratuito `:free` do OpenRouter **loga todos os prompts/respostas** e é
   marcado como "não usar em produção". Adequado para **teste/demonstração**, não
   para dados sensíveis.
-- A rota de chat faz streaming (SSE). `maxDuration` está em 60s
-  (`nuxt.config.ts` → `nitro.vercel.functions`); planos Hobby limitam a janela.
+- A rota de chat faz streaming (SSE). `maxDuration` está em 60s em
+  `fiaq-app/vercel.json`; planos Hobby limitam a janela.
 - O Supabase Free é suficiente para este uso inicial, mas o banco pode pausar ou
 atingir limites de armazenamento/egress se o projeto crescer.
 - Se o projeto deixar de ser acadêmico/pessoal, revise os termos dos planos

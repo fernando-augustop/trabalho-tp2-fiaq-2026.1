@@ -9,7 +9,7 @@ chat.
 
 - Aplicacao em producao: <https://fiaq-app.vercel.app>
 - Branch de producao: `main`
-- App Nuxt fica em `fiaq-app/`, nao na raiz.
+- App SvelteKit/Vite fica em `fiaq-app/`, nao na raiz.
 - Vercel esta configurado com `Root Directory = fiaq-app`.
 - Previews da Vercel estao bloqueados em `fiaq-app/vercel.json`; apenas `main`
   gera deployment.
@@ -19,8 +19,10 @@ chat.
 
 ## Stack
 
-- Framework: Nuxt 4, Vue 3, Nitro.
-- UI: Nuxt UI 4, Tailwind CSS 4, Iconify/Lucide.
+- Framework: SvelteKit, Vite e Svelte 5.
+- UI: shadcn-svelte, Tailwind CSS 4, Lucide.
+- Estado/tabelas de UI: TanStack Query e TanStack Table Core.
+- APIs: rotas server do SvelteKit em `src/routes/api/**/+server.ts`.
 - IA: OpenRouter em producao; Ollama pode ser usado localmente.
 - Embeddings: OpenRouter em producao, mesmo modelo usado no seed do RAG.
 - Banco: PostgreSQL/Supabase com `pgvector`.
@@ -49,12 +51,14 @@ chat.
 │   ├── 06_avaliacao_resposta.sql
 │   └── 07_admin_rag_review.sql
 └── fiaq-app/
-    ├── app/                     # UI Vue/Nuxt
-    ├── server/                  # APIs Nitro, repositorios e utils
+    ├── src/                     # rotas SvelteKit, UI, stores e APIs
+    │   ├── routes/              # páginas e /api/* via +server.ts
+    │   └── lib/                 # componentes shadcn-svelte, chat e utils
+    ├── server/                  # repositorios RAG/FAQ, DB, providers e assets
     ├── data/                    # FAQ, PDFs, crawls e fontes
     ├── scripts/                 # seeds, crawlers, build de FAQ/RAG
     ├── public/                  # favicon e imagens do Sarue
-    ├── nuxt.config.ts
+    ├── vite.config.ts
     ├── vercel.json
     └── .env.example
 ```
@@ -142,8 +146,10 @@ Principais variaveis:
 - `FIRECRAWL_API_URL`: endpoint/proxy Firecrawl para busca web.
 - `FIRECRAWL_API_KEY`: secret opcional.
 - `FIRECRAWL_INCLUDE_DOMAINS`: dominios oficiais permitidos.
-- `NUXT_PUBLIC_SUPABASE_URL`: URL publica do Supabase.
-- `NUXT_PUBLIC_SUPABASE_ANON_KEY`: anon key publica.
+- `VITE_SUPABASE_URL`: URL publica do Supabase para o cliente.
+- `VITE_SUPABASE_ANON_KEY`: anon key publica do Supabase para o cliente.
+- `SUPABASE_URL`: URL do Supabase para validacao server-side, opcional se `VITE_SUPABASE_URL` estiver definida.
+- `SUPABASE_ANON_KEY`: anon key server-side, opcional se `VITE_SUPABASE_ANON_KEY` estiver definida.
 - `SUPABASE_SERVICE_ROLE_KEY`: server-only; usada para convites/admin.
 - `ADMIN_BOOTSTRAP_EMAILS`: e-mails iniciais de administradores.
 - `ADMIN_BASE_URL`: URL canonica para redirects de convite.
@@ -276,24 +282,24 @@ Principais pontos ja aplicados:
 
 ## Arquivos de UI que costumam ser tocados
 
-- `fiaq-app/app/pages/index.vue`: home e pergunta inicial.
-- `fiaq-app/app/pages/chatbot.vue`: tela do assistente.
-- `fiaq-app/app/pages/admin.vue`: login/admin/curadoria.
-- `fiaq-app/app/components/AppNav.vue`: navegacao.
-- `fiaq-app/app/components/chat/ChatComposer.vue`: input de chat.
-- `fiaq-app/app/components/chat/ChatWindow.vue`: scroll/stream/jump bottom.
-- `fiaq-app/app/components/chat/MessageBubble.vue`: resposta, fontes, botoes.
-- `fiaq-app/app/components/chat/ConversationActions.vue`: importar/limpar.
-- `fiaq-app/app/utils/assistantText.ts`: limpeza de links/citacoes.
-- `fiaq-app/app/utils/conversationExport.ts`: PDF, Excel, Markdown, JSON, TXT.
-- `fiaq-app/app/utils/supabaseAuth.ts`: cliente Supabase Auth.
+- `fiaq-app/src/routes/+page.svelte`: home e pergunta inicial.
+- `fiaq-app/src/routes/chatbot/+page.svelte`: tela do assistente.
+- `fiaq-app/src/routes/admin/+page.svelte`: login/admin/curadoria.
+- `fiaq-app/src/lib/components/AppNav.svelte`: navegacao.
+- `fiaq-app/src/lib/components/chat/ChatComposer.svelte`: input de chat.
+- `fiaq-app/src/lib/components/chat/ChatWindow.svelte`: scroll/stream/jump bottom.
+- `fiaq-app/src/lib/components/chat/MessageBubble.svelte`: resposta, fontes, botoes.
+- `fiaq-app/src/lib/components/chat/ConversationActions.svelte`: importar/limpar.
+- `fiaq-app/src/lib/utils/assistantText.ts`: limpeza de links/citacoes.
+- `fiaq-app/src/lib/utils/conversationExport.ts`: PDF, Excel, Markdown, JSON, TXT.
+- `fiaq-app/src/lib/utils/supabaseAuth.ts`: cliente Supabase Auth.
 
 ## Arquivos de backend que costumam ser tocados
 
-- `fiaq-app/server/api/chat.post.ts`: chat RAG + fallback automatico web.
-- `fiaq-app/server/api/chat/web.post.ts`: complemento por feedback negativo.
-- `fiaq-app/server/api/chat/feedback.post.ts`: feedback e candidatas.
-- `fiaq-app/server/api/admin/*.ts`: admin e convites.
+- `fiaq-app/src/routes/api/chat/+server.ts`: chat RAG + fallback automatico web.
+- `fiaq-app/src/routes/api/chat/web/+server.ts`: complemento por feedback negativo.
+- `fiaq-app/src/routes/api/chat/feedback/+server.ts`: feedback e candidatas.
+- `fiaq-app/src/routes/api/admin/**/*.ts`: admin e convites.
 - `fiaq-app/server/repositorios/rag.ts`: busca e repositorio RAG.
 - `fiaq-app/server/repositorios/candidatos.ts`: fila de curadoria.
 - `fiaq-app/server/repositorios/pergunta.ts`: metricas anonimas.
@@ -334,7 +340,7 @@ Configuracao atual:
 
 ```json
 {
-  "framework": "nuxtjs",
+  "framework": "sveltekit",
   "installCommand": "pnpm install",
   "buildCommand": "pnpm build",
   "git": {
@@ -436,4 +442,3 @@ Resumo das entregas recentes que explicam o estado atual:
 6. Se afetar banco/RAG/admin/chat, validar endpoint ou fluxo navegavel.
 7. Remover/mover artefatos temporarios e deixar o repo limpo.
 8. Responder com o que mudou, comandos rodados, deploy/status e pendencias.
-

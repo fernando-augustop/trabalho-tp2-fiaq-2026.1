@@ -4,7 +4,7 @@
 
 ## Visão geral
 
-O fIAq é um portal acadêmico do CIC/UnB com FAQ navegável e assistente virtual com IA. A aplicação foi organizada como um app **Nuxt 4 + Vue 3 + Nitro**, localizado em `fiaq-app/`, com APIs server-side para chat, FAQ, saúde do banco e perguntas em alta. A entrega roda no caminho gratuito **Vercel Hobby + Supabase Free + OpenRouter**, mantendo o frontend, o backend Nitro e o streaming de resposta no mesmo deploy web.
+O fIAq é um portal acadêmico do CIC/UnB com FAQ navegável e assistente virtual com IA. A aplicação foi organizada como um app **SvelteKit + Vite**, localizado em `fiaq-app/`, com rotas server para chat, FAQ, saúde do banco e perguntas em alta. A entrega roda no caminho gratuito **Vercel Hobby + Supabase Free + OpenRouter**, mantendo frontend, APIs e streaming de resposta no mesmo deploy web.
 
 ## Deploy web
 
@@ -14,11 +14,11 @@ O fIAq é um portal acadêmico do CIC/UnB com FAQ navegável e assistente virtua
 | Projeto Vercel | `fernandos-projects-8b069a52/fiaq-app` |
 | Repositório | `fernando-augustop/trabalho-tp2-fiaq-2026.1` |
 | Root Directory | `fiaq-app` |
-| Framework | Nuxt/Nitro |
+| Framework | SvelteKit/Vite |
 | Install | `pnpm install` |
 | Build | `pnpm build` |
-| Output | Vercel Build Output nativo do Nitro |
-| Funções | Nitro/Vercel Function com janela de 60s para streaming SSE |
+| Output | gerenciado pelo adapter SvelteKit |
+| Funções | rotas server SvelteKit em Vercel Function com janela de 60s para streaming SSE |
 
 As variáveis de ambiente foram configuradas na Vercel para produção, preview e desenvolvimento. A chave do OpenRouter e a URL do banco ficam como segredos/encrypted envs, sem versionamento no repositório.
 

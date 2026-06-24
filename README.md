@@ -23,13 +23,14 @@ Trabalho da disciplina de **Técnicas de Programação 2** — UnB, 2026.1.
 
 | Camada | Tecnologia |
 |---|---|
-| Framework | [Nuxt 4](https://nuxt.com) (Vue 3 + Nitro) |
-| UI | [Nuxt UI 4](https://ui.nuxt.com) + [Tailwind CSS 4](https://tailwindcss.com) |
+| Framework | [SvelteKit](https://svelte.dev/docs/kit) + [Vite](https://vite.dev) |
+| UI | [shadcn-svelte](https://www.shadcn-svelte.com) + [Tailwind CSS 4](https://tailwindcss.com) + Lucide |
 | IA (chat + embeddings) | [OpenRouter](https://openrouter.ai) (ou [Ollama](https://ollama.ai) local) |
 | Banco / RAG | PostgreSQL + pgvector (Supabase no deploy) |
 | Linguagem | TypeScript |
 | Gerenciador | pnpm |
-| Deploy | Vercel (preset Nitro `vercel`) |
+| APIs | Rotas server do SvelteKit em `/api/*` |
+| Deploy | Vercel com adapter SvelteKit |
 
 > O provider de IA é configurável via `.env` (`CHAT_PROVIDER` / `EMBED_PROVIDER`):
 > `openrouter` (nuvem) ou `ollama` (local). Veja `fiaq-app/.env.example`.
@@ -40,16 +41,15 @@ O aplicativo fica em **`fiaq-app/`** (não na raiz):
 
 ```
 trabalhofinal-fiaq/
-├── fiaq-app/                 # o app Nuxt
-│   ├── app/                  # frontend (pages, components, composables)
-│   ├── server/               # API (/api/chat, /api/faq), RAG e utils
-│   │   ├── api/
-│   │   ├── repositorios/     # acesso a FAQ, RAG pgvector e métricas
-│   │   ├── plugins/          # carrega fallback JSON de compatibilidade
-│   │   ├── utils/            # embeddings, loaders e providers
-│   │   └── assets/rag-index.json   # fallback legado do RAG
+├── fiaq-app/                 # app SvelteKit/Vite
+│   ├── src/                  # rotas, layouts, componentes e stores Svelte
+│   │   ├── routes/           # páginas e APIs SvelteKit, incluindo /api/*
+│   │   └── lib/              # shadcn-svelte, chat, auth, TanStack e utilitários
+│   ├── server/               # repositórios RAG/FAQ, DB, providers e fallback JSON
 │   ├── data/                 # fontes: faq/, pdfs/, crawl/, sources/
 │   ├── scripts/              # build-faq, fetch-links, test-openrouter
+│   ├── svelte.config.js
+│   ├── vite.config.ts
 │   └── .env.example
 ├── docs/                     # decisões, desenvolvimento, deploy e relatório executivo
 │   ├── DESENVOLVIMENTO.md
@@ -67,13 +67,12 @@ pnpm install
 pnpm dev
 ```
 
-O comando acima roda o frontend Nuxt e as APIs Nitro usando as variáveis de
+O comando acima roda o app SvelteKit/Vite e as APIs server usando as variáveis de
 `fiaq-app/.env`. Com `DATABASE_URL` do Supabase e providers OpenRouter
 preenchidos, ele reproduz localmente a suite principal do deploy Vercel:
 FAQ/RAG no Supabase, chat por OpenRouter e registro anônimo de perguntas.
 
-O Nuxt tenta abrir `http://localhost:3000/`; se a porta estiver ocupada, use a
-URL alternativa impressa no terminal.
+O servidor local imprime a URL, normalmente `http://127.0.0.1:3000/`.
 
 Guia completo: [`docs/DESENVOLVIMENTO.md`](./docs/DESENVOLVIMENTO.md).
 Para validar a chave do OpenRouter isoladamente: `pnpm test:openrouter`.
