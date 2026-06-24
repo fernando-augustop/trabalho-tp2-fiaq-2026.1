@@ -405,8 +405,20 @@ export async function sendMessage(text: string) {
   const trimmed = text.trim()
   if (!trimmed || get(loading)) return
 
-  messages.update(current => [...current, { id: ++msgId, role: 'user', content: trimmed }])
+  const currentMessages = get(messages)
+  const lastMessage = currentMessages[currentMessages.length - 1]
+  const previousMessage = currentMessages[currentMessages.length - 2]
+  if (
+    lastMessage?.role === 'assistant'
+    && lastMessage.streaming
+    && previousMessage?.role === 'user'
+    && previousMessage.content.trim() === trimmed
+  ) {
+    return
+  }
+
   loading.set(true)
+  messages.update(current => [...current, { id: ++msgId, role: 'user', content: trimmed }])
 
   const assistantId = ++msgId
   messages.update(current => [...current, { id: assistantId, role: 'assistant', content: '', streaming: true }])

@@ -61,7 +61,7 @@
     </p>
 
     <form class="fiaq-search-form flex justify-center" onsubmit={(event) => { event.preventDefault(); ask() }}>
-      <div class="fiaq-search-box flex w-full max-w-2xl overflow-hidden rounded-xl border border-[#00a155] bg-white shadow-[0_18px_42px_rgba(4,12,30,0.22)] ring-1 ring-[#00dc82]/35">
+      <div class="fiaq-search-box flex min-h-14 w-full max-w-2xl items-stretch overflow-hidden rounded-xl border border-[#00a155] bg-white shadow-[0_18px_42px_rgba(4,12,30,0.22)] ring-1 ring-[#00dc82]/35">
         <Input
           bind:value={query}
           type="text"
@@ -69,12 +69,12 @@
           autocomplete="off"
           placeholder="Digite sua pergunta..."
           aria-label="Campo de pergunta para o assistente"
-          class="fiaq-search-input h-auto min-w-0 flex-1 border-0 bg-white px-5 py-4 text-base text-[#1a2e5a] shadow-none outline-none placeholder:text-slate-500 focus-visible:ring-0"
+          class="fiaq-search-input h-auto min-h-14 min-w-0 flex-1 rounded-none border-0 bg-white px-5 py-4 text-base text-[#1a2e5a] shadow-none outline-none placeholder:text-slate-500 focus-visible:ring-0"
         />
         <Button
           type="submit"
           aria-label="Perguntar ao assistente"
-          class="fiaq-search-button flex shrink-0 items-center gap-2 rounded-none border-l border-emerald-800/25 bg-[#00a155] px-4 py-4 text-base font-bold text-[#0a2e1a] transition-colors hover:bg-[#17b86a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a2e5a] sm:px-6"
+          class="fiaq-search-button flex h-auto min-h-14 shrink-0 self-stretch rounded-none border-l border-emerald-800/25 bg-[#00a155] px-4 py-0 text-base font-bold text-[#0a2e1a] transition-colors hover:bg-[#17b86a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a2e5a] sm:px-6"
         >
           <FiaqIcon name="i-lucide-send" class="h-5 w-5 sm:h-4 sm:w-4" />
           <span class="hidden sm:inline">Perguntar</span>

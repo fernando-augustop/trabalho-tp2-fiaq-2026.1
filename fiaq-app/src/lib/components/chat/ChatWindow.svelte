@@ -3,7 +3,6 @@
   import FiaqIcon from '$lib/components/FiaqIcon.svelte'
   import Button from '$lib/components/ui/button.svelte'
   import MessageBubble from '$lib/components/chat/MessageBubble.svelte'
-  import TypingIndicator from '$lib/components/chat/TypingIndicator.svelte'
   import type { Message } from '$lib/stores/fiaq-chat'
 
   interface Props {
@@ -23,12 +22,6 @@
   let scrollFrame: number | null = null
   let programmaticScrollUntil = 0
 
-  const typingMessage = $derived.by(() => {
-    const last = messages[messages.length - 1]
-    return last && last.role === 'assistant' && last.streaming && !last.content?.trim()
-      ? last
-      : null
-  })
   const showJumpToBottom = $derived(messages.length > 0 && !isNearBottom)
 
   const suggestions = [
@@ -139,25 +132,24 @@
             : 'justify-center py-10 sm:py-12'
         ]}
       >
-        {#if !composerFocused}
-          <div class="flex items-center justify-center">
-            <img src="/sarueBot.png" alt="Saruê, assistente virtual do fIAq" width="80" height="80" class="h-16 w-16 object-contain sm:h-20 sm:w-20" />
-          </div>
-          <div>
-            <p class="text-lg font-bold text-[#1a2e5a]">Olá! Como posso ajudar?</p>
-            <p class="mt-1 text-sm text-gray-500">Pergunte sobre matrícula, TCC, estágio, extensão e muito mais.</p>
-          </div>
-          <div class="mt-2 flex max-w-2xl flex-wrap justify-center gap-2">
-            {#each suggestions as suggestion (suggestion)}
-              <Button
-                class="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1a2e5a] shadow-sm transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-[#1a2e5a] hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 sm:px-4 sm:text-sm"
-                onclick={() => onSuggest?.(suggestion)}
-              >
-                {suggestion}
-              </Button>
-            {/each}
-          </div>
-        {/if}
+        <div class={['items-center justify-center', composerFocused ? 'hidden sm:flex' : 'flex']}>
+          <img src="/sarueBot.png" alt="Saruê, assistente virtual do fIAq" width="80" height="80" class="h-16 w-16 object-contain sm:h-20 sm:w-20" />
+        </div>
+        <div class={composerFocused ? 'hidden sm:block' : ''}>
+          <p class="text-lg font-bold text-[#1a2e5a]">Olá! Como posso ajudar?</p>
+          <p class="mt-1 text-sm text-gray-500">Pergunte sobre matrícula, TCC, estágio, extensão e muito mais.</p>
+        </div>
+        <div class="mt-2 flex max-w-2xl flex-wrap justify-center gap-2">
+          {#each suggestions as suggestion (suggestion)}
+            <Button
+              disabled={loading}
+              class="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1a2e5a] shadow-sm transition-[background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-[#1a2e5a] hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:text-sm"
+              onclick={() => onSuggest?.(suggestion)}
+            >
+              {suggestion}
+            </Button>
+          {/each}
+        </div>
       </div>
     {/if}
 
@@ -170,9 +162,6 @@
       />
     {/each}
 
-    {#if typingMessage}
-      <TypingIndicator message={typingMessage} />
-    {/if}
     <div bind:this={bottomSentinel} class="h-1" aria-hidden="true"></div>
   </div>
 
