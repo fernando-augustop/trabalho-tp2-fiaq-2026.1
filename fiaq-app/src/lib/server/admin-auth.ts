@@ -13,6 +13,15 @@ interface SupabaseAuthUser {
 
 const AUTH_REQUEST_TIMEOUT_MS = 10_000
 
+export class ApiHttpError extends Error {
+  status: number
+
+  constructor(status: number, message: string) {
+    super(message)
+    this.status = status
+  }
+}
+
 function supabaseUrl(): string {
   return String(
     process.env.SUPABASE_URL
@@ -56,7 +65,8 @@ export function getSupabaseAuthConfig() {
 
 async function getAuthenticatedUser(token: string): Promise<AdminUser | null> {
   const { url, anonKey } = getSupabaseAuthConfig()
-  if (!url || !anonKey || !token) return null
+  if (!token) return null
+  if (!url || !anonKey) throw new ApiHttpError(503, 'SUPABASE_AUTH_NOT_CONFIGURED')
 
   let response: Response
   try {
@@ -69,26 +79,18 @@ async function getAuthenticatedUser(token: string): Promise<AdminUser | null> {
     })
   } catch (error) {
     console.warn('[admin] Falha ao validar usuário no Supabase Auth:', error instanceof Error ? error.message : 'Request failed')
-    return null
+    throw new ApiHttpError(503, 'SUPABASE_AUTH_UNAVAILABLE')
   }
 
-  if (!response.ok) return null
+  if (response.status === 401 || response.status === 403) return null
+  if (!response.ok) throw new ApiHttpError(503, 'SUPABASE_AUTH_UNAVAILABLE')
 
-  const user = await response.json() as SupabaseAuthUser
-  const email = String(user.email || '').trim().toLowerCase()
-  const id = String(user.id || '').trim()
-  if (!email || !id) return null
+  const user = await response.json().catch(() => null) as SupabaseAuthUser | null
+  const email = String(user?.email || '').trim().toLowerCase()
+  const id = String(user?.id || '').trim()
+  if (!email || !id) throw new ApiHttpError(503, 'SUPABASE_AUTH_UNAVAILABLE')
 
   return { id, email }
-}
-
-export class ApiHttpError extends Error {
-  status: number
-
-  constructor(status: number, message: string) {
-    super(message)
-    this.status = status
-  }
 }
 
 export async function requireAdmin(event: RequestEvent): Promise<AdminUser> {

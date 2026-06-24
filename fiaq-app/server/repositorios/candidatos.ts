@@ -183,7 +183,6 @@ export async function aprovarCandidata(id: number, adminEmail: string, observaca
     throw repositoryError(404, 'CANDIDATE_NOT_FOUND')
   }
 
-  if (candidata.status === 'aprovada') return candidata
   if (candidata.status !== 'pendente') {
     throw repositoryError(409, 'CANDIDATE_ALREADY_REVIEWED')
   }

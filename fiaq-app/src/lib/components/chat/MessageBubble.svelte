@@ -32,9 +32,11 @@
 
   const cleanContent = $derived(cleanAssistantText(message.content ?? ''))
   const hasRenderableContent = $derived(cleanContent.length > 0)
-  const showBody = $derived(hasRenderableContent)
+  const hasAssistantArtifacts = $derived(Boolean(message.sources?.length || message.activity?.length))
+  const showBody = $derived(message.role === 'assistant' && (hasRenderableContent || hasAssistantArtifacts || message.streaming))
+  const showActions = $derived(!message.streaming && (hasRenderableContent || hasAssistantArtifacts))
   const renderedContent = $derived(renderMarkdown(cleanContent))
-  const hasWebSources = $derived(message.sources?.some(source => source.kind === 'web') ?? false)
+  const hasWebSources = $derived(message.sources?.some(source => source.kind === 'web' || source.kind === 'official') ?? false)
 
   const feedbackLabel = $derived.by(() => {
     if (message.feedback === 'helpful') return 'Ajudou'
@@ -220,7 +222,9 @@
         {#if message.streaming && message.activity?.length}
           <ResearchActivity activities={message.activity} compact />
         {/if}
-        <div class="fiaq-prose">{@html renderedContent}</div>
+        {#if hasRenderableContent}
+          <div class="fiaq-prose">{@html renderedContent}</div>
+        {/if}
         {#if message.streaming}
           <span class="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-[#1a2e5a] align-middle"></span>
         {/if}
@@ -238,7 +242,7 @@
         </div>
       {/if}
 
-      {#if !message.streaming && hasRenderableContent}
+      {#if showActions}
         <div bind:this={actionsEl} class="flex flex-wrap items-center gap-2 px-1 pt-1.5">
           <Button
             type="button"
@@ -264,6 +268,7 @@
               class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#1a2e5a] hover:text-[#1a2e5a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3"
               onclick={(event) => {
                 event.stopPropagation()
+                showFeedbackMenu = false
                 showExportMenu = !showExportMenu
               }}
             >
@@ -299,6 +304,7 @@
               class={`inline-flex h-9 items-center gap-1.5 rounded-xl border bg-white px-2.5 text-xs font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3 ${feedbackButtonClass}`}
               onclick={(event) => {
                 event.stopPropagation()
+                showExportMenu = false
                 showFeedbackMenu = !showFeedbackMenu
               }}
             >

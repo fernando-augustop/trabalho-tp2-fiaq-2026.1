@@ -317,8 +317,8 @@ async function streamAssistant(endpoint: string, payload: object, assistantId: n
       if (event.type === 'sources') {
         const sources = normalizeSources(event.items)
         const currentReason = get(messages).find(message => message.id === assistantId)?.webSearchReason
-        const webSources = sources.filter(source => source.kind === 'web')
-        const ragSources = sources.filter(source => source.kind !== 'web')
+        const webSources = sources.filter(source => source.kind === 'web' || source.kind === 'official')
+        const ragSources = sources.filter(source => source.kind === 'rag')
 
         if (ragSources.length) {
           upsertActivity(assistantId, {
@@ -529,10 +529,12 @@ export async function rateMessage(messageId: number, rating: 'helpful' | 'unhelp
   const question = findUserQuestionBefore(messageId)
   if (!question) return
 
-  updateAssistantMessage(messageId, { feedback: rating })
-  await persistFeedback(question, answer, rating, Boolean(answer.webEnhanced) || rating === 'unhelpful')
+  const shouldRequestWebAnswer = rating === 'unhelpful' && !answer.webEnhanced
 
-  if (rating === 'unhelpful') {
+  updateAssistantMessage(messageId, { feedback: rating })
+  await persistFeedback(question, answer, rating, Boolean(answer.webEnhanced) || shouldRequestWebAnswer)
+
+  if (shouldRequestWebAnswer) {
     await requestWebAnswer(question, answer)
   }
 }
@@ -542,6 +544,9 @@ export function replaceMessages(nextMessages: MessageDraft[]) {
 }
 
 export function clearMessages() {
+  activeAbortController?.abort()
+  activeAbortController = null
+  loading.set(false)
   messages.set([])
   if (typeof window !== 'undefined') sessionStorage.removeItem(STORAGE_KEY)
 }

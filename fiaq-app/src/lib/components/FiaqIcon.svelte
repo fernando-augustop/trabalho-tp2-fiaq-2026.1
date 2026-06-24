@@ -61,6 +61,7 @@
     X,
     Zap
   } from '@lucide/svelte'
+  import Github from '$lib/components/icons/GithubIcon.svelte'
   import type { Component } from 'svelte'
 
   interface Props {
@@ -97,7 +98,7 @@
     'i-lucide-globe': Globe,
     'i-lucide-globe-2': Globe2,
     'i-lucide-graduation-cap': GraduationCap,
-    'i-lucide-github': ExternalLink,
+    'i-lucide-github': Github,
     'i-lucide-help-circle': CircleHelp,
     'i-lucide-info': Info,
     'i-lucide-key-round': KeyRound,

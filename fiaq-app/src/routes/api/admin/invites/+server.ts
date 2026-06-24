@@ -13,17 +13,13 @@ function normalizeEmail(value: unknown): string {
   return String(value || '').trim().toLowerCase()
 }
 
-function canonicalBaseUrl(requestOrigin: string): string {
+function canonicalBaseUrl(): string {
   const configured = process.env.ADMIN_BASE_URL
     || process.env.APP_URL
     || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
 
   if (!configured) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('ADMIN_BASE_URL_REQUIRED')
-    }
-
-    return new URL(requestOrigin).origin.replace(/\/+$/, '')
+    throw new Error('ADMIN_BASE_URL_REQUIRED')
   }
 
   try {
@@ -48,20 +44,10 @@ export const POST: RequestHandler = async (event) => {
       return apiError(503, 'INVITES_NOT_CONFIGURED')
     }
 
-    const sql = getSql()
-    await sql`
-      INSERT INTO admin_usuario (email, ativo, criado_por, dthr_atualizacao)
-      VALUES (${email}, TRUE, ${admin.email}, CURRENT_TIMESTAMP)
-      ON CONFLICT ((lower(email))) DO UPDATE SET
-        ativo = TRUE,
-        criado_por = EXCLUDED.criado_por,
-        dthr_atualizacao = CURRENT_TIMESTAMP
-    `
-
     let response: Response
 
     try {
-      const redirectTo = `${canonicalBaseUrl(event.request.url)}/admin`
+      const redirectTo = `${canonicalBaseUrl()}/admin`
       response = await fetch(`${url}/auth/v1/invite?redirect_to=${encodeURIComponent(redirectTo)}`, {
         method: 'POST',
         signal: AbortSignal.timeout(INVITE_REQUEST_TIMEOUT_MS),
@@ -89,6 +75,16 @@ export const POST: RequestHandler = async (event) => {
 
       return apiError(response.status, message)
     }
+
+    const sql = getSql()
+    await sql`
+      INSERT INTO admin_usuario (email, ativo, criado_por, dthr_atualizacao)
+      VALUES (${email}, TRUE, ${admin.email}, CURRENT_TIMESTAMP)
+      ON CONFLICT ((lower(email))) DO UPDATE SET
+        ativo = TRUE,
+        criado_por = EXCLUDED.criado_por,
+        dthr_atualizacao = CURRENT_TIMESTAMP
+    `
 
     return json({ ok: true, email })
   } catch (error) {

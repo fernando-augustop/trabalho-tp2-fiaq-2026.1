@@ -22,7 +22,7 @@
 </script>
 
 <QueryClientProvider client={queryClient}>
-  <div class="fiaq-shell min-h-screen bg-background font-sans text-foreground">
+  <div class="fiaq-shell flex min-h-screen flex-col bg-background font-sans text-foreground">
     <AppNav />
     <main class="fiaq-main flex min-h-0 flex-1 flex-col">
       {@render children?.()}

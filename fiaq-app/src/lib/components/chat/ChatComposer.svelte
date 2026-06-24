@@ -45,6 +45,7 @@
   }
 
   function handleKeydown(event: KeyboardEvent) {
+    if (event.isComposing) return
     if (event.key !== 'Enter' || event.shiftKey || event.altKey || event.metaKey || event.ctrlKey) return
     event.preventDefault()
     void handleSend()

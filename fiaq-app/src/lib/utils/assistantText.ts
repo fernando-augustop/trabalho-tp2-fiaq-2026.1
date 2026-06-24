@@ -51,9 +51,27 @@ export function stripReferenceOnlySections(text: string): string {
     const heading = normalizeHeading(lines[index] || '')
     if (!REFERENCE_SECTION_HEADINGS.has(heading)) continue
 
-    const tail = lines.slice(index + 1).filter(line => line.trim())
-    if (tail.length > 0 && tail.every(isReferenceOnlyLine)) {
-      return lines.slice(0, index).join('\n').trimEnd()
+    let cursor = index + 1
+    let hasReferenceLine = false
+
+    while (cursor < lines.length) {
+      const line = lines[cursor] || ''
+      if (isReferenceOnlyLine(line)) {
+        hasReferenceLine = true
+        cursor++
+        continue
+      }
+
+      if (!line.trim()) {
+        cursor++
+        continue
+      }
+
+      break
+    }
+
+    if (hasReferenceLine) {
+      return [...lines.slice(0, index), ...lines.slice(cursor)].join('\n').trimEnd()
     }
   }
 

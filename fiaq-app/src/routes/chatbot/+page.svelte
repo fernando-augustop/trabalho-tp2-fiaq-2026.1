@@ -28,8 +28,13 @@
   onMount(() => {
     initChatStore()
 
-    const q = page.url.searchParams.get('q')
-    if (q?.trim()) void sendMessage(q.trim())
+    const q = page.url.searchParams.get('q')?.trim()
+    if (q) {
+      void sendMessage(q)
+      const nextUrl = new URL(page.url)
+      nextUrl.searchParams.delete('q')
+      window.history.replaceState(window.history.state, '', `${nextUrl.pathname}${nextUrl.search}`)
+    }
 
     if (typeof window === 'undefined' || !composerShellEl) return
     syncComposerHeight()

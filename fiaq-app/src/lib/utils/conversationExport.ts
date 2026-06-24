@@ -120,11 +120,25 @@ function hasSourceIdentity(source: unknown): source is SourceInput {
   return Boolean(String(candidate.titulo || '').trim() || String(candidate.url || '').trim())
 }
 
+function safeSourceUrl(value: unknown): string {
+  const raw = String(value || '').trim()
+  if (!raw) return ''
+
+  try {
+    const url = new URL(raw)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : ''
+  } catch {
+    return ''
+  }
+}
+
 function cleanSource(source: SourceInput): Source {
+  const url = safeSourceUrl(source.url)
+
   return {
-    id: String(source.id || source.url || source.titulo || 'fonte'),
+    id: String(source.id || url || source.titulo || 'fonte'),
     titulo: decodeEntities(String(source.titulo || 'Fonte oficial')).replace(/\s+/g, ' ').trim() || 'Fonte oficial',
-    url: String(source.url || '').trim(),
+    url,
     kind: source.kind === 'web' || source.kind === 'official' ? source.kind : 'rag',
     description: String(source.description || '').trim() || undefined
   }
@@ -650,7 +664,18 @@ async function exportPdf(messages: Message[], filename: string) {
   y = drawWrappedPdfText(doc, title, marginX, y, contentWidth, 27) + 18
 
   for (const message of messages) {
-    if (message.role !== 'assistant') continue
+    y = ensurePdfSpace(doc, y + 4, 64)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(BRAND_NAVY)
+    doc.text(message.role === 'user' ? 'Pergunta' : message.webEnhanced ? 'Resposta com pesquisa web' : 'Resposta', marginX, y)
+    y += 18
+
+    if (message.role === 'user') {
+      y = drawPdfBlocks(doc, markdownBlocks(message.content), marginX, y, contentWidth) + 10
+      continue
+    }
+
     y = drawPdfBlocks(doc, markdownBlocks(message.content), marginX, y, contentWidth)
     y = drawPdfSourceRefs(doc, registry.byMessageId.get(message.id) ?? [], sourcesByIndex, marginX, y, contentWidth)
   }
@@ -701,8 +726,17 @@ export async function exportConversation(messages: Message[], format: Conversati
 
 export async function readConversationFile(file: File): Promise<MessageDraft[]> {
   const text = await file.text()
-  const payload = JSON.parse(text)
-  const rawMessages = Array.isArray(payload) ? payload : payload?.messages
+  let payload: unknown
+  try {
+    payload = JSON.parse(text)
+  } catch {
+    throw new Error('INVALID_CONVERSATION')
+  }
+  const rawMessages = Array.isArray(payload)
+    ? payload
+    : payload && typeof payload === 'object' && 'messages' in payload
+      ? (payload as { messages?: unknown }).messages
+      : undefined
   if (!Array.isArray(rawMessages)) throw new Error('INVALID_CONVERSATION')
 
   const messages = rawMessages

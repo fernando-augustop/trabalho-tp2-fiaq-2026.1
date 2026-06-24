@@ -166,9 +166,11 @@ export const POST: RequestHandler = async ({ request }) => {
           kind: 'web',
           status: 'skipped',
           label: 'Pesquisa web sem nova fonte',
-          detail: 'Nenhuma fonte nova foi selecionada; vou responder com a orientação mais segura.',
+          detail: 'Nenhuma fonte nova foi selecionada para complementar esta resposta.',
           domains: webDomains
         })
+        await sendEvent(sse, { type: 'error', message: 'NO_WEB_SOURCES' })
+        return
       }
 
       const messages: ChatMessage[] = [

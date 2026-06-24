@@ -8,6 +8,6 @@ export default defineConfig({
     tailwindcss()
   ],
   optimizeDeps: {
-    include: ['marked', 'dompurify', 'jspdf']
+    include: ['marked', 'isomorphic-dompurify', 'jspdf']
   }
 })

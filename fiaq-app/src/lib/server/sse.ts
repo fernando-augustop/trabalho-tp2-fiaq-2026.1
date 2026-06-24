@@ -30,7 +30,8 @@ export function eventStream(work: (writer: SseWriter) => Promise<void> | void): 
         }
       }
 
-      Promise.resolve(work(writer))
+      Promise.resolve()
+        .then(() => work(writer))
         .catch(error => writer.error(error))
         .finally(() => writer.close())
     },

@@ -13,7 +13,14 @@ export const GET: RequestHandler = async ({ url }) => {
     return apiError(400, 'Parâmetro "limite" deve ser inteiro entre 1 e 20.')
   }
 
-  return json(await listarEmAlta(dias, limite), {
+  const items = await listarEmAlta(dias, limite)
+  const publicItems = items.map((item, index) => ({
+    rank: index + 1,
+    totalNoPeriodo: item.total_no_periodo,
+    totalGeral: item.total_geral
+  }))
+
+  return json(publicItems, {
     headers: {
       'Cache-Control': 'public, max-age=60, stale-while-revalidate=300'
     }

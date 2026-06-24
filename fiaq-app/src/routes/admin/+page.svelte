@@ -88,7 +88,7 @@
   ]
 
   const candidatesQuery = createQuery<CandidateResponse>(() => ({
-    queryKey: ['admin-candidates', status, session?.accessToken],
+    queryKey: ['admin-candidates', status],
     enabled: Boolean(session && authorized),
     queryFn: () => session
       ? adminFetch<CandidateResponse>(`/api/admin/candidates?status=${status}`)
@@ -401,7 +401,7 @@
   <meta name="description" content="Curadoria administrativa do conhecimento do fIAq." />
 </svelte:head>
 
-<section class="min-h-[calc(100vh-var(--nav-height))] bg-slate-50 px-4 py-8 text-[#1a2e5a] sm:px-6 lg:px-8">
+<section class="min-h-[calc(100vh_-_var(--nav-height))] bg-slate-50 px-4 py-8 text-[#1a2e5a] sm:px-6 lg:px-8">
   <section class="mx-auto flex max-w-7xl flex-col gap-6">
     <header class="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
       <div>
@@ -560,7 +560,7 @@
 
               {#if candidate.fontes_usadas.length}
                 <div class="mt-4 grid gap-2">
-                  {#each candidate.fontes_usadas as source (sourceKey(source))}
+                  {#each candidate.fontes_usadas as source, sourceIndex (`${sourceIndex}:${sourceKey(source)}`)}
                     <a
                       href={sourceUrl(source)}
                       target="_blank"

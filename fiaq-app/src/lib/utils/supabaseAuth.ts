@@ -146,9 +146,11 @@ export function readInviteSessionFromHash(): AdminSession | null {
     }
   }
 
-  const session = normalizeSession(payload)
-  window.history.replaceState(null, '', window.location.pathname)
-  return session
+  try {
+    return normalizeSession(payload)
+  } finally {
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`)
+  }
 }
 
 function decodeJwtPayload(token: string): Record<string, unknown> {

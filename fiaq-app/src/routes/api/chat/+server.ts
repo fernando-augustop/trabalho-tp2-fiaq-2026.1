@@ -407,11 +407,9 @@ export const POST: RequestHandler = async (event) => {
     return apiError(400, 'INVALID_PAYLOAD')
   }
 
-  const lastUserMessage = [...clientMessages]
-    .reverse()
-    .find(m => m.role === 'user')
+  const lastUserMessage = clientMessages[clientMessages.length - 1]
 
-  if (!lastUserMessage) {
+  if (!lastUserMessage || lastUserMessage.role !== 'user') {
     return apiError(400, 'INVALID_PAYLOAD')
   }
 
@@ -630,7 +628,7 @@ export const POST: RequestHandler = async (event) => {
     })
     await sendEvent(sse, { type: 'done' })
 
-    const questionVectorPromise = searchVector
+    const questionVectorPromise = searchVector && searchQuestion === question
       ? Promise.resolve(searchVector)
       : embedQuery(question)
 

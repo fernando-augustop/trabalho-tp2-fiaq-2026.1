@@ -38,7 +38,8 @@ function sanitizeWebSource(source: unknown): SanitizedFeedbackSource | null {
   if (!source || typeof source !== 'object') return null
   const item = source as Record<string, unknown>
 
-  if (String(item.kind || '') !== 'web') return null
+  const sourceKind = String(item.kind || '')
+  if (sourceKind !== 'web' && sourceKind !== 'official') return null
 
   try {
     const parsedUrl = new URL(String(item.url || '').trim())
@@ -73,10 +74,10 @@ function sanitizeFeedbackSources(sources: unknown): SanitizedFeedbackSource[] {
 }
 
 function clientKey(event: RequestEvent): string {
-  return event.request.headers.get('cf-connecting-ip')
+  return event.getClientAddress()
+    || event.request.headers.get('cf-connecting-ip')
     || event.request.headers.get('x-real-ip')
     || event.request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || event.getClientAddress()
     || 'unknown'
 }
 
@@ -143,7 +144,14 @@ export const POST: RequestHandler = async (event) => {
     }
 
     const sanitizedSources = sanitizeFeedbackSources(body?.sources)
-    const webSearchRequested = Boolean(body?.webSearchRequested) && sanitizedSources.length > 0
+    const webSearchRequested = Boolean(body?.webSearchRequested)
+    const webSearchReason = body?.webSearchReason === 'fallback_automatico' || body?.webSearchReason === 'feedback_negativo'
+      ? body.webSearchReason
+      : undefined
+
+    if (webSearchRequested && !webSearchReason) {
+      return apiError(400, 'INVALID_WEB_SEARCH_REASON')
+    }
 
     await registrarAvaliacaoResposta({
       pergunta: question,
@@ -151,9 +159,7 @@ export const POST: RequestHandler = async (event) => {
       avaliacao: rating,
       fontesUsadas: sanitizedSources,
       acionouBuscaWeb: webSearchRequested,
-      motivoBuscaWeb: body?.webSearchReason === 'fallback_automatico' || body?.webSearchReason === 'feedback_negativo'
-        ? body.webSearchReason
-        : undefined
+      motivoBuscaWeb: webSearchReason
     })
 
     return json({ ok: true })

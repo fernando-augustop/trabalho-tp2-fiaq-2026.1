@@ -6,6 +6,21 @@
   import { closeDepartmentsSidebar, departmentsSidebarOpen } from '$lib/stores/departments-sidebar'
 
   let panelEl = $state<HTMLElement | null>(null)
+  let restoreFocusEl: HTMLElement | null = null
+
+  function focusableElements(): HTMLElement[] {
+    if (!panelEl) return []
+
+    return Array.from(panelEl.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1)
+  }
+
+  function focusFirstControl() {
+    const first = focusableElements()[0]
+    const target = first ?? panelEl
+    target?.focus()
+  }
 
   $effect(() => {
     if (typeof document === 'undefined') return
@@ -23,9 +38,7 @@
 
     if (event.key !== 'Tab' || !panelEl) return
 
-    const focusable = Array.from(panelEl.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    )).filter(element => !element.hasAttribute('disabled') && element.tabIndex !== -1)
+    const focusable = focusableElements()
 
     if (!focusable.length) {
       event.preventDefault()
@@ -36,8 +49,13 @@
     const first = focusable[0]
     const last = focusable[focusable.length - 1]
     const active = document.activeElement
+    const activeIsFocusable = active instanceof HTMLElement && focusable.includes(active)
 
-    if (event.shiftKey && active === first) {
+    if (!panelEl.contains(active) || active === panelEl || !activeIsFocusable) {
+      event.preventDefault()
+      const target = event.shiftKey ? last : first
+      target.focus()
+    } else if (event.shiftKey && active === first) {
       event.preventDefault()
       last.focus()
     } else if (!event.shiftKey && active === last) {
@@ -49,10 +67,15 @@
   $effect(() => {
     if (typeof document === 'undefined' || !$departmentsSidebarOpen) return
 
+    restoreFocusEl = document.activeElement instanceof HTMLElement ? document.activeElement : null
     document.addEventListener('keydown', handleKeydown)
-    tick().then(() => panelEl?.focus())
+    tick().then(focusFirstControl)
 
-    return () => document.removeEventListener('keydown', handleKeydown)
+    return () => {
+      document.removeEventListener('keydown', handleKeydown)
+      restoreFocusEl?.focus()
+      restoreFocusEl = null
+    }
   })
 
   onDestroy(() => {
