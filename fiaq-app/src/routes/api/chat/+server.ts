@@ -600,17 +600,25 @@ export const POST: RequestHandler = async (event) => {
 
     const stream = await chatStream(messages)
     reader = stream.getReader()
+    const cancelReaderOnAbort = () => {
+      void reader?.cancel().catch(() => {})
+    }
+    sse.signal.addEventListener('abort', cancelReaderOnAbort, { once: true })
     let respostaCompleta = ''
 
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      if (sse.signal.aborted) {
-        await reader.cancel().catch(() => {})
-        return
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        if (sse.signal.aborted) {
+          await reader.cancel().catch(() => {})
+          return
+        }
+        respostaCompleta += value
+        await sendEvent(sse, { type: 'token', content: value })
       }
-      respostaCompleta += value
-      await sendEvent(sse, { type: 'token', content: value })
+    } finally {
+      sse.signal.removeEventListener('abort', cancelReaderOnAbort)
     }
 
     await sendActivity(sse, {

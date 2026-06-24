@@ -45,13 +45,15 @@ export async function bootstrapRag(): Promise<void> {
 
   // Compatibilidade: hidrata o índice JSON usado apenas se o pgvector não estiver disponível.
   if (cached?.chunks?.length) {
-    loadChunks(cached.chunks)
     if (cached.meta?.model && cached.meta.model !== embedInfo.model) {
-      console.warn(
-        `[RAG] ⚠️ Índice foi gerado com "${cached.meta.model}" mas o runtime usa `
-        + `"${embedInfo.model}". As buscas podem ficar inconsistentes — regenere o índice.`
+      loadChunks([])
+      throw new Error(
+        `RAG_INDEX_MODEL_MISMATCH: fallback gerado com "${cached.meta.model}", `
+        + `runtime usa "${embedInfo.model}". Regenere o índice antes de usar o fallback.`
       )
     }
+
+    loadChunks(cached.chunks)
     console.log(`[RAG] Fallback JSON carregado: ${getStoreSize()} chunks (modelo: ${cached.meta?.model ?? '?'}).`)
     return
   }

@@ -299,6 +299,7 @@ async function openRouterRawChatStream(model: string, messages: ChatMessage[]): 
           for (const line of lines) {
             const trimmed = line.trim()
             if (!trimmed || !trimmed.startsWith('data:')) continue
+            resetStreamTimeout()
 
             const payload = trimmed.slice(5).trim()
             if (payload === '[DONE]') {
@@ -312,7 +313,6 @@ async function openRouterRawChatStream(model: string, messages: ChatMessage[]): 
               const content = json.choices?.[0]?.delta?.content
 
               if (content) {
-                resetStreamTimeout()
                 controller.enqueue(content)
                 enqueued = true
               }
