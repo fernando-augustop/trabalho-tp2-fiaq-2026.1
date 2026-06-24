@@ -43,6 +43,12 @@ function checksum(value: string): string {
   return createHash('sha256').update(value).digest('hex')
 }
 
+function repositoryError(statusCode: number, message: string): Error & { statusCode: number } {
+  const error = new Error(message) as Error & { statusCode: number }
+  error.statusCode = statusCode
+  return error
+}
+
 function slugify(value: string): string {
   return value
     .normalize('NFD')
@@ -174,12 +180,12 @@ export async function aprovarCandidata(id: number, adminEmail: string, observaca
   const candidata = rows[0] ? normalizeRow(rows[0]) : null
 
   if (!candidata) {
-    throw createError({ statusCode: 404, message: 'CANDIDATE_NOT_FOUND' })
+    throw repositoryError(404, 'CANDIDATE_NOT_FOUND')
   }
 
   if (candidata.status === 'aprovada') return candidata
   if (candidata.status !== 'pendente') {
-    throw createError({ statusCode: 409, message: 'CANDIDATE_ALREADY_REVIEWED' })
+    throw repositoryError(409, 'CANDIDATE_ALREADY_REVIEWED')
   }
 
   const source = candidata.fontes_usadas.find(item => item && typeof item === 'object') as Record<string, unknown> | undefined
@@ -288,7 +294,7 @@ export async function aprovarCandidata(id: number, adminEmail: string, observaca
     `
 
     if (!row) {
-      throw createError({ statusCode: 409, message: 'CANDIDATE_ALREADY_REVIEWED' })
+      throw repositoryError(409, 'CANDIDATE_ALREADY_REVIEWED')
     }
 
     return normalizeRow(row)

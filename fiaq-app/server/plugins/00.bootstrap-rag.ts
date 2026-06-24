@@ -1,4 +1,4 @@
-import { readdir, writeFile } from 'fs/promises'
+import { readFile, readdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { embedChunk } from '../utils/embeddings'
 import type { EmbeddedChunk } from '../utils/embeddings'
@@ -16,20 +16,19 @@ interface RagIndexFile {
 // Caminho do índice em disco — usado apenas para REGRAVAR o cache em dev/regeneração.
 const INDEX_PATH = join(process.cwd(), 'server', 'assets', 'rag-index.json')
 
-// O índice é carregado como SERVER ASSET (não via import estático), pois importar
-// um JSON de vários MB faz o bundler inaliná-lo num chunk JS e estourar o heap.
-// server/assets/ é empacotado pelo Nitro e exposto no storage "assets:server".
 async function loadCachedIndex(): Promise<RagIndexFile | null> {
   try {
-    const data = await useStorage('assets:server').getItem('rag-index.json')
-    if (!data) return null
-    return (typeof data === 'string' ? JSON.parse(data) : data) as RagIndexFile
-  } catch {
+    const data = await readFile(INDEX_PATH, 'utf-8')
+    return JSON.parse(data) as RagIndexFile
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[RAG] Fallback JSON não foi carregado do disco:', error instanceof Error ? error.message : error)
+    }
     return null
   }
 }
 
-export default defineNitroPlugin(async () => {
+export async function bootstrapRag(): Promise<void> {
   const force = process.env.RAG_FORCE_REINDEX === '1'
   const cached = force ? null : await loadCachedIndex()
 
@@ -54,7 +53,7 @@ export default defineNitroPlugin(async () => {
   await indexCrawl()
   console.log(`[RAG] Indexação concluída: ${getStoreSize()} chunks.`)
   await writeIndex()
-})
+}
 
 async function writeIndex(): Promise<void> {
   const chunks = getAllChunks()

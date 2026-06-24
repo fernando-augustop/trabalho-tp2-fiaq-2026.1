@@ -1,3 +1,7 @@
+import { loadServerEnv } from '../env'
+
+loadServerEnv()
+
 export interface FirecrawlSource {
   id: string
   titulo: string

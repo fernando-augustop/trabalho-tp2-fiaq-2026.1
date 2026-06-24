@@ -9,8 +9,7 @@ dist/
 build/
 static/
 .vite/
-.nuxt/
-.output/
+.svelte-kit/
 .vercel/
 
 # Environment

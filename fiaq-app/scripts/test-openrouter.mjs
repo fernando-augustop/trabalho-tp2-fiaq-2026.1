@@ -2,7 +2,7 @@
 // Uso: node scripts/test-openrouter.mjs   (a partir de fiaq-app/)
 import { readFileSync } from 'node:fs'
 
-// Carrega o .env manualmente (script standalone não passa pelo Nitro).
+// Carrega o .env manualmente (script standalone não passa pelo runtime SvelteKit).
 function loadEnv() {
   try {
     const raw = readFileSync(new URL('../.env', import.meta.url), 'utf8')

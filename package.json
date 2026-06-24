@@ -1,11 +1,11 @@
 {
   "name": "trabalhofinal-fiaq",
   "version": "1.0.0",
-  "description": "fIAq — portal de FAQ e assistente virtual com IA do CIC/UnB. O app fica em fiaq-app/ (Nuxt 4).",
+  "description": "fIAq — portal de FAQ e assistente virtual com IA do CIC/UnB. O app fica em fiaq-app/ (SvelteKit + Vite).",
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "dev": "cross-env TMPDIR=/tmp NUXT_TELEMETRY_DISABLED=1 pnpm --dir fiaq-app dev",
+    "dev": "cross-env TMPDIR=/tmp pnpm --dir fiaq-app dev",
     "build": "pnpm --dir fiaq-app build",
     "preview": "pnpm --dir fiaq-app preview",
     "lint": "pnpm --dir fiaq-app lint",
