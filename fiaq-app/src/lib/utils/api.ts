@@ -2,6 +2,17 @@ interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
   body?: unknown
 }
 
+function isRawBodyInit(body: unknown): body is BodyInit {
+  if (typeof body === 'string') return true
+  if (body instanceof URLSearchParams) return true
+  if (body instanceof FormData) return true
+  if (body instanceof Blob) return true
+  if (body instanceof ArrayBuffer) return true
+  if (ArrayBuffer.isView(body)) return true
+  if (typeof ReadableStream !== 'undefined' && body instanceof ReadableStream) return true
+  return false
+}
+
 export async function apiFetch<T>(url: string, options: ApiFetchOptions = {}): Promise<T> {
   const headers = new Headers(options.headers)
   const { body, ...requestOptions } = options
@@ -11,8 +22,12 @@ export async function apiFetch<T>(url: string, options: ApiFetchOptions = {}): P
   }
 
   if (body !== undefined) {
-    headers.set('Content-Type', headers.get('Content-Type') || 'application/json')
-    init.body = typeof body === 'string' ? body : JSON.stringify(body)
+    if (isRawBodyInit(body)) {
+      init.body = body
+    } else {
+      headers.set('Content-Type', headers.get('Content-Type') || 'application/json')
+      init.body = JSON.stringify(body)
+    }
   }
 
   const response = await fetch(url, init)
