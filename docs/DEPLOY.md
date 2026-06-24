@@ -216,8 +216,9 @@ Para atualizar o crawl institucional antes: `pnpm fetch:links` (re-busca as pág
 - O modelo gratuito `:free` do OpenRouter **loga todos os prompts/respostas** e é
   marcado como "não usar em produção". Adequado para **teste/demonstração**, não
   para dados sensíveis.
-- A rota de chat faz streaming (SSE). `maxDuration` está em 60s em
-  `fiaq-app/vercel.json`; planos Hobby limitam a janela.
+- A rota de chat faz streaming (SSE). `maxDuration` está em 60s na configuração
+  do `@sveltejs/adapter-vercel` em `fiaq-app/svelte.config.js`; planos Hobby
+  limitam a janela.
 - O Supabase Free é suficiente para este uso inicial, mas o banco pode pausar ou
 atingir limites de armazenamento/egress se o projeto crescer.
 - Se o projeto deixar de ser acadêmico/pessoal, revise os termos dos planos

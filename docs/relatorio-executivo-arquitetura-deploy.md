@@ -1,10 +1,10 @@
 # Relatório Executivo — Arquitetura e Deploy do fIAq
 
-**Status em 16/06/2026:** publicado em produção na Vercel em `https://fiaq-app.vercel.app`, com banco Supabase ativo e registro real de perguntas validado.
+**Status em 24/06/2026:** a migração SvelteKit/Vite está validada no branch/PR; a produção pública continua em `https://fiaq-app.vercel.app` até o merge/deploy em `main`.
 
 ## Visão geral
 
-O fIAq é um portal acadêmico do CIC/UnB com FAQ navegável e assistente virtual com IA. A aplicação foi organizada como um app **SvelteKit + Vite**, localizado em `fiaq-app/`, com rotas server para chat, FAQ, saúde do banco e perguntas em alta. A entrega roda no caminho gratuito **Vercel Hobby + Supabase Free + OpenRouter**, mantendo frontend, APIs e streaming de resposta no mesmo deploy web.
+O fIAq é um portal acadêmico do CIC/UnB com FAQ navegável e assistente virtual com IA. Este branch organiza a aplicação como um app **SvelteKit + Vite**, localizado em `fiaq-app/`, com rotas server para chat, FAQ, saúde do banco e perguntas em alta. Após merge e deploy em `main`, a entrega roda no caminho gratuito **Vercel Hobby + Supabase Free + OpenRouter**, mantendo frontend, APIs e streaming de resposta no mesmo deploy web.
 
 ## Deploy web
 
@@ -14,13 +14,13 @@ O fIAq é um portal acadêmico do CIC/UnB com FAQ navegável e assistente virtua
 | Projeto Vercel | `fernandos-projects-8b069a52/fiaq-app` |
 | Repositório | `fernando-augustop/trabalho-tp2-fiaq-2026.1` |
 | Root Directory | `fiaq-app` |
-| Framework | SvelteKit/Vite |
+| Framework | SvelteKit/Vite no branch de migração |
 | Install | `pnpm install` |
 | Build | `pnpm build` |
 | Output | gerenciado pelo adapter SvelteKit |
 | Funções | rotas server SvelteKit em Vercel Function com janela de 60s para streaming SSE |
 
-As variáveis de ambiente foram configuradas na Vercel para produção, preview e desenvolvimento. A chave do OpenRouter e a URL do banco ficam como segredos/encrypted envs, sem versionamento no repositório.
+As variáveis de ambiente esperadas estão documentadas para Vercel produção, preview e desenvolvimento. A chave do OpenRouter e a URL do banco ficam como segredos/encrypted envs, sem versionamento no repositório.
 
 ## IA, modelos e RAG
 
@@ -49,4 +49,4 @@ Todas as tabelas estão com RLS habilitado. A role `fiaq_app` recebe apenas `SEL
 
 ## Organização e evidências
 
-O repositório separa app, banco e documentação: `fiaq-app/` contém frontend, APIs e RAG; `db/` contém SQL reaplicável e hardening Supabase; `docs/DEPLOY.md` documenta o caminho operacional; este relatório resume a arquitetura para entrega. A validação final confirmou `/api/health/db` OK, `/api/faq` com 7 categorias e 85 entradas, chat em produção respondendo via OpenRouter, registro da pergunta no Supabase e endpoint `/api/perguntas/em-alta` retornando a ocorrência registrada.
+O repositório separa app, banco e documentação: `fiaq-app/` contém frontend, APIs e RAG; `db/` contém SQL reaplicável e hardening Supabase; `docs/DEPLOY.md` documenta o caminho operacional; este relatório resume a arquitetura para entrega. A validação do branch confirmou `/api/health/db` OK, `/api/faq` com 7 categorias e 85 entradas e chat em preview local respondendo via OpenRouter sem erro SSE. A validação de produção deve ser repetida após o merge em `main`.

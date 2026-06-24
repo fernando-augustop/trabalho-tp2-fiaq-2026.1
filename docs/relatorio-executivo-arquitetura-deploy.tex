@@ -70,7 +70,7 @@
   \begin{minipage}{\dimexpr\linewidth-2\fboxsep}
     \vspace{7pt}
     {\color{white}\Huge\bfseries fIAq}\hfill
-    {\color{white}\small Produção validada em 16/06/2026}\\[-1pt]
+    {\color{white}\small Migração validada em branch em 24/06/2026}\\[-1pt]
     {\color{white}\Large Arquitetura executiva do app, IA e deploy}\\[4pt]
     \colorbox{green2}{\color{navy}\bfseries\Large\href{https://fiaq-app.vercel.app}{https://fiaq-app.vercel.app}}
     \vspace{7pt}
@@ -78,7 +78,7 @@
 }
 
 \vspace{5pt}
-\metric{READY}{Vercel}{SvelteKit/Vite em produção}
+\metric{PR}{Vercel}{SvelteKit/Vite pronto para merge}
 \metric{RLS}{Supabase}{Postgres com role limitada}
 \metric{2 modelos}{OpenRouter}{chat + embeddings}
 \metric{190}{RAG chunks}{85 FAQ, 90 crawl, 15 PDF}
@@ -94,7 +94,7 @@
 
 \vspace{5pt}
 {\large\bfseries\color{navy}Resumo executivo}\\[-1pt]
-O fIAq é um portal do CIC/UnB com FAQ por tema e assistente virtual com IA. A aplicação roda em \textbf{SvelteKit + Vite}, dentro de \texttt{fiaq-app/}, com frontend, APIs server-side, streaming de chat e registro de métricas anônimas no Supabase. A entrega está publicada no projeto \textbf{fIAq} em \href{https://fiaq-app.vercel.app}{\textbf{https://fiaq-app.vercel.app}}, no caminho gratuito \textbf{Vercel Hobby + Supabase Free + OpenRouter}.
+O fIAq é um portal do CIC/UnB com FAQ por tema e assistente virtual com IA. Este branch organiza a aplicação em \textbf{SvelteKit + Vite}, dentro de \texttt{fiaq-app/}, com frontend, APIs server-side, streaming de chat e registro de métricas anônimas no Supabase. A URL pública continua em \href{https://fiaq-app.vercel.app}{\textbf{https://fiaq-app.vercel.app}}; a validação de produção deve ser repetida após merge/deploy em \texttt{main}.
 
 \vspace{5pt}
 \begin{minipage}[t]{0.32\linewidth}
