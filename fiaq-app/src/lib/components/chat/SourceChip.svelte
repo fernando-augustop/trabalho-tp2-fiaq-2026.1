@@ -34,13 +34,21 @@
 
   function decodeEntities(text: string): string {
     return text
-      .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number(code)))
-      .replace(/&#x([0-9a-f]+);/gi, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 16)))
+      .replace(/&#(\d+);/g, (entity: string, code: string) => decodeCodePoint(entity, Number(code)))
+      .replace(/&#x([0-9a-f]+);/gi, (entity: string, code: string) => decodeCodePoint(entity, Number.parseInt(code, 16)))
       .replace(/&amp;/g, '&')
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
+  }
+
+  function decodeCodePoint(entity: string, codePoint: number): string {
+    if (!Number.isInteger(codePoint) || codePoint < 0 || codePoint > 0x10ffff) {
+      return entity
+    }
+
+    return String.fromCodePoint(codePoint)
   }
 </script>
 
