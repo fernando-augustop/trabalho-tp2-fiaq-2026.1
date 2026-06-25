@@ -14,6 +14,7 @@ package-lock.json
 
 # Local generated deliverables
 docs/relatorio-executivo-arquitetura-deploy.pdf
+qa-artifacts/
 
 # OS
 .DS_Store

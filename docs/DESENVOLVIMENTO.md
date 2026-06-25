@@ -1,7 +1,7 @@
 # Desenvolvimento local
 
 Este guia descreve o caminho recomendado para rodar o fIAq localmente com a
-mesma suite usada no deploy: app Nuxt, APIs Nitro, Supabase Postgres com
+mesma suite usada no deploy: app SvelteKit/Vite, APIs server do SvelteKit, Supabase Postgres com
 pgvector e OpenRouter para chat/embeddings.
 
 ## Fluxo recomendado
@@ -14,14 +14,14 @@ pnpm dev
 ```
 
 O script da raiz chama `pnpm --dir fiaq-app dev`, então não é preciso entrar em
-`fiaq-app/` manualmente. O Nuxt tenta abrir `http://localhost:3000/`; se a porta
-estiver ocupada, ele escolhe outra porta, como `http://localhost:3001/`. Use
+`fiaq-app/` manualmente. O servidor local tenta abrir `http://127.0.0.1:3000/`.
+Se a porta estiver ocupada, rode com `pnpm --dir fiaq-app dev --port 3001`. Use
 sempre a URL impressa no terminal.
 
 Esse comando sobe:
 
-- frontend Nuxt 4;
-- APIs Nitro em `/api/*`;
+- app SvelteKit/Vite com Svelte 5;
+- APIs server do SvelteKit em `/api/*`;
 - conexão com Supabase via `DATABASE_URL`;
 - OpenRouter para chat e embeddings quando `CHAT_PROVIDER=openrouter` e
   `EMBED_PROVIDER=openrouter`.
@@ -79,7 +79,7 @@ Depois que o `pnpm dev` imprimir a URL local, defina a porta usada:
 PORT=3000
 ```
 
-Se o Nuxt tiver escolhido outra porta, ajuste:
+Se você subiu em outra porta, ajuste:
 
 ```bash
 PORT=3001
@@ -198,7 +198,7 @@ pnpm preview
 
 Use os mesmos endpoints da seção anterior contra a porta impressa pelo
 `pnpm preview`. O `pnpm dev` continua sendo o comando diário mais rápido; o
-`build` + `preview` serve para validar o bundle gerado pelo Nitro.
+`build` + `preview` serve para validar o bundle SvelteKit/Vite e as rotas server de preview.
 
 ## Popular ou atualizar conhecimento
 
@@ -229,7 +229,7 @@ caminho mais fiel ao deploy continua sendo `pnpm dev` com a URI do Supabase.
 
 | Sintoma | Causa provável | O que fazer |
 |---|---|---|
-| Nuxt abriu em `3001` | `3000` já estava ocupada | Use a URL impressa no terminal |
+| Porta `3000` ocupada | Outro processo já usa a porta | Rode `pnpm --dir fiaq-app dev --port 3001` |
 | `/api/health/db` retorna `configured: false` | `DATABASE_URL` ausente | Confira `fiaq-app/.env` |
 | `/api/health/db` retorna `ok: false` | Banco indisponível ou URI inválida | Verifique senha, pooler `:6543` e `sslmode=require` |
 | Chat retorna `LLM_UNAVAILABLE` | OpenRouter indisponível ou chave inválida | Confira `OPENROUTER_API_KEY` e providers |
