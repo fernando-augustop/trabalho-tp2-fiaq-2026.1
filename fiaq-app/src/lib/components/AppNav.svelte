@@ -27,14 +27,12 @@
 </script>
 
 <nav class="fiaq-nav sticky top-0 z-50 flex shrink-0 items-center justify-between gap-1 bg-[#1a2e5a] px-2 py-2.5 sm:gap-3 sm:px-10 sm:py-4">
-  <a
-    href="/"
-    aria-label="fIAq - ir para o início"
-    class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 sm:hidden"
-  >
-    <img src="/sarue-avatar.png" alt="" width="36" height="36" class="h-9 w-9 object-contain" />
-  </a>
-  <FiaqBrand class="hidden shrink-0 sm:inline-flex" />
+  <div class="sm:hidden">
+    <FiaqBrand compact class="shrink-0" />
+  </div>
+  <div class="hidden sm:block">
+    <FiaqBrand class="shrink-0" />
+  </div>
 
   <div class="fiaq-nav-links flex shrink-0 items-center gap-1 text-white sm:gap-2.5">
     <a
@@ -53,7 +51,8 @@
       aria-label="Assistente"
       aria-current={assistantActive ? 'page' : undefined}
     >
-      <img src="/sarue-avatar.png" alt="" width="20" height="20" class="h-4 w-4 shrink-0 object-contain sm:h-5 sm:w-5" />
+      <FiaqIcon name="i-lucide-message-circle" class={navIconClass(assistantActive) + ' sm:hidden'} />
+      <img src="/sarue-avatar.png" alt="" width="20" height="20" class="hidden h-4 w-4 shrink-0 object-contain sm:block sm:h-5 sm:w-5" />
       <span class="hidden lg:inline">Assistente</span>
     </a>
 

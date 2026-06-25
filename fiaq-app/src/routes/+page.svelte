@@ -80,7 +80,7 @@
         <h1 class="fiaq-home-title mx-auto max-w-3xl text-4xl font-black leading-[1.05] text-white sm:text-5xl lg:mx-0 lg:text-6xl">
           Como o
           <span class="inline-flex items-center gap-2 whitespace-nowrap text-green-300">
-            <img src="/sarue-avatar.png" alt="" width="56" height="56" class="h-[0.9em] w-[0.9em] shrink-0 object-contain" />
+            <img src="/sarue-avatar.png" alt="" width="56" height="56" class="hidden h-[0.9em] w-[0.9em] shrink-0 object-contain sm:block" />
             Saruê
           </span>
           pode te ajudar?
