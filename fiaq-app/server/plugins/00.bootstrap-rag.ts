@@ -1,5 +1,6 @@
-import { readdir, writeFile } from 'fs/promises'
+import { readFile, readdir, writeFile } from 'fs/promises'
 import { join } from 'path'
+import { read } from '$app/server'
 import { embedChunk } from '../utils/embeddings'
 import type { EmbeddedChunk } from '../utils/embeddings'
 import { addChunk, loadChunks, getAllChunks, getStoreSize } from '../utils/vectorStore'
@@ -7,6 +8,7 @@ import { embedInfo } from '../utils/llmProvider'
 import { extractPdfChunks } from '../utils/pdfLoader'
 import { extractCrawlChunks } from '../utils/crawlLoader'
 import { listarFaq } from '../repositorios/faq'
+import ragIndexAsset from '../assets/rag-index.json?url'
 
 interface RagIndexFile {
   meta: { provider?: string, model?: string, dim?: number, count?: number, builtAt?: string }
@@ -16,32 +18,42 @@ interface RagIndexFile {
 // Caminho do índice em disco — usado apenas para REGRAVAR o cache em dev/regeneração.
 const INDEX_PATH = join(process.cwd(), 'server', 'assets', 'rag-index.json')
 
-// O índice é carregado como SERVER ASSET (não via import estático), pois importar
-// um JSON de vários MB faz o bundler inaliná-lo num chunk JS e estourar o heap.
-// server/assets/ é empacotado pelo Nitro e exposto no storage "assets:server".
 async function loadCachedIndex(): Promise<RagIndexFile | null> {
   try {
-    const data = await useStorage('assets:server').getItem('rag-index.json')
-    if (!data) return null
-    return (typeof data === 'string' ? JSON.parse(data) : data) as RagIndexFile
-  } catch {
+    const response = read(ragIndexAsset)
+    return await response.json() as RagIndexFile
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[RAG] Fallback JSON empacotado não foi carregado:', error instanceof Error ? error.message : error)
+    }
+  }
+
+  try {
+    const data = await readFile(INDEX_PATH, 'utf-8')
+    return JSON.parse(data) as RagIndexFile
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[RAG] Fallback JSON não foi carregado do disco:', error instanceof Error ? error.message : error)
+    }
     return null
   }
 }
 
-export default defineNitroPlugin(async () => {
+export async function bootstrapRag(): Promise<void> {
   const force = process.env.RAG_FORCE_REINDEX === '1'
   const cached = force ? null : await loadCachedIndex()
 
   // Compatibilidade: hidrata o índice JSON usado apenas se o pgvector não estiver disponível.
   if (cached?.chunks?.length) {
-    loadChunks(cached.chunks)
     if (cached.meta?.model && cached.meta.model !== embedInfo.model) {
-      console.warn(
-        `[RAG] ⚠️ Índice foi gerado com "${cached.meta.model}" mas o runtime usa `
-        + `"${embedInfo.model}". As buscas podem ficar inconsistentes — regenere o índice.`
+      loadChunks([])
+      throw new Error(
+        `RAG_INDEX_MODEL_MISMATCH: fallback gerado com "${cached.meta.model}", `
+        + `runtime usa "${embedInfo.model}". Regenere o índice antes de usar o fallback.`
       )
     }
+
+    loadChunks(cached.chunks)
     console.log(`[RAG] Fallback JSON carregado: ${getStoreSize()} chunks (modelo: ${cached.meta?.model ?? '?'}).`)
     return
   }
@@ -54,7 +66,7 @@ export default defineNitroPlugin(async () => {
   await indexCrawl()
   console.log(`[RAG] Indexação concluída: ${getStoreSize()} chunks.`)
   await writeIndex()
-})
+}
 
 async function writeIndex(): Promise<void> {
   const chunks = getAllChunks()

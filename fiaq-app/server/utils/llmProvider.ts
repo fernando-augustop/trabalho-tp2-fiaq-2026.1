@@ -1,3 +1,7 @@
+import { loadServerEnv } from '../env'
+
+loadServerEnv()
+
 // ─── Configuração de providers ──────────────────────────────────────────────
 // Por padrão tudo roda local via Ollama. Para usar o OpenRouter, defina no .env:
 //   OPENROUTER_API_KEY=sk-or-...
@@ -286,7 +290,6 @@ async function openRouterRawChatStream(model: string, messages: ChatMessage[]): 
             controller.close()
             return
           }
-          resetStreamTimeout()
           buffer += decoder.decode(value, { stream: true })
           const lines = buffer.split('\n')
 
@@ -296,6 +299,7 @@ async function openRouterRawChatStream(model: string, messages: ChatMessage[]): 
           for (const line of lines) {
             const trimmed = line.trim()
             if (!trimmed || !trimmed.startsWith('data:')) continue
+            resetStreamTimeout()
 
             const payload = trimmed.slice(5).trim()
             if (payload === '[DONE]') {

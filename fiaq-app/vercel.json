@@ -1,5 +1,5 @@
 {
-  "framework": "nuxtjs",
+  "framework": "sveltekit",
   "installCommand": "pnpm install",
   "buildCommand": "pnpm build",
   "git": {
