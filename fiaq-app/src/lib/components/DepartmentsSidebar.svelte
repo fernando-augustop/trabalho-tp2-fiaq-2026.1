@@ -91,38 +91,38 @@
   ></div>
   <div
     bind:this={panelEl}
-    class="fixed right-0 top-0 z-[80] flex h-dvh w-[min(88vw,24rem)] flex-col overflow-hidden bg-[#1a2e5a] text-white shadow-2xl"
+    class="fixed right-0 top-0 z-[80] flex h-dvh w-[min(92vw,28rem)] flex-col overflow-hidden bg-white text-[#1a2e5a] shadow-2xl"
     role="dialog"
     aria-modal="true"
     aria-label="Departamentos da UnB"
     tabindex="-1"
     onkeydown={handleKeydown}
   >
-    <header class="flex items-center justify-between border-b border-white/10 px-5 py-4">
+    <header class="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4">
       <div>
-        <p class="text-xs font-bold uppercase tracking-wide text-green-300">Contatos</p>
+        <p class="text-xs font-bold uppercase tracking-wide text-[#00a155]">Contatos</p>
         <h2 class="text-lg font-black">Departamentos</h2>
       </div>
       <Button
         variant="ghost"
         size="icon"
         aria-label="Fechar departamentos"
-        class="text-blue-100 hover:bg-white/10 hover:text-white"
+        class="rounded-xl border border-slate-200 bg-white text-[#1a2e5a] shadow-sm hover:bg-blue-50 hover:text-[#1a2e5a]"
         onclick={closeDepartmentsSidebar}
       >
         <FiaqIcon name="i-lucide-x" class="h-5 w-5" />
       </Button>
     </header>
 
-    <div class="flex-1 overflow-y-auto overscroll-contain px-4 py-4">
+    <div class="flex-1 overflow-y-auto overscroll-contain bg-slate-50 px-4 py-4">
       <div class="grid gap-3">
         {#each departamentos as departamento (departamento.slug)}
           <a
             href={`/contatos/${departamento.slug}`}
-            class="group rounded-lg border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+            class="group rounded-xl border border-[#1a2e5a]/10 bg-[#1a2e5a] p-4 text-white shadow-sm transition-[background-color,box-shadow,transform] hover:-translate-y-0.5 hover:bg-[#243d75] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
             onclick={closeDepartmentsSidebar}
           >
-            <span class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-green-300">
+            <span class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-green-300 ring-1 ring-white/10">
               <FiaqIcon name={departamento.icon} class="h-5 w-5" />
             </span>
             <span class="block text-sm font-black">{departamento.nome}</span>

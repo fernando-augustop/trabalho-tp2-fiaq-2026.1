@@ -127,10 +127,10 @@
       disabled={disabled || busy || !canClear}
       aria-label="Limpar conversa"
       title="Limpar conversa"
-      class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+      class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:opacity-50 sm:h-12 sm:w-12"
       onclick={handleClear}
     >
-      <FiaqIcon name="i-lucide-trash-2" class="h-4 w-4" />
+      <FiaqIcon name="i-lucide-trash-2" class="h-5 w-5" />
     </Button>
   </div>
 </div>
