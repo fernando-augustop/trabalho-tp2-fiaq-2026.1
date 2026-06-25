@@ -14,7 +14,7 @@
 
   function navItemClass(active: boolean) {
     return cn(
-      'inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border px-2.5 py-1.5 text-xs font-black leading-none shadow-none transition-[background-color,border-color,color,box-shadow,transform] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 sm:min-h-10 sm:px-4 sm:text-sm',
+      'inline-flex h-8 min-h-8 w-8 items-center justify-center gap-1 rounded-full border p-0 text-xs font-black leading-none shadow-none transition-[background-color,border-color,color,box-shadow,transform] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 sm:h-auto sm:min-h-10 sm:w-auto sm:gap-1.5 sm:px-4 sm:py-1.5 sm:text-sm',
       active
         ? 'border-white bg-white text-[#1a2e5a] shadow-sm shadow-slate-950/20 hover:bg-white hover:text-[#1a2e5a]'
         : 'border-white/20 bg-white/10 text-white/90 hover:-translate-y-0.5 hover:border-[#00e08a]/70 hover:bg-white/20 hover:text-white hover:shadow-sm hover:shadow-slate-950/20'
@@ -26,10 +26,17 @@
   }
 </script>
 
-<nav class="fiaq-nav sticky top-0 z-50 flex shrink-0 items-center justify-between gap-2 bg-[#1a2e5a] px-3 py-2.5 sm:gap-3 sm:px-10 sm:py-4">
-  <FiaqBrand class="shrink-0" />
+<nav class="fiaq-nav sticky top-0 z-50 flex shrink-0 items-center justify-between gap-1 bg-[#1a2e5a] px-2 py-2.5 sm:gap-3 sm:px-10 sm:py-4">
+  <a
+    href="/"
+    aria-label="fIAq - ir para o início"
+    class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 sm:hidden"
+  >
+    <img src="/sarue-avatar.png" alt="" width="36" height="36" class="h-9 w-9 object-contain" />
+  </a>
+  <FiaqBrand class="hidden shrink-0 sm:inline-flex" />
 
-  <div class="fiaq-nav-links flex shrink-0 items-center gap-1.5 text-white sm:gap-2.5">
+  <div class="fiaq-nav-links flex shrink-0 items-center gap-1 text-white sm:gap-2.5">
     <a
       href="/"
       class={navItemClass(homeActive)}
@@ -46,7 +53,7 @@
       aria-label="Assistente"
       aria-current={assistantActive ? 'page' : undefined}
     >
-      <img src="/sarue-avatar.png" alt="" width="20" height="20" class="h-5 w-5 shrink-0 object-contain" />
+      <img src="/sarue-avatar.png" alt="" width="20" height="20" class="h-4 w-4 shrink-0 object-contain sm:h-5 sm:w-5" />
       <span class="hidden lg:inline">Assistente</span>
     </a>
 

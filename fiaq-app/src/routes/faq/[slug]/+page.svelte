@@ -96,12 +96,14 @@
   }
 
   function handleDialogKeydown(event: KeyboardEvent) {
+    if (!selectedItem) return
+
     if (event.key === 'Escape') {
       closeItem()
       return
     }
 
-    if (event.key !== 'Tab') return
+    if (event.key !== 'Tab' || !dialogEl) return
 
     const focusable = getDialogFocusable()
     if (focusable.length === 0) {
@@ -113,8 +115,13 @@
     const first = focusable[0]
     const last = focusable[focusable.length - 1]
     const active = document.activeElement
+    const activeIsFocusable = active instanceof HTMLElement && focusable.includes(active)
 
-    if (event.shiftKey && (active === first || active === dialogEl)) {
+    if (!dialogEl.contains(active) || active === dialogEl || !activeIsFocusable) {
+      event.preventDefault()
+      const target = event.shiftKey ? last : first
+      target.focus()
+    } else if (event.shiftKey && active === first) {
       event.preventDefault()
       last.focus()
     } else if (!event.shiftKey && active === last) {
@@ -129,6 +136,7 @@
 
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', handleDialogKeydown)
 
     tick().then(() => {
       if (!selectedItem) return
@@ -138,6 +146,7 @@
     })
 
     return () => {
+      document.removeEventListener('keydown', handleDialogKeydown)
       document.body.style.overflow = previousOverflow
     }
   })
@@ -265,7 +274,6 @@
       aria-modal="true"
       aria-labelledby={`faq-dialog-title-${selectedItem.id}`}
       tabindex="-1"
-      onkeydown={handleDialogKeydown}
     >
       <header class="border-b border-slate-200 bg-[#f8fbff] px-5 py-4 sm:px-6">
         <div class="flex items-start justify-between gap-4">
