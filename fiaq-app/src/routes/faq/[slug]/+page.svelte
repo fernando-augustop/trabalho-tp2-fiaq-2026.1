@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy, tick } from 'svelte'
   import { page } from '$app/state'
   import { createQuery } from '@tanstack/svelte-query'
   import FiaqIcon from '$lib/components/FiaqIcon.svelte'
@@ -12,7 +13,9 @@
   const skeletonQuestions = ['faq-question-loading-1', 'faq-question-loading-2', 'faq-question-loading-3', 'faq-question-loading-4']
 
   let searchQuery = $state('')
-  let openIds = $state<string[]>([])
+  let selectedItemId = $state<string | null>(null)
+  let dialogEl = $state<HTMLElement | null>(null)
+  let restoreFocusEl: HTMLElement | null = null
 
   const slug = $derived(page.params.slug ?? '')
   const faqQuery = createQuery<FaqCategory[]>(() => ({
@@ -23,6 +26,7 @@
 
   const categories = $derived<FaqCategory[]>(faqQuery.data ?? [])
   const category = $derived(categories.find((c: FaqCategory) => c.slug === slug) ?? null)
+  const selectedItem = $derived((category?.items ?? []).find((item: FaqItem) => item.id === selectedItemId) ?? null)
   const filteredItems = $derived.by<FaqItem[]>(() => {
     const items = category?.items ?? []
     const query = normalizeSearchText(searchQuery.trim())
@@ -41,11 +45,60 @@
       .toLowerCase()
   }
 
-  function toggle(id: string) {
-    openIds = openIds.includes(id)
-      ? openIds.filter(openId => openId !== id)
-      : [...openIds, id]
+  function openItem(id: string, event?: MouseEvent) {
+    restoreFocusEl = event?.currentTarget instanceof HTMLElement ? event.currentTarget : document.activeElement instanceof HTMLElement ? document.activeElement : null
+    selectedItemId = id
   }
+
+  function closeItem() {
+    selectedItemId = null
+    tick().then(() => {
+      restoreFocusEl?.focus()
+      restoreFocusEl = null
+    })
+  }
+
+  function previewText(text: string): string {
+    const clean = text
+      .replace(/```[\s\S]*?```/g, ' ')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/[#*_>~-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    if (clean.length <= 128) return clean
+    return `${clean.slice(0, 125).trim()}...`
+  }
+
+  function sourceHost(url: string): string {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '')
+    } catch {
+      return 'fonte oficial'
+    }
+  }
+
+  function handleDialogKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') closeItem()
+  }
+
+  $effect(() => {
+    if (typeof document === 'undefined') return
+    document.body.style.overflow = selectedItem ? 'hidden' : ''
+
+    if (selectedItem) {
+      tick().then(() => dialogEl?.focus())
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  })
+
+  onDestroy(() => {
+    if (typeof document !== 'undefined') document.body.style.overflow = ''
+  })
 </script>
 
 <svelte:head>
@@ -73,7 +126,7 @@
         </p>
 
         <div class="relative mt-5">
-          <FiaqIcon name="i-lucide-search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-300" />
+          <FiaqIcon name="i-lucide-search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#00a155]" />
           <Input
             bind:value={searchQuery}
             type="search"
@@ -81,14 +134,14 @@
             autocomplete="off"
             aria-label="Buscar pergunta nesta categoria"
             placeholder="Buscar pergunta..."
-            class="w-full rounded-lg border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-base text-white shadow-none outline-none transition-colors placeholder:text-blue-300 focus:border-white/30 focus:bg-white/15 focus-visible:ring-0"
+            class="w-full rounded-xl border border-[#00a155]/80 bg-white py-3 pl-10 pr-4 text-base text-[#1a2e5a] shadow-[0_16px_34px_rgba(4,12,30,0.18)] outline-none transition-colors placeholder:text-slate-500 focus:border-[#00a155] focus-visible:ring-2 focus-visible:ring-[#00a155]/30"
           />
         </div>
       {/if}
     </div>
   </section>
 
-  <section class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+  <section class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
     {#if faqQuery.error}
       <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
         Não foi possível carregar o FAQ agora. Tente atualizar a página em alguns instantes.
@@ -104,35 +157,40 @@
         <p class="mt-1 text-sm text-gray-500">Tente buscar por outro termo.</p>
       </div>
     {:else}
-      <div class="flex flex-col gap-3">
+      <div class="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
         {#if faqQuery.isLoading}
           {#each skeletonQuestions as skeletonId (skeletonId)}
-            <div class="h-16 animate-pulse rounded-2xl border border-gray-200 bg-white shadow-sm" aria-hidden="true"></div>
+            <div class="h-32 animate-pulse rounded-2xl border-2 border-gray-200 bg-white shadow-sm" aria-hidden="true"></div>
           {/each}
         {/if}
 
         {#each filteredItems as item (item.id)}
-          <article class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <article class="group overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-[#1a2e5a]/45 hover:shadow-md">
             <Button
               variant="ghost"
-              class="flex h-auto min-h-14 w-full items-center justify-between gap-3 whitespace-normal px-5 py-4 text-left transition-colors hover:bg-blue-50/50"
-              aria-expanded={openIds.includes(item.id)}
-              onclick={() => toggle(item.id)}
+              class="grid h-auto w-full grid-cols-[2.5rem_1fr] items-start gap-x-3 gap-y-2 whitespace-normal bg-white px-4 py-3.5 text-left shadow-none transition-colors hover:bg-blue-50/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+              aria-haspopup="dialog"
+              aria-label={`Abrir resposta: ${item.titulo}`}
+              onclick={(event) => openItem(item.id, event)}
             >
-              <span class="min-w-0 flex-1 break-words text-sm font-semibold leading-snug text-[#1a2e5a]">{item.titulo}</span>
-              <FiaqIcon name="i-lucide-chevron-down" class={`h-5 w-5 shrink-0 text-[#1a2e5a] transition-transform duration-200 ${openIds.includes(item.id) ? 'rotate-180' : ''}`} />
-            </Button>
+              <span class="row-span-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#1a2e5a] ring-1 ring-blue-100 transition-colors group-hover:bg-[#1a2e5a] group-hover:text-white">
+                <FiaqIcon name="i-lucide-book-open" class="h-5 w-5" />
+              </span>
 
-            {#if openIds.includes(item.id)}
-              <div class="px-5 pb-5 pt-1">
-                <div class="fiaq-prose text-sm leading-relaxed text-gray-700">{@html renderMarkdown(item.conteudo)}</div>
+              <span class="min-w-0">
+                <span class="block break-words text-sm font-black leading-snug text-[#1a2e5a]">{item.titulo}</span>
                 {#if item.url}
-                  <div class="mt-3">
-                    <SourceChip source={{ id: item.id, titulo: 'Fonte oficial', url: item.url, kind: 'rag' }} />
-                  </div>
+                  <span class="mt-1 inline-flex max-w-full items-center gap-1.5 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-500 ring-1 ring-slate-200">
+                    <FiaqIcon name="i-lucide-link" class="h-3 w-3 shrink-0 text-[#00a155]" />
+                    <span class="truncate">{sourceHost(item.url)}</span>
+                  </span>
                 {/if}
-              </div>
-            {/if}
+              </span>
+
+              <span class="faq-preview text-xs font-semibold leading-relaxed text-slate-500">
+                {previewText(item.conteudo)}
+              </span>
+            </Button>
           </article>
         {/each}
       </div>
@@ -140,12 +198,73 @@
 
     <div class="mt-8 text-center">
       <p class="mb-3 text-sm text-gray-500">Não encontrou o que procurava?</p>
-      <a href="/chatbot" class="inline-flex items-center gap-2 rounded-full bg-[#1a2e5a] px-6 py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#243d75]">
-        <FiaqIcon name="i-lucide-message-circle" class="h-4 w-4 text-green-400" />
-        Perguntar ao Assistente Virtual
+      <a href="/chatbot" class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-[#1a2e5a] py-2 pl-2 pr-5 text-sm font-bold text-white shadow-md transition-[background-color,box-shadow,transform] hover:-translate-y-0.5 hover:bg-[#243d75] hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400">
+        <span class="flex h-12 w-14 shrink-0 items-center justify-center overflow-visible">
+          <img src="/sarueBot.png" alt="" width="70" height="48" class="h-12 w-16 object-contain" />
+        </span>
+        <span>Perguntar ao Assistente Virtual</span>
       </a>
     </div>
   </section>
+
+  {#if selectedItem}
+    <button
+      type="button"
+      class="fixed inset-0 z-[90] cursor-default border-0 bg-slate-950/50 p-0 backdrop-blur-sm"
+      aria-label="Fechar resposta"
+      tabindex="-1"
+      onclick={closeItem}
+    ></button>
+
+    <div
+      bind:this={dialogEl}
+      class="fixed inset-x-0 bottom-0 z-[100] max-h-[88dvh] overflow-hidden rounded-t-2xl border-2 border-slate-200 bg-white shadow-2xl outline-none sm:inset-x-1/2 sm:bottom-auto sm:top-1/2 sm:w-[min(42rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={`faq-dialog-title-${selectedItem.id}`}
+      tabindex="-1"
+      onkeydown={handleDialogKeydown}
+    >
+      <header class="border-b border-slate-200 bg-[#f8fbff] px-5 py-4 sm:px-6">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex min-w-0 items-start gap-3">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#1a2e5a] ring-1 ring-blue-100">
+              <FiaqIcon name="i-lucide-book-open" class="h-5 w-5" />
+            </span>
+            <div class="min-w-0">
+              <p class="text-xs font-black uppercase tracking-wide text-[#00a155]">{category?.titulo ?? 'FAQ'}</p>
+              <h2 id={`faq-dialog-title-${selectedItem.id}`} class="mt-1 break-words text-lg font-black leading-snug text-[#1a2e5a]">
+                {selectedItem.titulo}
+              </h2>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            aria-label="Fechar resposta"
+            title="Fechar resposta"
+            class="h-10 w-10 shrink-0 rounded-xl border-slate-200 bg-white p-0 text-[#1a2e5a] shadow-sm hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+            onclick={closeItem}
+          >
+            <FiaqIcon name="i-lucide-x" class="h-5 w-5" />
+          </Button>
+        </div>
+      </header>
+
+      <div class="max-h-[calc(88dvh-6rem)] overflow-y-auto px-5 py-5 sm:px-6">
+        <div class="rounded-xl border-2 border-slate-200 bg-white p-4">
+          <div class="fiaq-prose text-sm leading-relaxed text-gray-700 sm:text-base">{@html renderMarkdown(selectedItem.conteudo)}</div>
+        </div>
+
+        {#if selectedItem.url}
+          <div class="mt-4">
+            <SourceChip source={{ id: selectedItem.id, titulo: 'Fonte oficial', url: selectedItem.url, kind: 'rag' }} />
+          </div>
+        {/if}
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -158,6 +277,13 @@
   .fiaq-prose :global(ol) { list-style: decimal; }
   .fiaq-prose :global(li) { margin: 0.2rem 0; }
   .fiaq-prose :global(strong) { font-weight: 700; }
+  .faq-preview {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
   .fiaq-prose :global(h1),
   .fiaq-prose :global(h2),
   .fiaq-prose :global(h3) {

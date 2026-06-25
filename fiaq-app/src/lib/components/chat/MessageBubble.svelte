@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte'
+  import { onDestroy, tick } from 'svelte'
   import FiaqIcon from '$lib/components/FiaqIcon.svelte'
   import Button from '$lib/components/ui/button.svelte'
   import ResearchActivity from '$lib/components/chat/ResearchActivity.svelte'
@@ -25,6 +25,7 @@
   let actionStatus = $state('')
   let actionStatusKind = $state<'info' | 'error'>('info')
   let exportBusy = $state(false)
+  let showSources = $state(false)
   let showExportMenu = $state(false)
   let showFeedbackMenu = $state(false)
   let actionsEl = $state<HTMLElement | null>(null)
@@ -37,6 +38,8 @@
   const showActions = $derived(!message.streaming && (hasRenderableContent || hasAssistantArtifacts))
   const renderedContent = $derived(renderMarkdown(cleanContent))
   const hasWebSources = $derived(message.sources?.some(source => source.kind === 'web' || source.kind === 'official') ?? false)
+  const sourceCount = $derived(message.sources?.length ?? 0)
+  const sourceCountLabel = $derived(`${sourceCount} ${sourceCount === 1 ? 'fonte' : 'fontes'}`)
 
   const feedbackLabel = $derived.by(() => {
     if (message.feedback === 'helpful') return 'Ajudou'
@@ -192,6 +195,16 @@
     showFeedbackMenu = false
   }
 
+  function revealActionMenu(target: EventTarget | null) {
+    if (!(target instanceof HTMLElement)) return
+    const wrapper = target.closest('[data-action-menu]')
+    if (!(wrapper instanceof HTMLElement)) return
+
+    tick().then(() => {
+      wrapper.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    })
+  }
+
   onDestroy(() => {
     if (typeof document === 'undefined') return
     document.removeEventListener('click', handleDocumentClick)
@@ -231,45 +244,69 @@
       </div>
 
       {#if message.sources && message.sources.length > 0}
-        <div class="grid gap-1.5 px-1">
-          <p class="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide text-slate-500">
-            <FiaqIcon name="i-lucide-list-checks" class="h-3.5 w-3.5 text-green-600" />
-            Fontes verificadas
-          </p>
-          {#each message.sources as source (source.id)}
-            <SourceChip {source} />
-          {/each}
+        <div class="px-1">
+          <Button
+            type="button"
+            variant="outline"
+            aria-expanded={showSources}
+            aria-controls={`sources-${message.id}`}
+            class="inline-flex min-h-10 w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs font-black uppercase tracking-wide text-slate-600 shadow-sm transition-colors hover:border-[#1a2e5a] hover:bg-blue-50/60 hover:text-[#1a2e5a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 sm:w-auto sm:min-w-64"
+            onclick={() => {
+              showSources = !showSources
+            }}
+          >
+            <span class="flex min-w-0 items-center gap-2">
+              <FiaqIcon name="i-lucide-list-checks" class="h-4 w-4 shrink-0 text-[#00a155]" />
+              <span>Fontes verificadas</span>
+            </span>
+            <span class="flex shrink-0 items-center gap-2 text-[11px] normal-case tracking-normal text-slate-500">
+              {sourceCountLabel}
+              <FiaqIcon name="i-lucide-chevron-down" class={`h-3.5 w-3.5 transition-transform ${showSources ? 'rotate-180' : ''}`} />
+            </span>
+          </Button>
+
+          {#if showSources}
+            <div id={`sources-${message.id}`} class="mt-2 grid gap-1.5 rounded-xl border border-slate-200 bg-white/80 p-2 shadow-sm">
+              {#each message.sources as source (source.id)}
+                <SourceChip {source} />
+              {/each}
+            </div>
+          {/if}
         </div>
       {/if}
 
       {#if showActions}
-        <div bind:this={actionsEl} class="flex flex-wrap items-center gap-2 px-1 pt-1.5">
-          <Button
-            type="button"
-            title={copyTitle}
-            class={`inline-flex h-9 items-center gap-1.5 rounded-xl border bg-white px-2.5 text-xs font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 sm:px-3 ${
-              copyStatus === 'error'
-                ? 'border-red-200 text-red-600 hover:border-red-300'
-                : 'border-slate-200 text-slate-600 hover:border-[#1a2e5a] hover:text-[#1a2e5a]'
-            }`}
-            onclick={copyMessage}
-          >
-            <FiaqIcon name={copyIcon} class="h-4 w-4" />
-            {copyLabel}
-          </Button>
+        <div bind:this={actionsEl} class="px-1 pt-1.5" data-action-menu>
+          <div class="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              title={copyTitle}
+              class={`inline-flex h-9 items-center gap-1.5 rounded-xl border bg-white px-2.5 text-xs font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 sm:px-3 ${
+                copyStatus === 'error'
+                  ? 'border-red-200 text-red-600 hover:border-red-300'
+                  : 'border-slate-200 text-slate-600 hover:border-[#1a2e5a] hover:text-[#1a2e5a]'
+              }`}
+              onclick={copyMessage}
+            >
+              <FiaqIcon name={copyIcon} class="h-4 w-4" />
+              {copyLabel}
+            </Button>
 
-          <div class="relative">
             <Button
               type="button"
               disabled={exportBusy}
+              variant="outline"
               aria-expanded={showExportMenu}
               aria-haspopup="menu"
               title="Baixar conversa"
-              class="inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-[#1a2e5a] hover:text-[#1a2e5a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3"
+              class={`inline-flex h-9 items-center gap-1.5 rounded-xl border bg-white px-2.5 text-xs font-semibold shadow-sm transition-colors hover:border-[#1a2e5a] hover:bg-blue-50/60 hover:text-[#1a2e5a] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3 ${
+                showExportMenu ? 'border-[#1a2e5a] text-[#1a2e5a]' : 'border-slate-200 text-slate-600'
+              }`}
               onclick={(event) => {
                 event.stopPropagation()
                 showFeedbackMenu = false
                 showExportMenu = !showExportMenu
+                if (showExportMenu) revealActionMenu(event.currentTarget)
               }}
             >
               <FiaqIcon name="i-lucide-download" class="h-4 w-4" />
@@ -277,35 +314,19 @@
               <FiaqIcon name="i-lucide-chevron-down" class="h-3 w-3" />
             </Button>
 
-            {#if showExportMenu}
-              <div role="menu" class="absolute bottom-full left-0 z-30 mb-2 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl ring-1 ring-slate-900/5">
-                {#each exportOptions as option (option.format)}
-                  <Button
-                    type="button"
-                    role="menuitem"
-                    class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 hover:text-[#1a2e5a] focus:bg-slate-100 focus:outline-none"
-                    onclick={() => void handleExport(option.format)}
-                  >
-                    <FiaqIcon name={option.icon} class="h-4 w-4" />
-                    {option.label}
-                  </Button>
-                {/each}
-              </div>
-            {/if}
-          </div>
-
-          <div class="relative">
             <Button
               type="button"
               disabled={feedbackDisabled}
+              variant="outline"
               aria-expanded={showFeedbackMenu}
               aria-haspopup="menu"
               title="Avaliar resposta"
-              class={`inline-flex h-9 items-center gap-1.5 rounded-xl border bg-white px-2.5 text-xs font-semibold shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3 ${feedbackButtonClass}`}
+              class={`inline-flex h-9 items-center gap-1.5 rounded-xl border bg-white px-2.5 text-xs font-semibold shadow-sm transition-colors hover:bg-blue-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3 ${showFeedbackMenu ? 'border-[#1a2e5a] text-[#1a2e5a]' : feedbackButtonClass}`}
               onclick={(event) => {
                 event.stopPropagation()
                 showExportMenu = false
                 showFeedbackMenu = !showFeedbackMenu
+                if (showFeedbackMenu) revealActionMenu(event.currentTarget)
               }}
             >
               <FiaqIcon name={feedbackIcon} class="h-4 w-4" />
@@ -313,34 +334,60 @@
               <FiaqIcon name="i-lucide-chevron-down" class="h-3 w-3" />
             </Button>
 
-            {#if showFeedbackMenu}
-              <div role="menu" class="absolute bottom-full left-0 z-30 mb-2 w-52 overflow-hidden rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl ring-1 ring-slate-900/5">
-                <Button
-                  type="button"
-                  role="menuitem"
-                  class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-semibold text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:outline-none"
-                  onclick={() => handleFeedback('helpful')}
-                >
-                  <FiaqIcon name="i-lucide-thumbs-up" class="h-4 w-4" />
-                  Essa resposta me ajudou
-                </Button>
-                <Button
-                  type="button"
-                  role="menuitem"
-                  class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-semibold text-slate-700 transition-colors hover:bg-amber-50 hover:text-amber-700 focus:bg-amber-50 focus:outline-none"
-                  onclick={() => handleFeedback('unhelpful')}
-                >
-                  <FiaqIcon name="i-lucide-thumbs-down" class="h-4 w-4" />
-                  Não me ajudou
-                </Button>
-              </div>
+            {#if actionStatus || feedbackStatus}
+              <span
+                role="status"
+                aria-live="polite"
+                class={[
+                  'text-xs font-medium',
+                  actionStatus && actionStatusKind === 'error' ? 'text-red-600' : 'text-slate-500'
+                ]}
+              >
+                {actionStatus || feedbackStatus}
+              </span>
             {/if}
           </div>
 
-          {#if actionStatus || feedbackStatus}
-            <span role="status" aria-live="polite" class={['text-xs font-medium', actionStatusKind === 'error' ? 'text-red-600' : 'text-slate-500']}>
-              {actionStatus || feedbackStatus}
-            </span>
+          {#if showExportMenu}
+            <div role="menu" class="mt-2 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl ring-1 ring-slate-900/5">
+              {#each exportOptions as option (option.format)}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  role="menuitem"
+                  class="flex h-auto w-full justify-start gap-2 rounded-lg bg-white px-3 py-2.5 text-left text-xs font-semibold text-slate-700 shadow-none transition-colors hover:bg-blue-50 hover:text-[#1a2e5a] focus:bg-blue-50 focus:outline-none"
+                  onclick={() => void handleExport(option.format)}
+                >
+                  <FiaqIcon name={option.icon} class="h-4 w-4" />
+                  {option.label}
+                </Button>
+              {/each}
+            </div>
+          {/if}
+
+          {#if showFeedbackMenu}
+            <div role="menu" class="mt-2 w-52 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl ring-1 ring-slate-900/5">
+              <Button
+                type="button"
+                variant="ghost"
+                role="menuitem"
+                class="flex h-auto w-full justify-start gap-2 rounded-lg bg-white px-3 py-2.5 text-left text-xs font-semibold text-slate-700 shadow-none transition-colors hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:outline-none"
+                onclick={() => handleFeedback('helpful')}
+              >
+                <FiaqIcon name="i-lucide-thumbs-up" class="h-4 w-4" />
+                Essa resposta me ajudou
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                role="menuitem"
+                class="flex h-auto w-full justify-start gap-2 rounded-lg bg-white px-3 py-2.5 text-left text-xs font-semibold text-slate-700 shadow-none transition-colors hover:bg-amber-50 hover:text-amber-700 focus:bg-amber-50 focus:outline-none"
+                onclick={() => handleFeedback('unhelpful')}
+              >
+                <FiaqIcon name="i-lucide-thumbs-down" class="h-4 w-4" />
+                Não me ajudou
+              </Button>
+            </div>
           {/if}
         </div>
       {/if}
