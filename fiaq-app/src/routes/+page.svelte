@@ -47,6 +47,7 @@
 
   <!-- Hero -->
   <div class="bg-[#1a2e5a] px-10 pt-12 pb-16 text-center">
+    <img src="/sarue-avatar.png" alt="" width="88" height="88" class="mx-auto mb-4 h-[88px] w-[88px] object-contain" />
     <h1 class="text-4xl font-extrabold text-white mb-3">O que você precisa?</h1>
     <p class="text-blue-200 text-base mb-8">
       Base de dúvidas frequentes do departamento de Ciência da Computação - UnB
@@ -56,7 +57,7 @@
       class="flex justify-center"
       onsubmit={(event) => { event.preventDefault(); ask() }}
     >
-      <div class="flex w-full max-w-3xl rounded-xl overflow-hidden border border-[#00a155] shadow-[0_18px_42px_rgba(4,12,30,0.22)] ring-1 ring-[#00dc82]/35">
+      <div class="flex w-full max-w-3xl rounded-xl overflow-hidden border border-[#00a155] shadow-[0_18px_42px_rgba(4,12,30,0.22)] ring-1 ring-[#00a155]/35">
         <input
           bind:value={query}
           type="text"
@@ -79,7 +80,7 @@
   <!-- Categories -->
   <div class="px-10 py-10">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold text-[#1a2e5a]">Categorias</h2>
+      <h2 class="text-xl font-bold text-[#1a2e5a]">Perguntas frequentes por tema</h2>
       <button class="text-sm text-gray-500 hover:text-[#1a2e5a] transition-colors">Filtrar</button>
     </div>
 
@@ -112,21 +113,6 @@
         {/each}
       </div>
     {/if}
-
-    <!-- Chatbot CTA -->
-    <div class="flex justify-center mt-6">
-      <a href="/chatbot" class="group">
-        <div class="bg-white rounded-2xl border border-dashed border-[#1a2e5a]/40 shadow-sm px-8 py-4 flex items-center gap-4 hover:shadow-md hover:border-[#1a2e5a] hover:bg-blue-50 transition-all duration-200 cursor-pointer w-fit">
-          <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
-            <FiaqIcon name="i-lucide-bot" class="w-7 h-7 text-[#1a2e5a]" />
-          </div>
-          <div>
-            <p class="font-bold text-[#1a2e5a] text-sm">Assistente Virtual</p>
-            <p class="text-xs text-gray-400 mt-0.5">Tire suas dúvidas com IA</p>
-          </div>
-        </div>
-      </a>
-    </div>
 
   </div>
 
