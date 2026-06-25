@@ -26,7 +26,6 @@ function supabaseUrl(): string {
   return String(
     process.env.SUPABASE_URL
       || process.env.VITE_SUPABASE_URL
-      || process.env.NUXT_PUBLIC_SUPABASE_URL
       || ''
   ).replace(/\/+$/, '')
 }
@@ -35,7 +34,6 @@ function supabaseAnonKey(): string {
   return String(
     process.env.SUPABASE_ANON_KEY
       || process.env.VITE_SUPABASE_ANON_KEY
-      || process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY
       || ''
   )
 }
