@@ -47,32 +47,40 @@
 
   <!-- Hero -->
   <div class="bg-[#1a2e5a] px-10 pt-12 pb-16 text-center">
-    <img src="/sarue-avatar.png" alt="" width="88" height="88" class="mx-auto mb-4 h-[88px] w-[88px] object-contain" />
-    <h1 class="text-4xl font-extrabold text-white mb-3">O que você precisa?</h1>
-    <p class="text-blue-200 text-base mb-8">
-      Base de dúvidas frequentes do departamento de Ciência da Computação - UnB
+    <img src="/sarue-avatar.png" alt="" width="72" height="72" class="mx-auto mb-5 h-[72px] w-[72px] object-contain" />
+    <h1 class="text-4xl font-extrabold text-white mb-3">Como podemos te ajudar?</h1>
+    <p class="text-blue-200 text-base mb-8 max-w-2xl mx-auto">
+      Pergunte em linguagem natural sobre matrícula, TCC, estágio, extensão e mais. O assistente responde com base no conteúdo oficial do CIC/UnB.
     </p>
 
     <form
       class="flex justify-center"
       onsubmit={(event) => { event.preventDefault(); ask() }}
     >
-      <div class="flex w-full max-w-3xl rounded-xl overflow-hidden border border-[#00a155] shadow-[0_18px_42px_rgba(4,12,30,0.22)] ring-1 ring-[#00a155]/35">
+      <div class="flex w-full max-w-2xl rounded-xl overflow-hidden shadow-[0_18px_42px_rgba(4,12,30,0.22)]">
         <input
           bind:value={query}
           type="text"
-          placeholder="Digite sua pergunta..."
-          class="flex-1 bg-white text-[#1a2e5a] placeholder-slate-500 px-6 py-5 text-base outline-none"
+          placeholder="Ex: Quais são as etapas da matrícula?"
+          class="flex-1 bg-[#2b3f6e] text-white placeholder-blue-200/70 px-6 py-4 text-base outline-none"
         />
         <button
           type="submit"
-          class="flex items-center gap-2 bg-[#00a155] text-[#0a2e1a] font-bold px-8 py-5 text-base hover:bg-[#17b86a] transition-colors"
+          class="flex items-center gap-2 bg-[#00a155] text-[#0a2e1a] font-bold px-8 py-4 text-base hover:bg-[#17b86a] transition-colors"
         >
           <FiaqIcon name="i-lucide-send" class="w-5 h-5" />
           Perguntar
         </button>
       </div>
     </form>
+
+    <a
+      href="/chatbot"
+      class="inline-flex items-center gap-1.5 text-blue-200 hover:text-green-400 text-sm font-medium mt-4 transition-colors"
+    >
+      <FiaqIcon name="i-lucide-message-circle" class="w-4 h-4" />
+      Abrir o Assistente Virtual
+    </a>
   </div>
 
   <div class="h-px bg-gray-300 mx-10"></div>

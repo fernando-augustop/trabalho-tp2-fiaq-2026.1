@@ -12,7 +12,7 @@
   const aboutActive = $derived(pathname === '/sobre' || pathname.startsWith('/sobre/'))
   function navItemClass(active: boolean) {
     return cn(
-      'inline-flex h-8 min-h-8 w-8 items-center justify-center gap-1 rounded-full border p-0 text-xs font-black leading-none shadow-none transition-[background-color,border-color,color,box-shadow,transform] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 sm:h-auto sm:min-h-10 sm:w-auto sm:gap-1.5 sm:px-4 sm:py-1.5 sm:text-sm',
+      'inline-flex h-8 min-h-8 w-8 items-center justify-center gap-1 rounded-xl border p-0 text-xs font-black leading-none shadow-none transition-[background-color,border-color,color,box-shadow,transform] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300 sm:h-auto sm:min-h-10 sm:w-auto sm:gap-1.5 sm:px-4 sm:py-1.5 sm:text-sm',
       active
         ? 'border-white bg-white text-[#1a2e5a] shadow-sm shadow-slate-950/20 hover:bg-white hover:text-[#1a2e5a]'
         : 'border-white/20 bg-white/10 text-white/90 hover:-translate-y-0.5 hover:border-[#00e08a]/70 hover:bg-white/20 hover:text-white hover:shadow-sm hover:shadow-slate-950/20'
