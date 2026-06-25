@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, tick } from 'svelte'
+  import { tick } from 'svelte'
   import { page } from '$app/state'
   import { createQuery } from '@tanstack/svelte-query'
   import FiaqIcon from '$lib/components/FiaqIcon.svelte'
@@ -79,25 +79,67 @@
     }
   }
 
+  function getDialogFocusable(): HTMLElement[] {
+    if (!dialogEl) return []
+
+    const selector = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])'
+    ].join(',')
+
+    return Array.from(dialogEl.querySelectorAll<HTMLElement>(selector))
+      .filter((element) => element.getClientRects().length > 0)
+  }
+
   function handleDialogKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape') closeItem()
+    if (event.key === 'Escape') {
+      closeItem()
+      return
+    }
+
+    if (event.key !== 'Tab') return
+
+    const focusable = getDialogFocusable()
+    if (focusable.length === 0) {
+      event.preventDefault()
+      dialogEl?.focus()
+      return
+    }
+
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    const active = document.activeElement
+
+    if (event.shiftKey && (active === first || active === dialogEl)) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault()
+      first.focus()
+    }
   }
 
   $effect(() => {
     if (typeof document === 'undefined') return
-    document.body.style.overflow = selectedItem ? 'hidden' : ''
+    if (!selectedItem) return
 
-    if (selectedItem) {
-      tick().then(() => dialogEl?.focus())
-    }
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    tick().then(() => {
+      if (!selectedItem) return
+      const firstFocusable = getDialogFocusable()[0]
+      const focusTarget = firstFocusable ?? dialogEl
+      focusTarget?.focus()
+    })
 
     return () => {
-      document.body.style.overflow = ''
+      document.body.style.overflow = previousOverflow
     }
-  })
-
-  onDestroy(() => {
-    if (typeof document !== 'undefined') document.body.style.overflow = ''
   })
 </script>
 
